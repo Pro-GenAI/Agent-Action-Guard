@@ -1,12 +1,17 @@
-<center>
-<img src="./assets/project_banner.jpg" alt="Project banner" height="360px"/>
-<!-- $ convert project_banner.png project_banner.jpg -->
+<p align="center">
+<img src="./assets/project_banner.gif" alt="Project banner" width="600" height="319"/>
+<!--
+$ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
+# $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
+-->
+<!-- <img src="./assets/project_banner.jpg" alt="Project banner" height="360px"/> -->
+<!-- $ convert project_banner.png -resize 600x319 project_banner.jpg -->
 <!-- <img src="./assets/project_logo.jpg" alt="Project logo" width="270px"/> -->
 <!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
-<h1 align="center">Agent MCP Action Guard</h1>
-<hr/>
+<h2 align="center">Agent MCP Action Guard</h2>
+<!-- <hr/> -->
 <h4 align="center"><em>Classifying AI agent actions to ensure safety and reliability</em></h4>
-</center>
+</p>
 
 A neural network model to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines.
 

@@ -23,6 +23,7 @@ coverage.xml
 .mypy_cache
 .pytest_cache
 .hypothesis
+unused/
 
 # Exclude environment files
 <!-- .env -->
