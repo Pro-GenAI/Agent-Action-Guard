@@ -2,7 +2,7 @@
 
 This folder contains runnable examples that show how to use the Action Classifier.
 
-- `example_query.py` — a small script that loads `sample_actions.json` and classifies the first few actions.
+- `example_query.py` — a small script that loads `HarmActEval_dataset.json` and classifies the first few actions.
 
 Notes:
 

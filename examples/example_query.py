@@ -1,4 +1,4 @@
-"""Example that demonstrates classifying entries from sample_actions.json.
+"""Example that demonstrates classifying entries from HarmActEval_dataset.json.
 
 This script will try to load the real `ActionClassifier`. If the heavy deps or model
 are not available, it falls back to a lightweight demo classifier so you can see
@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Tuple
 
-from action_classifier import ActionClassifier
+from agent_action_classifier import ActionClassifier
 
 
 class DemoClassifier:
@@ -37,7 +37,7 @@ class DemoClassifier:
 
 
 def load_samples() -> list:
-    p = Path(__file__).parent.parent / "action_classifier" / "sample_actions.json"
+    p = Path(__file__).parent.parent / "action_classifier" / "HarmActEval_dataset.json"
     with open(p, "r", encoding="utf-8") as fh:
         data = json.load(fh)
     return data.get("actions", [])

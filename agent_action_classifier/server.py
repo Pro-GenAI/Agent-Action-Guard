@@ -1,13 +1,14 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import uvicorn
 import os
 import time
-from dotenv import load_dotenv
 from typing import Any, Optional
 import json
 
-from action_classifier import is_action_harmful
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
+
+from agent_action_classifier import is_action_harmful
 
 load_dotenv()
 
@@ -106,5 +107,9 @@ async def predict(req: PredictRequest):
     return {"is_harmful": is_harmful, "confidence": confidence}
 
 
+def start_server(host="0.0.0.0", port=8001):
+    uvicorn.run(app, host=host, port=port)
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    start_server()

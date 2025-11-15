@@ -10,7 +10,7 @@ AC_PATH = ROOT / "action_classifier" / "action_classifier.py"
 
 
 def test_flatten_action_to_text_basic():
-    from action_classifier import ActionClassifier
+    from agent_action_classifier import ActionClassifier
 
     ac = ActionClassifier()
     sample = {
@@ -53,7 +53,7 @@ def test_predict_mock_embedding(monkeypatch):
             # return zeros logits for two classes
             return torch.zeros((x.shape[0], 2))
 
-    from action_classifier import get_classifier
+    from agent_action_classifier import get_classifier
 
     clf = get_classifier()
     monkeypatch.setattr(clf, "embed_model", DummyEmbed())

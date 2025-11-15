@@ -10,15 +10,35 @@ metadata.
 import json
 import random
 import re
+import os
 from pathlib import Path
 
 import numpy as np
+import openai
 import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split  # type: ignore
 from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
 from torch.distributions import Categorical
+from torch.utils.data import DataLoader, TensorDataset
+
+# from .common_functions import EmbeddingModel
+openai_client = openai.OpenAI(
+    api_key="test",
+    base_url=os.getenv("EMBEDDING_BASE_URL", "http://localhost:1234/v1"),
+)
+
+class EmbeddingModel:
+    def __init__(self, model_name: str, *args, **kwargs):
+        self.model_name = model_name
+
+    def encode(self, texts, *args, **kwargs):
+        responses = openai_client.embeddings.create(
+            model=self.model_name,
+            input=texts,
+        )
+        embs = [data.embedding for data in responses.data]
+        return np.array(embs)
 
 
 def accuracy_score(y_true, y_pred):
@@ -51,63 +71,53 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-
-EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-BATCH_SIZE = 8
-EPOCHS = 6  # best found
-LR = 2e-3  # best found
-HIDDEN = 256  # best found
-FORCE_CPU = False
-DEVICE = torch.device("cuda" if torch.cuda.is_available() and not FORCE_CPU else "cpu")
 set_seed()
 
+# EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+# EMBED_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+# EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L12-v2"
+# EMBED_MODEL_NAME = "unsloth/embeddinggemma-300m-GGUF"
+EMBED_MODEL_NAME = "all-MiniLM-L12-v2-GGUF"
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+BATCH_SIZE = 8
+
+# Best hyperparameters found via tuning
+HIDDEN = 64
+LR = 0.0020
+EPOCHS = 4
+WEIGHT_DECAY = 0.0
+
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "sample_actions.json"
+DATA_PATH = ROOT / "HarmActEval_dataset.json"
 MODEL_PATH = ROOT / "emb_nn_model.pt"
-_EMBED_MODEL = None
 
-
-def _get_embed_model():
-    global _EMBED_MODEL
-    if _EMBED_MODEL is None:
-        _EMBED_MODEL = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
-    return _EMBED_MODEL
+if "GGUF" in EMBED_MODEL_NAME:
+    embed_model = EmbeddingModel(EMBED_MODEL_NAME)
+else:
+    embed_model = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
 
 
 def get_label(entry):
-    """Get 2 scores: harmful_score, unethical_score."""
     classification = (entry.get("classification") or "").lower()
-    risk_level = (entry.get("risk_level") or "").lower()
-
-    score = 0.0
-    if risk_level == "low":
-        score = 1.0
-    elif risk_level == "medium":
-        score = 2.0
-    elif risk_level == "high":
-        score = 3.0
-
-    harmful_score = 0.0
-    unethical_score = 0.0
-
-    if classification == "harmful":
-        # Harmful actions are also unethical
-        harmful_score = score
-        unethical_score = score
+    if classification == "safe":
+        return 0
+    elif classification == "harmful":
+        return 1
     elif classification == "unethical":
-        unethical_score = score
-    
-    return [harmful_score, unethical_score]
-
-
-def classify_from_scores(harmful_score, unethical_score):
-    """Classify as safe, harmful, or unethical based on scores."""
-    if harmful_score <= 0.5 and unethical_score <= 0.5:
-        return "safe"
-    elif harmful_score > unethical_score:
-        return "harmful"
+        return 2
     else:
-        return "unethical"
+        raise ValueError(f"Unknown classification label: {classification}")
+        # # derive from risk_level
+        # risk_level = (entry.get("risk_level") or "").lower()
+        # if risk_level in ["none", "low"]:
+        #     return 0
+        # elif risk_level == "medium":
+        #     return 2  # unethical
+        # elif risk_level == "high":
+        #     return 1  # harmful
+        # else:
+        #     return 0
 
 
 def flatten_action_to_text(entry):
@@ -115,6 +125,7 @@ def flatten_action_to_text(entry):
     parts = []
     parts.append(entry.get("label", ""))
     parts.append(entry.get("resource", ""))
+    parts.append(entry.get("prompt", ""))
     action_meta = entry.get("action", {}) or {}
     parts.append(action_meta.get("server_label", ""))
     server_url = action_meta.get("server_url", "")
@@ -131,7 +142,7 @@ def flatten_action_to_text(entry):
         parts.extend(sorted(list(params.keys())))
     else:
         parts.append(str(type(params)))
-    return " ".join([str(p) for p in parts if p])
+    return " ".join([str(p).lower() for p in parts if p])
 
 
 class SimpleMLP(nn.Module):
@@ -141,12 +152,14 @@ class SimpleMLP(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(in_dim, hidden),
-            nn.ReLU(),
+            nn.LayerNorm(hidden),
+            nn.GELU(),
             nn.Dropout(0.2),
             nn.Linear(hidden, hidden // 2),
-            nn.ReLU(),
+            nn.LayerNorm(hidden // 2),
+            nn.GELU(),
             nn.Dropout(0.2),
-            nn.Linear(hidden // 2, 2),  # 2 scores: harmful, unethical
+            nn.Linear(hidden // 2, 3),  # 3 classes: safe, harmful, unethical
         )
 
     def forward(self, x):
@@ -157,19 +170,18 @@ class SimpleMLP(nn.Module):
 def load_texts_and_labels():
     """Load texts and labels from dataset."""
     with open(DATA_PATH, encoding="utf-8") as f:
-        j = json.load(f)
-    items = j.get("actions", [])
+        dataset = json.load(f)
     texts = []
     labels = []
     classes = []
-    for it in items:
-        texts.append(flatten_action_to_text(it))
-        lbl = get_label(it)
+    for row in dataset:
+        texts.append(flatten_action_to_text(row))
+        lbl = get_label(row)
         labels.append(lbl)
         # prefer explicit classification field when present, else derive from scores
-        cls = (it.get("classification") or "").lower()
+        cls = (row.get("classification") or "").lower()
         if not cls:
-            cls = classify_from_scores(lbl[0], lbl[1])
+            cls = ["safe", "harmful", "unethical"][lbl]
         classes.append(cls)
     return texts, labels, classes
 
@@ -177,15 +189,14 @@ def load_texts_and_labels():
 def make_embeddings(texts):
     """Generate embeddings for texts."""
     # sentence-transformers returns numpy arrays
-    model = _get_embed_model()
-    embs = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+    embs = embed_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
     return np.array(embs)
 
 
-loss_fn = nn.MSELoss()
+loss_fn = nn.CrossEntropyLoss()
 
 def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
-              yte: np.ndarray, hidden: int, lr: float, epochs: int):
+              yte: np.ndarray, hidden: int, lr: float, epochs: int, weight_decay: float = 0):
     """Train the model for one configuration.
 
     Returns the trained model, classification accuracy (based on mapping scores
@@ -193,7 +204,7 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
     """
     set_seed()
     Xtr_t = torch.tensor(Xtr, dtype=torch.float32)
-    ytr_t = torch.tensor(ytr, dtype=torch.float32)
+    ytr_t = torch.tensor(ytr, dtype=torch.long)
 
     train_ds = TensorDataset(Xtr_t, ytr_t)
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
@@ -201,7 +212,7 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
     model = SimpleMLP(in_dim=Xtr.shape[1], hidden=hidden)
     model.to(DEVICE)
 
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -224,16 +235,9 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
     with torch.inference_mode():
         model.eval()
         logits = model(torch.tensor(Xte, dtype=torch.float32).to(DEVICE))
-        preds = torch.round(logits).cpu().numpy()
+        preds = torch.argmax(logits, dim=1).cpu().numpy()
         yte_np = np.array(yte)
-        # Compute regression-style match (both scores within 0.5)
-        reg_correct = np.all(np.abs(preds - yte_np) < 0.5, axis=1)
-        reg_acc = np.mean(reg_correct)
-
-        # Compute classification accuracy by mapping scores back to labels
-        pred_classes = [classify_from_scores(float(p[0]), float(p[1])) for p in preds]
-        true_classes = [classify_from_scores(float(t[0]), float(t[1])) for t in yte_np]
-        cls_acc = accuracy_score(true_classes, pred_classes)
+        cls_acc = accuracy_score(yte_np, preds)
 
     # return classification accuracy as primary metric (used by hyperparam tuning)
     return model, cls_acc, preds
@@ -357,7 +361,8 @@ def train_model():
     print("Training...")
     cfg = {"hidden": HIDDEN, "lr": LR, "epochs": EPOCHS}
     model, acc, _ = train_one(
-        Xtr_embs, ytr, Xte_embs, yte, hidden=HIDDEN, lr=LR, epochs=EPOCHS
+        Xtr_embs, ytr, Xte_embs, yte, hidden=HIDDEN,
+        lr=LR, epochs=EPOCHS, weight_decay=WEIGHT_DECAY
     )
     print(f"-> acc: {acc:.4f}")
 

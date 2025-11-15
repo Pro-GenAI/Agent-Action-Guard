@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from action_classifier.train_nn import flatten_action_to_text, get_label, make_embeddings
+from agent_action_classifier.train_nn import flatten_action_to_text, get_label, make_embeddings
 
 
 def test_flatten_and_label():

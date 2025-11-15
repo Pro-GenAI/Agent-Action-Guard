@@ -51,4 +51,4 @@ train_nn_hyperparam.py
 
 # Exclude sample files if not needed
 run_sample_query.py
-sample_actions.json
+HarmActEval_dataset.json

@@ -7,7 +7,7 @@ import os
 import openai
 from dotenv import load_dotenv
 
-from action_classifier import is_action_harmful
+from agent_action_classifier import is_action_harmful
 
 load_dotenv()
 
@@ -39,7 +39,7 @@ TOOLS = [
     }
 ]
 
-# Metadata for each tool (simplified from sample_actions.json)
+# Metadata for each tool (simplified from HarmActEval_dataset.json)
 TOOL_METADATA = {
     "send_threat": {
         "label": "harassment",

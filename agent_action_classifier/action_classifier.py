@@ -3,13 +3,13 @@ Action Classifier Module
 Loads the trained neural network model to classify agent actions as harmful or safe.
 """
 
-import re
 from pathlib import Path
 
 import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
-from torch import nn
+
+from agent_action_classifier.train_nn import SimpleMLP, flatten_action_to_text
 
 # Configuration
 EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
@@ -18,25 +18,6 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() and not FORCE_CPU else
 
 ROOT = Path(__file__).parent
 MODEL_PATH = ROOT / "emb_nn_model.pt"
-
-
-class SimpleMLP(nn.Module):
-    """Simple MLP for binary classification."""
-
-    def __init__(self, in_dim, hidden=256):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden, hidden // 2),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden // 2, 2),
-        )
-
-    def forward(self, x):
-        return self.net(x)
 
 
 class ActionClassifier:
@@ -56,7 +37,6 @@ class ActionClassifier:
 
     def load_model(self):
         """Load the trained model from file."""
-        """Load the trained model from file."""
         if not MODEL_PATH.exists():
             raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
 
@@ -70,38 +50,15 @@ class ActionClassifier:
         self.model.to(DEVICE)
         self.model.eval()
 
-    def flatten_action_to_text(self, entry):
-        """Flatten action metadata to text, same as in training."""
-        parts = []
-        parts.append(entry.get("label", ""))
-        parts.append(entry.get("resource", ""))
-        action_meta = entry.get("action", {}) or {}
-        parts.append(action_meta.get("server_label", ""))
-        server_url = action_meta.get("server_url", "")
-        if server_url:
-            try:
-                host = re.sub(r"^https?://", "", server_url)
-                host = host.split("/")[0]
-                parts.append(host)
-            except (ValueError, AttributeError):
-                parts.append(server_url)
-        parts.append(action_meta.get("require_approval", ""))
-        params = action_meta.get("parameters") or {}
-        if isinstance(params, dict):
-            parts.extend(sorted(list(params.keys())))
-        else:
-            parts.append(str(type(params)))
-        return " ".join([str(p) for p in parts if p])
-
     def predict(self, action_dict):
         """
         Predict if an action is harmful.
-        Returns: (is_harmful: bool, confidence: float)
+        Returns: (harmful_score: float, unethical_score: float)
         """
         if self.model is None:
             raise RuntimeError("Model not loaded")
 
-        text = self.flatten_action_to_text(action_dict)
+        text = flatten_action_to_text(action_dict)
         if self.embed_model is None:
             raise RuntimeError("Embedding model not initialized.")
         embedding = self.embed_model.encode(
@@ -117,27 +74,43 @@ class ActionClassifier:
 
         with torch.inference_mode():
             logits = self.model(torch.tensor(embedding, dtype=torch.float32).to(DEVICE))
-            probs = torch.softmax(logits, dim=1)
-            pred_class = torch.argmax(logits, dim=1).item()
-            confidence = probs[0, int(pred_class)].item()
-
-        is_harmful = pred_class == 1
-        return is_harmful, confidence
+            harmful_score = logits[0, 0].item()
+            unethical_score = logits[0, 1].item()
+        return harmful_score, unethical_score
 
 
 # Lazy global classifier accessor
-_GLOBAL_CLASSIFIER = None
-
-
-def get_classifier():
-    """Get the global classifier instance."""
-    global _GLOBAL_CLASSIFIER
-    if _GLOBAL_CLASSIFIER is None:
-        _GLOBAL_CLASSIFIER = ActionClassifier()
-    return _GLOBAL_CLASSIFIER
+classifier = ActionClassifier()
 
 
 def is_action_harmful(action_dict):
     """Convenience function to check if an action is harmful."""
-    clf = get_classifier()
-    return clf.predict(action_dict)
+    harmful_score, unethical_score = classifier.predict(action_dict)
+    confidence = max(harmful_score, unethical_score)
+    if max(harmful_score, unethical_score) >= 0.5:
+        if harmful_score >= unethical_score:
+            return "Harmful", confidence
+        else:
+            return "Unethical", confidence
+    return None, confidence
+
+
+# Example usage
+if __name__ == "__main__":
+    sample_action = {
+        "label": "Delete all files",
+        "resource": "File System",
+        "action": {
+            "type": "mcp",
+            "server_label": "weather_api",
+            "server_url": "https://api.weather.com/v1/current",
+            "parameters": {
+                "location": "New York City",
+                "units": "imperial",
+            },
+            "require_approval": "never"
+        },
+    }
+
+    classification, confidence = is_action_harmful(sample_action)
+    print(f"Is harmful: {classification}, Confidence: {confidence:.2f}")

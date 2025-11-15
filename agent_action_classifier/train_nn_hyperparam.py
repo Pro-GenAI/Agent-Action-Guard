@@ -19,9 +19,10 @@ import torch
 # Hyperparameter grid
 PARAM_GRID = {
     # updated search space: focus on mid/large networks and slightly larger lr
-    "hidden": [128, 256, 512],
+    "hidden": [64, 128, 256, 512],
     "lr": [5e-4, 1e-3, 2e-3],
-    "epochs": [4, 6, 8],
+    "epochs": [2, 3, 4, 6, 8],
+    "weight_decay": [0, 1e-4],
 }
 
 
@@ -54,6 +55,7 @@ def hyperparam_tuning():
             hidden=cfg["hidden"],
             lr=cfg["lr"],
             epochs=cfg["epochs"],
+            weight_decay=cfg["weight_decay"],
         )
         print(f"-> acc: {acc:.4f}")
         # store trial result
@@ -62,6 +64,7 @@ def hyperparam_tuning():
                 "hidden": cfg["hidden"],
                 "lr": cfg["lr"],
                 "epochs": cfg["epochs"],
+                "weight_decay": cfg["weight_decay"],
                 "acc": float(acc),
             }
         )
@@ -73,7 +76,7 @@ def hyperparam_tuning():
     if pd is not None:
         df = pd.DataFrame(results)
         df = df.sort_values(
-            by=["acc", "hidden", "lr", "epochs"], ascending=[False, True, True, True]
+            by=["acc", "hidden", "lr", "epochs", "weight_decay"], ascending=[False, True, True, True, True]
         )
         print("\nAll trials sorted by acc:")
         print(df.to_string(index=False))
@@ -88,48 +91,51 @@ def hyperparam_tuning():
     # save best supervised/pretrained model for RL initialization
     try:
         if best.get("model") is not None:
-            torch.save({"model_state_dict": best["model"].state_dict(), "config": best["config"]}, MODEL_PATH.with_name(MODEL_PATH.stem + "_pretrained.pt"))
-            print(f"Saved best pretrained model to {MODEL_PATH.with_name(MODEL_PATH.stem + '_pretrained.pt')}")
+            torch.save(
+                {"model_state_dict": best["model"].state_dict(), "config": best["config"]},
+                MODEL_PATH
+            )
+            print(f"Saved best pretrained model to {MODEL_PATH}")
     except Exception as e:
         print("Failed saving pretrained model:", e)
 
-    # Run RL fine-tuning on top of embeddings using class strings
-    try:
-        print("Running RL fine-tune on best config (safe defaults)...")
-        # use a safer, smaller LR and fewer epochs for RL to avoid degrading pretrained
-        cfg = best["config"]
-        m = best.get("model")
-        pre_state = m.state_dict() if m is not None else None
+    # # Run RL fine-tuning on top of embeddings using class strings
+    # try:
+    #     print("Running RL fine-tune on best config (safe defaults)...")
+    #     # use a safer, smaller LR and fewer epochs for RL to avoid degrading pretrained
+    #     cfg = best["config"]
+    #     m = best.get("model")
+    #     pre_state = m.state_dict() if m is not None else None
 
-        rl_lr = float(cfg.get("lr", 0.001)) * 0.1
-        rl_epochs = max(2, int(cfg.get("epochs", 6) // 2))
-        print(f"RL params: hidden={cfg['hidden']} lr={rl_lr:.6f} epochs={rl_epochs}")
+    #     rl_lr = float(cfg.get("lr", 0.001)) * 0.1
+    #     rl_epochs = max(2, int(cfg.get("epochs", 6) // 2))
+    #     print(f"RL params: hidden={cfg['hidden']} lr={rl_lr:.6f} epochs={rl_epochs}")
 
-        clf, rl_acc = rl_fine_tune(
-            xtr_embs,
-            xte_embs,
-            ctr,
-            cte,
-            hidden=cfg["hidden"],
-            lr=rl_lr,
-            epochs=rl_epochs,
-            batch_size=32,
-            pretrained_state_dict=pre_state,
-        )
-        print(f"-> RL acc: {rl_acc:.4f} (supervised: {best['acc']:.4f})")
+    #     clf, rl_acc = rl_fine_tune(
+    #         xtr_embs,
+    #         xte_embs,
+    #         ctr,
+    #         cte,
+    #         hidden=cfg["hidden"],
+    #         lr=rl_lr,
+    #         epochs=rl_epochs,
+    #         batch_size=32,
+    #         pretrained_state_dict=pre_state,
+    #     )
+    #     print(f"-> RL acc: {rl_acc:.4f} (supervised: {best['acc']:.4f})")
 
-        # Save whichever is better: supervised pretrained or RL head
-        if rl_acc > float(best["acc"]):
-            try:
-                torch.save({"model_state_dict": clf.state_dict(), "config": cfg},
-                           MODEL_PATH.with_name(MODEL_PATH.stem + "_rl.pt"))
-                print(f"RL improved. Saved RL model to {MODEL_PATH.with_name(MODEL_PATH.stem + '_rl.pt')}")
-            except Exception:
-                print("RL improved but failed to save RL model file.")
-        else:
-            print("RL did not improve over supervised model. Keeping pretrained supervised model.")
-    except Exception as e:
-        print("RL fine-tune failed:", e)
+    #     # Save whichever is better: supervised pretrained or RL head
+    #     if rl_acc > float(best["acc"]):
+    #         try:
+    #             torch.save({"model_state_dict": clf.state_dict(), "config": cfg},
+    #                        MODEL_PATH.with_name(MODEL_PATH.stem + "_rl.pt"))
+    #             print(f"RL improved. Saved RL model to {MODEL_PATH.with_name(MODEL_PATH.stem + '_rl.pt')}")
+    #         except Exception:
+    #             print("RL improved but failed to save RL model file.")
+    #     else:
+    #         print("RL did not improve over supervised model. Keeping pretrained supervised model.")
+    # except Exception as e:
+    #     print("RL fine-tune failed:", e)
 
 
 if __name__ == "__main__":

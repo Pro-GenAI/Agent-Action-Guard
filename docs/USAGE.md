@@ -2,9 +2,8 @@
 
 This document shows how to use the Action Classifier included in this repository.
 
-## Quick start
-
-1. Create and activate a virtual environment, then install dependencies:
+### Development Setup:
+1. Create a virtual environment and install dependencies:
 
 ```bash
 python3 -m venv .venv
@@ -12,17 +11,24 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. (Optional) Train a model and save it (the repo includes a pre-trained `emb_nn_model.pt`):
+2. Implement the trained model in LLM calls - run the example:
+
+```bash
+python3 action_classifier/run_sample_query.py
+```
+
+3. Train the model (Optional):
 
 ```bash
 python3 action_classifier/train_nn.py
 ```
 
-3. Run the example script in `examples/`:
-
+4. Integrate to MCP
 ```bash
-python3 examples/example_query.py
+pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
+mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
+Now, connect your MCP client to localhost:8081.
 
 The example will attempt to load the real model and embedding model. If the environment
 does not have the heavy dependencies or `emb_nn_model.pt` available, the example falls back
@@ -73,7 +79,7 @@ is_harmful, confidence = is_action_harmful(sample_action)
 
 ## Example data
 
-The `action_classifier/sample_actions.json` file contains many example actions used for training and demos.
+The `action_classifier/HarmActEval_dataset.json` file contains many example actions used for training and demos.
 
 ## Notes and troubleshooting
 

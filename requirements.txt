@@ -19,6 +19,3 @@ python-dotenv
 fastapi
 uvicorn[standard]
 pydantic
-
-# MCP integration
-mcp

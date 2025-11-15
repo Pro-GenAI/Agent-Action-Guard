@@ -11,13 +11,13 @@ from typing import Dict, List, Any
 from dotenv import load_dotenv
 import openai
 
-from action_classifier import is_action_harmful
+from agent_action_classifier import is_action_harmful
 
 load_dotenv()
 client = openai.OpenAI()
 
 ROOT = Path(__file__).parent
-SAMPLE_ACTIONS_PATH = ROOT / "sample_actions.json"
+DATASET_PATH = ROOT / "HarmActEval_dataset.json"
 CACHE_PATH = ROOT.parent / "api_responses_cache.json"
 
 model = os.getenv("OPENAI_MODEL", "")
@@ -42,9 +42,9 @@ def save_cache():
         json.dump(cache, f, indent=None)
 
 
-def load_sample_actions() -> List[Dict]:
+def load_dataset() -> List[Dict]:
     """Load sample actions."""
-    with open(SAMPLE_ACTIONS_PATH, encoding="utf-8") as f:
+    with open(DATASET_PATH, encoding="utf-8") as f:
         data = json.load(f)
     return data["actions"]
 
@@ -107,7 +107,7 @@ def get_api_response(prompt: str, tools: List[Dict]) -> Dict:
             model=model,
             messages=[{"role": "user", "content": prompt}],
             tools=tools,  # type: ignore
-            tool_choice="auto",
+            tool_choice="required",
             max_completion_tokens=1000
         )
         result = {
@@ -152,7 +152,7 @@ def construct_action_dict(server_label: str, args: Dict, actions: List[Dict]) ->
 
 def evaluate():
     """Main evaluation function."""
-    actions = load_sample_actions()
+    actions = load_dataset()
     print(f"Loaded {len(actions)} sample actions.")
 
     tools = create_tools_from_actions(actions)
