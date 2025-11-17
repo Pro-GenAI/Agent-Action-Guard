@@ -11,6 +11,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <h2 align="center">Agent MCP Action Guard</h2>
 <!-- <hr/> -->
 <h4 align="center"><em>Classifying AI agent actions to ensure safety and reliability</em></h4>
+<h4 align="center"><em>Safe actions for safe AI</em></h4>
 </p>
 
 A neural network model to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines.
@@ -24,6 +25,10 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActEval)
 [![HuggingFace Model](https://img.shields.io/badge/HuggingFace_Model-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/prane-eth/Agent-Action-Classifier)
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.XXXXX/XXXXX-darkgreen?style=for-the-badge)](https://doi.org/10.XXXXX/XXXXX) -->
+
+
+### Implementation
+![Implementation Diagram](./assets/Implementation.gif)
 
 
 ## Common causes of harmful actions by AI agents:
@@ -50,13 +55,6 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 - Allows safe actions to proceed normally
 
 
-### Implementation
-![Implementation Diagram](./assets/Implementation.jpg)
-
-#### Training
-![Training Diagram](./assets/Training.jpg)
-
-
 ### Usage:
 1. Create a virtual environment and install dependencies:
 
@@ -73,6 +71,10 @@ mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
 
 3. Now, connect your MCP client to localhost:8081.
+
+
+#### Training
+![Training Diagram](./assets/Training.jpg)
 
 
 ## Docs and examples

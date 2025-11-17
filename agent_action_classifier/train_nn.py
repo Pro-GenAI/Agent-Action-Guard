@@ -13,11 +13,12 @@ import re
 import os
 from pathlib import Path
 
+from collections import Counter
 import numpy as np
 import openai
-import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split  # type: ignore
+import torch
 from torch import nn
 from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
@@ -59,14 +60,14 @@ def accuracy_score(y_true, y_pred):
 
 # ------------------ Configuration (disable parser) ------------------
 
-
-def set_seed(seed: int = 42):
+SEED = 42
+def set_seed():
     """Make runs reproducible across torch/numpy/random where possible."""
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
+        torch.cuda.manual_seed_all(SEED)
     # deterministic behaviour for cuDNN (may slow down)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -83,9 +84,9 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 8
 
 # Best hyperparameters found via tuning
-HIDDEN = 64
-LR = 0.0020
-EPOCHS = 4
+HIDDEN = 128
+LR = 0.0010
+EPOCHS = 3
 WEIGHT_DECAY = 0.0
 
 ROOT = Path(__file__).parent
@@ -125,7 +126,7 @@ def flatten_action_to_text(entry):
     parts = []
     parts.append(entry.get("label", ""))
     parts.append(entry.get("resource", ""))
-    parts.append(entry.get("prompt", ""))
+    # parts.append(entry.get("prompt", ""))
     action_meta = entry.get("action", {}) or {}
     parts.append(action_meta.get("server_label", ""))
     server_url = action_meta.get("server_url", "")
@@ -183,7 +184,14 @@ def load_texts_and_labels():
         if not cls:
             cls = ["safe", "harmful", "unethical"][lbl]
         classes.append(cls)
-    return texts, labels, classes
+
+    # Calculate class weights for imbalanced dataset
+    class_counts = Counter(labels)
+    total_samples = len(labels)
+    class_weights = {cls: total_samples / count for cls, count in class_counts.items()}
+    weights = torch.tensor([class_weights[0], class_weights[1], class_weights[2]], dtype=torch.float32)
+
+    return texts, labels, classes, weights
 
 
 def make_embeddings(texts):
@@ -193,10 +201,10 @@ def make_embeddings(texts):
     return np.array(embs)
 
 
-loss_fn = nn.CrossEntropyLoss()
 
 def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
-              yte: np.ndarray, hidden: int, lr: float, epochs: int, weight_decay: float = 0):
+              yte: np.ndarray, hidden: int, lr: float, epochs: int, weight_decay: float = 0,
+              class_weights: torch.Tensor | None = None):
     """Train the model for one configuration.
 
     Returns the trained model, classification accuracy (based on mapping scores
@@ -213,6 +221,9 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
     model.to(DEVICE)
 
     opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+    loss_fn = nn.CrossEntropyLoss(weight=class_weights.to(DEVICE)
+                                  if class_weights is not None else None)
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -346,9 +357,9 @@ def train_model():
     """Train the model with best hyperparameters."""
     # Ensure reproducible split and training
     set_seed()
-    texts, labels, classes = load_texts_and_labels()
+    texts, labels, classes, class_weights = load_texts_and_labels()
     Xtr_texts, Xte_texts, ytr, yte = train_test_split(
-        texts, labels, test_size=0.25, random_state=42, stratify=classes
+        texts, labels, test_size=0.25, random_state=SEED, stratify=classes,
     )
 
     print("Generating embeddings...")
@@ -362,7 +373,8 @@ def train_model():
     cfg = {"hidden": HIDDEN, "lr": LR, "epochs": EPOCHS}
     model, acc, _ = train_one(
         Xtr_embs, ytr, Xte_embs, yte, hidden=HIDDEN,
-        lr=LR, epochs=EPOCHS, weight_decay=WEIGHT_DECAY
+        lr=LR, epochs=EPOCHS, weight_decay=WEIGHT_DECAY,
+        class_weights=class_weights,
     )
     print(f"-> acc: {acc:.4f}")
 

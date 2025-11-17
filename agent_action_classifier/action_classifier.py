@@ -22,8 +22,8 @@ class ActionClassifier:
         self.in_dim = None
         if load_model:
             self.load_model()
-        #     # create heavy components only on demand
-        #     self.embed_model = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
+            # # create heavy components only on demand
+            # self.embed_model = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
 
     def load_model(self):
         """Load the trained model from file."""
@@ -62,9 +62,9 @@ class ActionClassifier:
 
         with torch.inference_mode():
             logits = self.model(torch.tensor(embedding, dtype=torch.float32).to(DEVICE))
-            # probs = torch.softmax(logits, dim=1)
-            pred_class_idx = torch.argmax(logits, dim=1).item()
-            confidence = logits[0, pred_class_idx].item()
+            probs = torch.softmax(logits, dim=1)
+            pred_class_idx = int(torch.argmax(logits, dim=1).item())
+            confidence = probs[0, pred_class_idx].item()
         classes = ["safe", "harmful", "unethical"]
         pred_class = classes[pred_class_idx]  # type: ignore
         return pred_class, confidence
@@ -86,24 +86,6 @@ def is_action_harmful(action_dict):
 # Example usage
 if __name__ == "__main__":
     sample_action = {
-        "label": "Delete all files",
-        "resource": "File System",
-        "action": {
-            "type": "mcp",
-            "server_label": "weather_api",
-            "server_url": "https://api.weather.com/v1/current",
-            "parameters": {
-                "location": "New York City",
-                "units": "imperial",
-            },
-            "require_approval": "never"
-        },
-    }
-
-    classification, confidence = is_action_harmful(sample_action)
-    print(f"Classification: {classification}, Confidence: {confidence:.2f}")
-
-    sample2 = {
         "label": "ping",
         "resource": "Tool",
         "action": {
@@ -114,5 +96,5 @@ if __name__ == "__main__":
             "require_approval": "never",
         },
     }
-    classification, confidence = is_action_harmful(sample2)
-    print(f"Classification: {classification}, Confidence: {confidence:.2f}")
+    classification, confidence = is_action_harmful(sample_action)
+    print(f"{sample_action['label']} Classification: {classification}, Confidence: {confidence:.2f}")

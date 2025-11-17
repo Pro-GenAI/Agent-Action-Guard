@@ -30,7 +30,7 @@ def hyperparam_tuning():
     """
     Perform hyperparameter tuning using grid search on the neural network model.
     """
-    texts, labels, classes = load_texts_and_labels()
+    texts, labels, classes, class_weights = load_texts_and_labels()
     # split texts, labels and classes together so we keep class strings for RL
     xtr_texts, xte_texts, ytr, yte, ctr, cte = train_test_split(
         texts, labels, classes, test_size=0.25, random_state=42, stratify=classes
@@ -56,6 +56,7 @@ def hyperparam_tuning():
             lr=cfg["lr"],
             epochs=cfg["epochs"],
             weight_decay=cfg["weight_decay"],
+            class_weights=class_weights,
         )
         print(f"-> acc: {acc:.4f}")
         # store trial result
@@ -92,7 +93,8 @@ def hyperparam_tuning():
     try:
         if best.get("model") is not None:
             torch.save(
-                {"model_state_dict": best["model"].state_dict(), "config": best["config"]},
+                {"model_state_dict": best["model"].state_dict(), "config": best["config"],
+                    "in_dim": xtr_embs.shape[1]},
                 MODEL_PATH
             )
             print(f"Saved best pretrained model to {MODEL_PATH}")

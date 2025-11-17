@@ -5,6 +5,7 @@ import json
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+import openai
 from pydantic import BaseModel
 import uvicorn
 
@@ -12,13 +13,14 @@ from agent_action_classifier import is_action_harmful
 
 load_dotenv()
 
-MODEL_ID = os.getenv("OPENAI_MODEL", "")
-if not MODEL_ID:
+model_name = os.getenv("OPENAI_MODEL", "")
+if not model_name:
     # allow server to start in test contexts but warn via exception on use
     raise ValueError("OPENAI_MODEL environment variable not set.")
 
 
 app = FastAPI(title="OpenAI-Compatible API", version="1.0")
+openai_client = openai.OpenAI()
 
 
 class ChatCompletionRequest(BaseModel):
@@ -36,60 +38,66 @@ class PredictRequest(BaseModel):
 
 @app.get("/v1/models")
 def list_models():
-    return {"data": [{"id": MODEL_ID, "object": "model"}]}
+    return {"data": [{"id": model_name, "object": "model"}]}
 
 
-def _format_chat_response(text: str) -> dict:
-    return {
-        "id": f"chatcmpl-{int(time.time())}",
-        "object": "chat.completion",
-        "created": int(time.time()),
-        "model": MODEL_ID,
-        "choices": [
-            {
-                "index": 0,
-                "message": {"role": "assistant", "content": text},
-                "finish_reason": "stop",
-            }
-        ],
-    }
-
-
-def get_response(messages: list[dict[str, str]], max_new_tokens: Optional[int] = None,
-                 temperature: Optional[float] = None) -> str:
+def get_response(messages: list[dict[str, str]]) -> str:
     """Simple response generator for demo purposes.
 
-    If a message content contains a JSON object with an `action` key, we will
+    If the model's response contains a JSON object with an `action` key, we will
     route it to the local action classifier and return a short classification
-    summary. Otherwise, the function concatenates message contents.
+    summary. Otherwise, return the model's response.
     """
-    # Find first message with a parsable JSON that includes 'action'
-    for m in messages:
-        content = m.get("content", "")
-        # Try to parse raw JSON content
-        try:
-            parsed = json.loads(content)
-            if isinstance(parsed, dict) and "action" in parsed:
-                is_harmful, conf = is_action_harmful(parsed["action"])
-                return (
-                    f"Action classification: is_harmful={is_harmful}, confidence={conf:.4f}"
-                )
-        except Exception:
-            # not JSON — skip
-            pass
+    response = openai_client.chat.completions.create(
+        messages=messages,  # type: ignore
+        model=model_name,
+    )
+    tool_calls = response.choices[0].message.tool_calls or []
 
-    # Fallback: join user-visible content
-    parts = [m.get("content", "") for m in messages if m.get("content")]
-    return "\n".join(parts) if parts else ""
+    for tool_call in tool_calls:
+        if hasattr(tool_call, "function"):
+            func_name = tool_call.function.name  # type: ignore
+            args = tool_call.function.arguments  # type: ignore
+        elif hasattr(tool_call, "custom"):
+            func_name = tool_call.custom.name  # type: ignore
+            args = tool_call.custom.input  # type: ignore
+        else:
+            print("WARNING: unrecognized tool_call format:", tool_call)
+            continue
+
+        is_harmful, conf = is_action_harmful({
+            "label": "mcp",
+            "resource": func_name,
+            "action": {
+                "server_label": func_name,
+                "parameters": args,
+            }
+        })
+        return (
+            f"Action classification: is_harmful={is_harmful}, confidence={conf:.4f}"
+        )
+
+    return response.choices[0].message.content or ""
 
 
 @app.post("/v1/chat/completions")
 async def create_chat_completion(request: ChatCompletionRequest):
     # Generate response
-    response = get_response(request.messages, max_new_tokens=request.max_tokens,
-                            temperature=request.temperature)
+    response = get_response(request.messages)
 
-    return _format_chat_response(response)
+    return {
+        "id": f"chatcmpl-{int(time.time())}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model_name,
+        "choices": [
+            {
+                "index": 0,
+                "message": {"role": "assistant", "content": response},
+                "finish_reason": "stop",
+            }
+        ],
+    }
 
 
 @app.post("/predict")
