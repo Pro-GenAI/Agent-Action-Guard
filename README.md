@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/project_banner.gif" alt="Project banner" width="400" height="211"/>
+<img src="./assets/project_banner.gif" alt="Project banner" height="300"/>
 <!--
 $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 # $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
@@ -28,7 +28,7 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 
 
 ### Implementation
-![Implementation Diagram](./assets/Implementation.gif)
+<img src="./assets/Implementation.gif" alt="Implementation Diagram" height="450"/>
 
 
 ## Common causes of harmful actions by AI agents:
@@ -73,8 +73,8 @@ mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 3. Now, connect your MCP client to localhost:8081.
 
 
-#### Training
-![Training Diagram](./assets/Training.jpg)
+<!-- #### Training
+<img src="./assets/Training.jpg" alt="Training Diagram" height="150"/> -->
 
 
 ## Docs and examples
