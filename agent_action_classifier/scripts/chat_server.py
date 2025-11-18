@@ -1,6 +1,6 @@
 import streamlit as st
 
-from server import get_response, model_name
+from agent_action_classifier.scripts.api_server import get_response, model_name
 
 # Ensure this file is run using: streamlit run <filename>
 

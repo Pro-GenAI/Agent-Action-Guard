@@ -14,19 +14,20 @@ import os
 from pathlib import Path
 
 from collections import Counter
+from dotenv import load_dotenv
 import numpy as np
 import openai
 from sentence_transformers import SentenceTransformer
-from sklearn.model_selection import train_test_split  # type: ignore
+from sklearn.model_selection import train_test_split
 import torch
 from torch import nn
 from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
 
-# from .common_functions import EmbeddingModel
+load_dotenv()
+
 openai_client = openai.OpenAI(
-    api_key="test",
-    base_url=os.getenv("EMBEDDING_BASE_URL", "http://localhost:1234/v1"),
+    base_url=os.getenv("EMBEDDING_BASE_URL"),
 )
 
 class EmbeddingModel:

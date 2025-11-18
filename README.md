@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/project_banner.gif" alt="Project banner" width="600" height="319"/>
+<img src="./assets/project_banner.gif" alt="Project banner" width="400" height="211"/>
 <!--
 $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 # $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
@@ -32,7 +32,7 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 
 
 ## Common causes of harmful actions by AI agents:
-- User trying to jailbreak the model.
+- User attempting to jailbreak the model.
 - Model hallucinating or misunderstanding the context.
 - Model being overconfident in its incorrect knowledge.
 - Lack of proper constraints or guidelines for the agent.

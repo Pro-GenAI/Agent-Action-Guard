@@ -1,4 +1,4 @@
-from agent_action_classifier.run_sample_query import TOOL_METADATA
+from agent_action_classifier.scripts.run_sample_query import TOOL_METADATA
 
 
 def test_tool_metadata_has_entry():
