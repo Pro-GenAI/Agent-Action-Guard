@@ -1,9 +1,6 @@
 """
-Train a small neural network on SentenceTransformer embeddings built from action
-metadata.
-- Reuses the same metadata->text flattening as `train_classifier.py`.
-- Uses `sentence-transformers/all-MiniLM-L6-v2` to generate embeddings.
-- Trains a tiny PyTorch MLP classifier.
+Train a neural network on embeddings built from action metadata.
+- Trains a PyTorch MLP classifier.
 - Saves the trained PyTorch model and the embedding model name used.
 """
 
@@ -17,7 +14,6 @@ from collections import Counter
 from dotenv import load_dotenv
 import numpy as np
 import openai
-from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split
 import torch
 from torch import nn
@@ -25,6 +21,10 @@ from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
 
 load_dotenv()
+
+EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
+if not EMBED_MODEL_NAME:
+    raise ValueError("EMBED_MODEL_NAME environment variable not set.")
 
 openai_client = openai.OpenAI(
     base_url=os.getenv("EMBEDDING_BASE_URL"),
@@ -75,13 +75,8 @@ def set_seed():
 
 set_seed()
 
-# EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-# EMBED_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
-# EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L12-v2"
-# EMBED_MODEL_NAME = "unsloth/embeddinggemma-300m-GGUF"
-EMBED_MODEL_NAME = "all-MiniLM-L12-v2-GGUF"
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu") #torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 8
 
 # Best hyperparameters found via tuning
@@ -94,10 +89,7 @@ ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "HarmActEval_dataset.json"
 MODEL_PATH = ROOT / "emb_nn_model.pt"
 
-if "GGUF" in EMBED_MODEL_NAME:
-    embed_model = EmbeddingModel(EMBED_MODEL_NAME)
-else:
-    embed_model = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
+embed_model = EmbeddingModel(EMBED_MODEL_NAME)
 
 
 def get_label(entry):

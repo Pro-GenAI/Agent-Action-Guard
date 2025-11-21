@@ -3,32 +3,38 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-action-classifier"
+name = "agent-action-guard"
 version = "0.1.0"
 description = "A classifier for AI agent actions to determine if they are harmful or safe."
 authors = [
     {name = "Praneeth Vadlapati", email = "praneeth.vad@gmail.com"},
 ]
 dependencies = [
-    "scikit-learn",
-    "joblib",
-    "numpy",
+    # Core ML and embeddings
     "torch",
     "sentence-transformers",
+    # Utilities
+    "numpy",
+    "scikit-learn",
+    "joblib",
+    # Integrations with LLMs
+    "mcp",
     "openai",
     "python-dotenv",
+    # Web framework
     "fastapi",
     "uvicorn[standard]",
     "pydantic",
+    "gradio>=6.0.0.dev5",
 ]
 requires-python = ">=3.8"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agent_action_classifier*"]
+include = ["agent_action_guard*"]
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.package-data]
-agent_action_classifier = ["*.pt", "*.json", "requirements.txt"]
+agent_action_guard = ["*.pt", "*.json", "requirements.txt"]

@@ -11,7 +11,7 @@ from typing import Dict, List, Any
 from dotenv import load_dotenv
 import openai
 
-from agent_action_classifier import is_action_harmful
+from agent_action_guard import is_action_harmful
 
 load_dotenv()
 client = openai.OpenAI()

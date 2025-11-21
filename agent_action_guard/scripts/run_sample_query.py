@@ -7,7 +7,7 @@ import os
 import openai
 from dotenv import load_dotenv
 
-from agent_action_classifier import is_action_harmful
+from agent_action_guard import is_action_harmful
 
 load_dotenv()
 

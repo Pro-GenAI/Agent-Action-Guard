@@ -27,6 +27,9 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.XXXXX/XXXXX-darkgreen?style=for-the-badge)](https://doi.org/10.XXXXX/XXXXX) -->
 
 
+### Demo
+<img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
+
 ### Implementation
 <img src="./assets/Implementation.gif" alt="Implementation Diagram" height="450"/>
 
@@ -45,6 +48,7 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 - The model is lightweight and can be easily integrated into existing AI agent frameworks like MCP.
 - This project is about classifying actions and not related to Guardrails.
 - Integration to MCP (Model Context Protocol) to allow real-time action classification.
+- Unlike `"require_approval": "always"` flag, this blocks harmful actions without human intervention.
   <!-- - Integration to MCP server - fixes if client sends a bad action irrespective of server's tool descriptions.
   - Integration to MCP client - fixes if the server made the model take bad actions. -->
 
@@ -56,38 +60,49 @@ A neural network model to classify actions proposed by autonomous AI agents as h
 
 
 ### Usage:
-1. Create a virtual environment and install dependencies:
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Pro-GenAI/AgentActionGuard
+cd AgentActionGuard
+```
+
+2. Create a virtual environment and install dependencies:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install git+https://github.com/Pro-GenAI/AgentActionClassifier
+pip install -e .
+# pip install git+https://github.com/Pro-GenAI/AgentActionGuard
 ```
 
-2. Integrate to MCP
+3. Start an MCP server (if not already running):
+
+```bash
+python agent_action_guard/scripts/sample_mcp_server.py
+```
+
+4. Use a guarded proxy protected by ActionGuard.
 ```bash
 pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
 mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
 
-3. Now, connect your MCP client to localhost:8081.
-
+1. Start the chat server that uses the guarded proxy:
+```bash
+python agent_action_guard/scripts/chat_server.py
+```
 
 <!-- #### Training
 <img src="./assets/Training.jpg" alt="Training Diagram" height="150"/> -->
-
-
-## Docs and examples
-- Detailed usage, including API examples: `docs/USAGE.md`
-- Runnable example scripts: `examples/example_query.py` (see `examples/README.md`)
 
 
 ### Citation
 If you find this repository useful in your research, please consider citing:
 ```bibtex
 @article{202510.1415,
-	title = {Agent Action Classifier: Classifying AI Agent Actions to Ensure Safety and Reliability},
-  year = 2025,
+	title = {Agent Action Guard: Classifying AI Agent Actions to Ensure Safety and Reliability},
+  	year = 2025,
 	month = {October},
 	publisher = {Preprints},
 	author = {Praneeth Vadlapati},
@@ -104,3 +119,16 @@ Personally Identifiable Information (PII) detection is not performed by this pro
 ### Created based on my past work
 
 Agent-Supervisor: Supervising Actions of Autonomous AI Agents for Ethical Compliance: [GitHub](https://github.com/Pro-GenAI/Agent-Supervisor)
+
+
+## Acknowledgements
+- Thanks to [Hugging Face](https://huggingface.co/) for hosting the hackathon.
+- Thanks to [Gradio](https://gradio.app/) for the interface of the demo app.
+- Thanks to [Anthropic](https://www.anthropic.com/news/model-context-protocol) for the Model Context Protocol (MCP) framework.
+- Thanks to [OpenAI](https://openai.com/) for providing a Python package to interact with LLMs.
+
+<!-- logos -->
+[![HuggingFace](https://img.shields.io/badge/Huggingface-FFD21E?style=for-the-badge&logo=Huggingface&logoColor=black "HuggingFace")](https://huggingface.co/)
+[![Gradio](https://img.shields.io/badge/Gradio-FF7C00?style=for-the-badge&logo=gradio&logoColor=white "Gradio")](https://gradio.app/)
+[![Anthropic](https://img.shields.io/badge/Anthropic-000000?style=for-the-badge&logo=anthropic&logoColor=white "MCP")](https://www.anthropic.com/news/model-context-protocol)
+[![OpenAI](https://img.shields.io/badge/OpenAI-74AA9C?style=for-the-badge&logo=openai&logoColor=white "OpenAI")](https://openai.com/)

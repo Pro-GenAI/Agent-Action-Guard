@@ -6,7 +6,7 @@ Loads the trained neural network model to classify agent actions as harmful or s
 import numpy as np
 import torch
 
-from agent_action_classifier.train_nn import embed_model, flatten_action_to_text, \
+from agent_action_guard.train_nn import embed_model, flatten_action_to_text, \
     SimpleMLP, MODEL_PATH, DEVICE
 
 
