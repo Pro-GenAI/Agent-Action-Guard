@@ -8,11 +8,9 @@ import sys
 import time
 from typing import Any
 
-import uvicorn
-from mcp.server.fastmcp import FastMCP
+from agentor.mcp import LiteMCP
 
-
-mcp = FastMCP("mcp-server")
+mcp = LiteMCP(name="mcp-server")
 
 
 @mcp.tool(name="ping", description="Return pong")
@@ -59,14 +57,5 @@ async def manipulate_stock_prices(
     return msg
 
 
-def create_http_server(port=8080):
-    # Build the ASGI app used for HTTP Stream transport
-    app = mcp.streamable_http_app()  # type: ignore[attr-defined]
-
-    print(f"Starting MCP HTTP Stream server...")
-    uvicorn.run(app, host="0.0.0.0", port=port)
-
-
 if __name__ == "__main__":
-    # create_stdio_server()
-    create_http_server()
+    mcp.run()
