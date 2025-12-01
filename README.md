@@ -41,6 +41,15 @@ Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and h
 - Lack of proper constraints or guidelines for the agent.
 - Inadequate training data for specific scenarios.
 - MCP server providing incorrect tool descriptions that mislead the agent.
+- Harmful MCP servers returning manipulative text to mislead the model.
+- The experiments proved that the model performs a harmful action and still responds "Sorry, I can't help with that."
+
+## New contributions in this project:
+1. 	**HarmActions**, an structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
+2. 	**Action Classifier**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
+3. 	A deployment integration via an MCP proxy supporting live action screening using existing MCP servers and clients.
+4. 	**HarmActEval** benchmark leveraging a new metric “Harm@k.”
+
 
 ## Special features:
 - This project introduces "HarmActEval" dataset and benchmark to evaluate an AI agent's probability of generating harmful actions.
@@ -48,13 +57,13 @@ Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and h
 - The model is lightweight and can be easily integrated into existing AI agent frameworks like MCP.
 - This project is about classifying actions and not related to Guardrails.
 - Integration to MCP (Model Context Protocol) to allow real-time action classification.
-- Unlike `"require_approval": "always"` flag, this blocks harmful actions without human intervention.
+- Unlike OpenAI's `"require_approval": "always"` flag, this blocks harmful actions without human intervention.
   <!-- - Integration to MCP server - fixes if client sends a bad action irrespective of server's tool descriptions.
   - Integration to MCP client - fixes if the server made the model take bad actions. -->
 
 **Safety Features:**
-- Automatically classifies tool calls before execution
-- Blocks harmful actions based on the trained model
+- Automatically classifies MCP tool calls before execution.
+- Blocks harmful actions based on the outputs of the trained model
 - Provides detailed classification results
 - Allows safe actions to proceed normally
 

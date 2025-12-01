@@ -47,7 +47,7 @@ class EmbedRequest(BaseModel):
 @app.post("/v1/embeddings")
 def embed_texts(req: EmbedRequest):  # OpenAI-compatible endpoint
     # To embed texts using the sentence-transformer model.
-    embeddings = embed_model.encode(req.inputs)
+    embeddings = embed_model.encode(req.inputs, normalize_embeddings=True, show_progress_bar=False)
     return {
         "data": [
             {"index": idx, "object": "embedding", "embedding": embedding.tolist()}

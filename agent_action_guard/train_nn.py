@@ -43,6 +43,18 @@ class EmbeddingModel:
         return np.array(embs)
 
 
+def check_match(actual_label, predicted_label):
+    """Check if predicted label matches actual label."""
+    # The agent's action gets blocked if label is 1 or 2 (harmful/unethical),
+    # which means both are the same.
+    if actual_label and predicted_label:
+        return True
+    elif not actual_label and not predicted_label:
+        return True
+    # If one is harmful/unethical and the other is safe, no match.
+    return False
+
+
 def accuracy_score(y_true, y_pred):
     """Lightweight accuracy scorer used when sklearn is not available.
 
@@ -56,7 +68,7 @@ def accuracy_score(y_true, y_pred):
         return 0.0
     # only compare up to the shorter length to avoid throwing
     n = min(len(yt), len(yp))
-    matches = sum(1 for i in range(n) if yt[i] == yp[i])
+    matches = sum(1 for i in range(n) if check_match(yt[i], yp[i]))
     return matches / n
 
 # ------------------ Configuration (disable parser) ------------------
@@ -77,41 +89,29 @@ set_seed()
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 8
 
 # Best hyperparameters found via tuning
-HIDDEN = 128
+HIDDEN = 64
 LR = 0.0010
 EPOCHS = 3
 WEIGHT_DECAY = 0.0
+BATCH_SIZE = 4
 
 ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "HarmActEval_dataset.json"
-MODEL_PATH = ROOT / "emb_nn_model.pt"
+DATA_PATH = ROOT / "HarmActions_dataset.json"
+MODEL_PATH = ROOT / "action_classifier_model.pt"
 
 embed_model = EmbeddingModel(EMBED_MODEL_NAME)
 
+ALL_CLASSES = ["safe", "harmful", "unethical"]
+
 
 def get_label(entry):
-    classification = (entry.get("classification") or "").lower()
-    if classification == "safe":
-        return 0
-    elif classification == "harmful":
-        return 1
-    elif classification == "unethical":
-        return 2
-    else:
+    classification = entry["classification"].lower()
+    if classification not in ALL_CLASSES:
         raise ValueError(f"Unknown classification label: {classification}")
-        # # derive from risk_level
-        # risk_level = (entry.get("risk_level") or "").lower()
-        # if risk_level in ["none", "low"]:
-        #     return 0
-        # elif risk_level == "medium":
-        #     return 2  # unethical
-        # elif risk_level == "high":
-        #     return 1  # harmful
-        # else:
-        #     return 0
+
+    return ALL_CLASSES.index(classification)
 
 
 def flatten_action_to_text(entry):
@@ -139,7 +139,7 @@ def flatten_action_to_text(entry):
     return " ".join([str(p).lower() for p in parts if p])
 
 
-class SimpleMLP(nn.Module):
+class ActionClassNet(nn.Module):
     """Simple MLP for multi-class classification."""
 
     def __init__(self, in_dim, hidden=256):
@@ -155,6 +155,7 @@ class SimpleMLP(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(hidden // 2, 3),  # 3 classes: safe, harmful, unethical
         )
+        self.net.to(DEVICE)
 
     def forward(self, x):
         """Forward pass."""
@@ -163,6 +164,7 @@ class SimpleMLP(nn.Module):
 
 with open(DATA_PATH, encoding="utf-8") as f:
     dataset = json.load(f)
+
 
 def load_texts_and_labels():
     """Load texts and labels from dataset."""
@@ -173,10 +175,7 @@ def load_texts_and_labels():
         texts.append(flatten_action_to_text(row))
         lbl = get_label(row)
         labels.append(lbl)
-        # prefer explicit classification field when present, else derive from scores
-        cls = (row.get("classification") or "").lower()
-        if not cls:
-            cls = ["safe", "harmful", "unethical"][lbl]
+        cls = row["classification"]
         classes.append(cls)
 
     # Calculate class weights for imbalanced dataset
@@ -196,8 +195,9 @@ def make_embeddings(texts):
 
 
 
-def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
-              yte: np.ndarray, hidden: int, lr: float, epochs: int, weight_decay: float = 0,
+def train_one(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
+              y_test: np.ndarray, hidden: int, lr: float, epochs: int,
+              weight_decay: float = 0, batch_size: int = BATCH_SIZE,
               class_weights: torch.Tensor | None = None):
     """Train the model for one configuration.
 
@@ -205,14 +205,13 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
     back to class labels), and the raw predicted scores for the test set.
     """
     set_seed()
-    Xtr_t = torch.tensor(Xtr, dtype=torch.float32)
-    ytr_t = torch.tensor(ytr, dtype=torch.long)
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
-    train_ds = TensorDataset(Xtr_t, ytr_t)
-    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+    train_ds = TensorDataset(X_train_tensor, y_train_tensor)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
 
-    model = SimpleMLP(in_dim=Xtr.shape[1], hidden=hidden)
-    model.to(DEVICE)
+    model = ActionClassNet(in_dim=X_train.shape[1], hidden=hidden)
 
     opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
@@ -239,29 +238,30 @@ def train_one(Xtr: np.ndarray, ytr: np.ndarray, Xte: np.ndarray,
 
     with torch.inference_mode():
         model.eval()
-        logits = model(torch.tensor(Xte, dtype=torch.float32).to(DEVICE))
+        logits = model(torch.tensor(X_test, dtype=torch.float32).to(DEVICE))
         preds = torch.argmax(logits, dim=1).cpu().numpy()
-        yte_np = np.array(yte)
+        yte_np = np.array(y_test)
         cls_acc = accuracy_score(yte_np, preds)
 
-    # return classification accuracy as primary metric (used by hyperparam tuning)
     return model, cls_acc, preds
 
 
 def _class_to_int(cls: str) -> int:
-    mapping = {"safe": 0, "harmful": 1, "unethical": 2}
-    return mapping.get(cls, 0)
+    for i in range(len(ALL_CLASSES)):
+        if ALL_CLASSES[i] == cls:
+            return i
+    return 0
 
 
-def rl_fine_tune(
+def _rl_fine_tune(
     xtr_embs: np.ndarray,
     xte_embs: np.ndarray,
     ytr_classes: list,
     yte_classes: list,
-    hidden: int = 256,
-    lr: float = 1e-3,
-    epochs: int = 10,
-    batch_size: int = 32,
+    hidden: int = HIDDEN,
+    lr: float = LR,
+    epochs: int = EPOCHS,
+    batch_size: int = BATCH_SIZE,
     pretrained_state_dict: dict | None = None,
 ):
     """Simple REINFORCE fine-tuning on a small classifier head.
@@ -276,16 +276,7 @@ def rl_fine_tune(
     yte_int = np.array([_class_to_int(c) for c in yte_classes])
 
     in_dim = xtr_embs.shape[1]
-    clf = nn.Sequential(
-        nn.Linear(in_dim, hidden),
-        nn.ReLU(),
-        nn.Dropout(0.2),
-        nn.Linear(hidden, hidden // 2),
-        nn.ReLU(),
-        nn.Dropout(0.2),
-        nn.Linear(hidden // 2, 3),
-    )
-    clf.to(DEVICE)
+    clf = ActionClassNet(in_dim=in_dim, hidden=hidden)
     opt = torch.optim.Adam(clf.parameters(), lr=lr)
 
     # If a pretrained supervised model state dict is provided, try to load

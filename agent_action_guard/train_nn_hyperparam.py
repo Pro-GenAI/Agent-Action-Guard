@@ -12,7 +12,7 @@ from train_nn import (
     make_embeddings,
     train_one,
     MODEL_PATH,
-    rl_fine_tune,
+    # rl_fine_tune,
 )
 import torch
 
@@ -22,7 +22,8 @@ PARAM_GRID = {
     "hidden": [64, 128, 256, 512],
     "lr": [5e-4, 1e-3, 2e-3],
     "epochs": [2, 3, 4, 6, 8],
-    "weight_decay": [0, 1e-4],
+    "weight_decay": [0],  # , 1e-4
+    "batch_size": [4, 8, 16],  # , 32
 }
 
 
@@ -56,6 +57,7 @@ def hyperparam_tuning():
             lr=cfg["lr"],
             epochs=cfg["epochs"],
             weight_decay=cfg["weight_decay"],
+            batch_size=cfg["batch_size"],
             class_weights=class_weights,
         )
         print(f"-> acc: {acc:.4f}")
@@ -66,6 +68,7 @@ def hyperparam_tuning():
                 "lr": cfg["lr"],
                 "epochs": cfg["epochs"],
                 "weight_decay": cfg["weight_decay"],
+                "batch_size": cfg["batch_size"],
                 "acc": float(acc),
             }
         )
@@ -121,7 +124,7 @@ def hyperparam_tuning():
     #         hidden=cfg["hidden"],
     #         lr=rl_lr,
     #         epochs=rl_epochs,
-    #         batch_size=32,
+    #         batch_size=BATCH_SIZE,
     #         pretrained_state_dict=pre_state,
     #     )
     #     print(f"-> RL acc: {rl_acc:.4f} (supervised: {best['acc']:.4f})")

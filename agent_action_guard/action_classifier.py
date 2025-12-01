@@ -6,24 +6,16 @@ Loads the trained neural network model to classify agent actions as harmful or s
 import numpy as np
 import torch
 
-from agent_action_guard.train_nn import embed_model, flatten_action_to_text, \
-    SimpleMLP, MODEL_PATH, DEVICE
+from agent_action_guard.train_nn import embed_model, flatten_action_to_text, ActionClassNet, \
+    ALL_CLASSES, DEVICE, MODEL_PATH
 
 
 class ActionClassifier:
     """Classifier for AI agent actions using embeddings and MLP."""
 
-    def __init__(self, load_model: bool = True):
-        """If load_model is False, heavy dependencies (embedding/model) are not created.
-        Tests can instantiate with load_model=False and then set attributes manually.
-        """
-        pass
+    def __init__(self):
         self.model = None
-        self.in_dim = None
-        if load_model:
-            self.load_model()
-            # # create heavy components only on demand
-            # self.embed_model = SentenceTransformer(EMBED_MODEL_NAME, device=str(DEVICE))
+        self.load_model()
 
     def load_model(self):
         """Load the trained model from file."""
@@ -31,13 +23,11 @@ class ActionClassifier:
             raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
 
         checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
-        self.in_dim = checkpoint["in_dim"]
-        config = checkpoint["config"]
-        hidden = config["hidden"]
+        in_dim = checkpoint["in_dim"]
+        hidden = checkpoint["config"]["hidden"]
 
-        self.model = SimpleMLP(in_dim=self.in_dim, hidden=hidden)
+        self.model = ActionClassNet(in_dim=in_dim, hidden=hidden)
         self.model.load_state_dict(checkpoint["model_state_dict"])
-        self.model.to(DEVICE)
         self.model.eval()
 
     def predict(self, action_dict):
@@ -65,8 +55,8 @@ class ActionClassifier:
             probs = torch.softmax(logits, dim=1)
             pred_class_idx = int(torch.argmax(logits, dim=1).item())
             confidence = probs[0, pred_class_idx].item()
-        classes = ["safe", "harmful", "unethical"]
-        pred_class = classes[pred_class_idx]  # type: ignore
+
+        pred_class = ALL_CLASSES[pred_class_idx]
         return pred_class, confidence
 
 

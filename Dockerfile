@@ -12,8 +12,7 @@ COPY . /app
 
 # Install project and runtime dependencies
 RUN python -m pip install --upgrade pip setuptools wheel \
-    && pip install -e . \
-    && pip install --no-cache-dir git+https://github.com/Pro-GenAI/mcp-proxy-guarded
+    && pip install -e .
 
 EXPOSE 8080 8081 8000 7860
 
