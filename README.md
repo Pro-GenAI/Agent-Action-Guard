@@ -97,9 +97,17 @@ pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
 mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
 
-1. Start the chat server that uses the guarded proxy:
+5. Start the chat server that uses the guarded proxy:
 ```bash
 python agent_action_guard/scripts/chat_server.py
+```
+
+6. To import Action Guard to other projects:
+```python
+from agent_action_guard import is_action_harmful, HarmfulActionException
+is_harmful, confidence = is_action_harmful(action_dict)
+if is_harmful:
+	raise HarmfulActionException(action_dict)
 ```
 
 ### Docker Compose

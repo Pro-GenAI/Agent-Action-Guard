@@ -12,3 +12,4 @@ llamacpp_files/
 build/
 dist/
 *.log
+harmacteval_cache.json

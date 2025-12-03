@@ -91,9 +91,9 @@ set_seed()
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Best hyperparameters found via tuning
-HIDDEN = 64
-LR = 0.0010
-EPOCHS = 3
+HIDDEN = 128
+LR = 0.002
+EPOCHS = 2
 WEIGHT_DECAY = 0.0
 BATCH_SIZE = 4
 
@@ -163,7 +163,7 @@ class ActionClassNet(nn.Module):
 
 
 with open(DATA_PATH, encoding="utf-8") as f:
-    dataset = json.load(f)
+    dataset: list[dict] = json.load(f)
 
 
 def load_texts_and_labels():

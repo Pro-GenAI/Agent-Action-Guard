@@ -21,6 +21,7 @@ dependencies = [
     "agentor",
     "openai",
     "python-dotenv",
+    "requests",
     # Web framework
     "fastapi",
     "uvicorn[standard]",

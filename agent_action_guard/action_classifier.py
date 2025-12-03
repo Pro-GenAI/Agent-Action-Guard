@@ -5,9 +5,10 @@ Loads the trained neural network model to classify agent actions as harmful or s
 
 import numpy as np
 import torch
+from typing import Tuple
 
-from agent_action_guard.train_nn import embed_model, flatten_action_to_text, ActionClassNet, \
-    ALL_CLASSES, DEVICE, MODEL_PATH
+from agent_action_guard.train_nn import embed_model, flatten_action_to_text, \
+    ActionClassNet, ALL_CLASSES, DEVICE, MODEL_PATH
 
 
 class ActionClassifier:
@@ -30,7 +31,7 @@ class ActionClassifier:
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.model.eval()
 
-    def predict(self, action_dict):
+    def predict(self, action_dict: dict) -> Tuple[str, float]:
         """
         Predict the class of an action.
         Returns: (class: str, confidence: float)
@@ -71,6 +72,21 @@ def is_action_harmful(action_dict):
         return None, confidence
     else:
         return pred_class, confidence
+
+
+class HarmfulActionException(ValueError):
+    """Exception raised when a harmful action is detected."""
+    pass
+
+
+def verify_action_safety(action_dict, raise_exception: bool = False) -> bool:
+    """Raise an exception if the action is harmful."""
+    is_harmful, confidence = is_action_harmful(action_dict)
+    if is_harmful and raise_exception:
+        raise HarmfulActionException(
+            f"Action classified as harmful ({is_harmful}) with confidence {confidence:.2f}"
+        )
+    return not is_harmful
 
 
 # Example usage
