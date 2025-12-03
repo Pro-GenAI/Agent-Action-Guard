@@ -8,8 +8,9 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- $ convert project_banner.png -resize 600x319 project_banner.jpg -->
 <!-- <img src="./assets/project_logo.jpg" alt="Project logo" width="270px"/> -->
 <!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
-<h2 align="center">Safe Agent using Action Guard</h2>
+<h1 align="center">MCP Agent Action Guard</h1>
 <!-- <hr/> -->
+<h4 align="center"><em>Safe AI Agents through Action Classifier</em></h4>
 <h4 align="center"><em>Classifying AI agent actions to ensure safety and reliability</em></h4>
 <h4 align="center"><em>Safe actions for safe AI</em></h4>
 </p>
@@ -22,7 +23,7 @@ Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and h
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]()
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](./LICENSE.md)
 [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449)
-[![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActEval)
+[![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions)
 [![HuggingFace Model](https://img.shields.io/badge/HuggingFace_Model-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/prane-eth/Agent-Action-Classifier)
 [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415)
 
