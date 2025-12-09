@@ -17,9 +17,7 @@ if not model_name:
     # allow server to start in test contexts but warn via exception on use
     raise ValueError("OPENAI_MODEL environment variable not set.")
 
-model_name_guarded = os.getenv("OPENAI_MODEL_GUARDED", "")
-if not model_name_guarded:
-    raise ValueError("OPENAI_MODEL_GUARDED environment variable is not set.")
+model_name_guarded = model_name + "-GUARDED"
 
 mcp_url_direct = os.getenv("MCP_URL_DIRECT", "")
 if not mcp_url_direct:
@@ -61,12 +59,6 @@ class ChatCompletionRequest(BaseModel):
     messages: list[dict[str, str]]
     max_tokens: Optional[int] = 512
     temperature: Optional[float] = 0.7
-
-
-class PredictRequest(BaseModel):
-    # model is optional; defaults to server MODEL_ID
-    model: Optional[str] = None
-    action: dict[str, Any]
 
 
 SYSTEM_MESSAGE_TOOL_USE = "You must use tools for every answer. Send the result to the user."

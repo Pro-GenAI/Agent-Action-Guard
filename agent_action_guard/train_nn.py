@@ -26,7 +26,7 @@ EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
 if not EMBED_MODEL_NAME:
     raise ValueError("EMBED_MODEL_NAME environment variable not set.")
 
-openai_client = openai.OpenAI(
+embed_client = openai.OpenAI(
     base_url=os.getenv("EMBEDDING_BASE_URL"),
 )
 
@@ -35,7 +35,7 @@ class EmbeddingModel:
         self.model_name = model_name
 
     def encode(self, texts, *args, **kwargs):
-        responses = openai_client.embeddings.create(
+        responses = embed_client.embeddings.create(
             model=self.model_name,
             input=texts,
         )
