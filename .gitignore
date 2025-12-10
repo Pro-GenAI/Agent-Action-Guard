@@ -5,11 +5,10 @@ __pycache__/
 .mypy_cache/
 TODO.md
 unused/
-api_responses_cache.json
 *.egg-info
 *.drawio.bkp
 llamacpp_files/
 build/
 dist/
 *.log
-harmacteval_cache.json
+*_cache.json

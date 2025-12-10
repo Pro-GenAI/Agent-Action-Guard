@@ -265,16 +265,16 @@ def get_response(prompt: str, attempt: int = 0, tool: Dict | None = None) -> Dic
             tool_calls = msg_obj.get("tool_calls") or [] if isinstance(msg_obj, dict) else []
             if not tool_calls:
                 logger.warning("The model sent a request with empty tool calls.")
-            for tc in tool_calls:
-                if tc.get("type") == "function":
-                    fn = tc.get("function", {})
+            for action in tool_calls:
+                if action.get("type") == "function":
+                    fn = action.get("function", {})
                     fn_name = fn.get("name")
                     if fn_name == "call_tool":
                         raw_args = fn.get("arguments", "{}")
                         args = json.loads(raw_args) if isinstance(raw_args, str) else (raw_args or {})
                         call_tool(**args)
                 else:
-                    logger.warning(f"Unknown tool call type: {tc.get('type')}")
+                    logger.warning(f"Unknown tool call type: {action.get('type')}")
 
         # cache[model_key][cache_key] = {"response": result}
         # save_cache()

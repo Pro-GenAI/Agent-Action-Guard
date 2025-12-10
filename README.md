@@ -16,7 +16,7 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 
 [![Preprint](https://img.shields.io/badge/Paper-PDF-FFF7CC?style=for-the-badge&logo=files)](https://www.researchgate.net/publication/396525269_MCP_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=rEmnRMNBwKo)
-[![Blog](https://img.shields.io/badge/Blog-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/blog/agent-action-guard)
+[![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/agent-action-guard)
 <!-- [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449) -->
 [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
 [![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]()
@@ -176,13 +176,14 @@ Agent-Supervisor: Supervising Actions of Autonomous AI Agents for Ethical Compli
 
 
 ## Acknowledgements
-- Thanks to [Hugging Face](https://huggingface.co/) for hosting the hackathon.
-- Thanks to [Gradio](https://gradio.app/) for the interface of the demo app.
+- Thanks to [Hugging Face](https://huggingface.co/) for the [Gradio](https://gradio.app/) framework for the interface of the chatbot app.
 - Thanks to [Anthropic](https://www.anthropic.com/news/model-context-protocol) for the Model Context Protocol (MCP) framework.
 - Thanks to [OpenAI](https://openai.com/) for providing a Python package to interact with LLMs.
+- Thanks to [Google](https://google.com/) for the Agent-to-Agent (A2A) protocol.
 
 <!-- logos -->
 [![HuggingFace](https://img.shields.io/badge/Huggingface-FFD21E?style=for-the-badge&logo=Huggingface&logoColor=black "HuggingFace")](https://huggingface.co/)
 [![Gradio](https://img.shields.io/badge/Gradio-FF7C00?style=for-the-badge&logo=gradio&logoColor=white "Gradio")](https://gradio.app/)
 [![Anthropic](https://img.shields.io/badge/Anthropic-000000?style=for-the-badge&logo=anthropic&logoColor=white "MCP")](https://www.anthropic.com/news/model-context-protocol)
 [![OpenAI](https://img.shields.io/badge/OpenAI-74AA9C?style=for-the-badge&logo=openai&logoColor=white "OpenAI")](https://openai.com/)
+[![Google](https://img.shields.io/badge/Google-4285F4?style=for-the-badge&logo=google&logoColor=white "Google")](https://google.com/)

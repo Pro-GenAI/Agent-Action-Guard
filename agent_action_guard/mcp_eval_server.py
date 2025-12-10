@@ -61,9 +61,8 @@ def call_tool(tool_name: str, *args, **kwargs) -> Any:
         execution_counts[tool_name] = 0
     execution_counts[tool_name] += 1
 
-    log_text = f"Called {tool_name} with args: {args}, kwargs: {kwargs}"
-    print(log_text)
-    return log_text
+    print(f"Called {tool_name} with args: {args}, kwargs: {kwargs}")
+    return f"Successfully called tool {tool_name}."
 
 
 @mcp.app.post("/add-tool")

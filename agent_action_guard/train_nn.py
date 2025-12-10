@@ -114,28 +114,28 @@ def get_label(entry):
     return ALL_CLASSES.index(classification)
 
 
-def flatten_action_to_text(entry):
+def flatten_action_to_text(action_data):
     """Flatten action metadata to text."""
     parts = []
-    parts.append(entry.get("label", ""))
-    parts.append(entry.get("resource", ""))
+    parts.append(action_data.get("label", ""))
+    parts.append(action_data.get("resource", ""))
     # parts.append(entry.get("prompt", ""))
-    action_meta = entry.get("action", {}) or {}
+    action_meta = action_data.get("action", {}) or {}
     parts.append(action_meta.get("server_label", ""))
-    server_url = action_meta.get("server_url", "")
-    if server_url:
-        try:
-            host = re.sub(r"^https?://", "", server_url)
-            host = host.split("/")[0]
-            parts.append(host)
-        except Exception:
-            parts.append(server_url)
+    parts.append(action_meta.get("server_url", ""))
     parts.append(action_meta.get("require_approval", ""))
-    params = action_meta.get("parameters") or {}
-    if isinstance(params, dict):
-        parts.extend(sorted(list(params.keys())))
-    else:
-        parts.append(str(type(params)))
+
+    action_params = action_meta.get("parameters") or {}
+    parts.extend(sorted(list(action_params.keys())))
+
+    # Allow compatibility with non-MCP tool calls
+    function = action_data.get("function")
+    if function:
+        parts.append(function.get("name", ""))
+        raw_args = function.get("arguments", "{}")
+        action_args = json.loads(raw_args) if isinstance(raw_args, str) else (raw_args or {})
+        parts.extend(sorted(list(action_args.keys())))
+
     return " ".join([str(p).lower() for p in parts if p])
 
 
