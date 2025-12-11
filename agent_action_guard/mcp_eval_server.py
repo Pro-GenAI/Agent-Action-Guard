@@ -77,7 +77,7 @@ async def add_tool(tool_definition: dict) -> dict:
         return {"status": "error", "message": "Tool definition must include a 'name' field."}
     tool_description = tool_definition.get("description", "")
     if not tool_description:
-        return {"status": "error", "message": "Tool definition must include a 'function' field."}
+        return {"status": "error", "message": "Tool definition must include a 'description' field."}
     schema = tool_definition.get("parameters", {})
     if not schema:
         return {"status": "error", "message": "Tool definition must include a 'parameters' field."}

@@ -15,7 +15,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and harmful usage of tools as proven using __HarmActEval__. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on __HarmActions__ dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. Safe AI Agents are made possible by Action Classifier.
 
 [![Preprint](https://img.shields.io/badge/Paper-PDF-FFF7CC?style=for-the-badge&logo=files)](https://www.researchgate.net/publication/396525269_MCP_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier)
-[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=rEmnRMNBwKo)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=7pNYXv3x7MA)
 [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/agent-action-guard)
 <!-- [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449) -->
 [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
@@ -25,6 +25,9 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions)
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
 
+### A2A version:
+While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at: 
+https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
 
 ### Demo
 <img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
@@ -55,8 +58,9 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 - The dataset has been used to train a lightweight neural network model that classifies actions as safe, harmful, or unethical.
 - The model is lightweight and can be easily integrated into existing AI agent frameworks like MCP.
 - This project is about classifying actions and not related to Guardrails.
-- Integration to MCP (Model Context Protocol) to allow real-time action classification.
+- Supports MCP (Model Context Protocol) to allow real-time action classification.
 - Unlike OpenAI's `"require_approval": "always"` flag, this blocks harmful actions without human intervention.
+- A2A-compatible version: https://github.com/Pro-GenAI/A2A-Agent-Action-Guard.
   <!-- - Integration to MCP server - fixes if client sends a bad action irrespective of server's tool descriptions.
   - Integration to MCP client - fixes if the server made the model take bad actions. -->
 
