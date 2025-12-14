@@ -4,3 +4,6 @@ Image credits for icons:
 - Data processing: https://www.flaticon.com/free-icon/data-processing_7017511
 - Action: https://www.flaticon.com/free-icon/automation_2103800
 - Response: https://www.flaticon.com/free-icon/fast-response_10748876
+- Toolkit: https://www.flaticon.com/free-icon/tool-box_2276313
+- Harmful action: https://www.flaticon.com/free-icon/danger_12211330
+- Harmful query: https://www.flaticon.com/free-icon/abuse_4665375

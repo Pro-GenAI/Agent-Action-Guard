@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/project_banner.gif" alt="Project banner" height="300"/>
+<img src="./assets/project_banner.gif" alt="Project banner" height="250"/>
 <!--
 $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 # $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
@@ -8,8 +8,9 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- $ convert project_banner.png -resize 600x319 project_banner.jpg -->
 <!-- <img src="./assets/project_logo.jpg" alt="Project logo" width="270px"/> -->
 <!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
-<h1 align="center">MCP Agent Action Guard</h1>
-<h4 align="center"><em>Safe actions for safe AI</em></h4>
+<!-- <h1 align="center">MCP Agent Action Guard</h1>
+<h4 align="center"><em>Safe actions for safe AI</em></h4> -->
+<img src="./assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
 </p>
 
 AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and harmful usage of tools as proven using __HarmActEval__. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on __HarmActions__ dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. Safe AI Agents are made possible by Action Classifier.
@@ -31,9 +32,6 @@ https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
 
 ### Demo
 <img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
-
-### Implementation
-<img src="./assets/Implementation.gif" alt="Implementation Diagram" height="450"/>
 
 
 ## Common causes of harmful actions by AI agents:
