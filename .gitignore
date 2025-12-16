@@ -12,3 +12,4 @@ build/
 dist/
 *.log
 *_cache.json
+posts.*

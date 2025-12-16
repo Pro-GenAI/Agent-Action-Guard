@@ -41,3 +41,13 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 agent_action_guard = ["*.pt", "*.json", "requirements.txt"]
+
+[project.optional-dependencies]
+dev = [
+    "pandas",
+    "black",
+    "isort",
+    "flake8",
+    "pylint",
+    "mypy",
+]

@@ -26,10 +26,6 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions)
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
 
-### A2A version:
-While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at: 
-https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
-
 ### Demo
 <img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
 
@@ -44,11 +40,12 @@ https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
 - Harmful MCP servers returning manipulative text to mislead the model.
 - The experiments proved that the model performs a harmful action and still responds "Sorry, I can't help with that."
 
+
 ## New contributions of Agent-Action-Guard framework:
 1. 	**HarmActions**, an structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
-2. 	**Action Classifier**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
-3. 	A deployment integration via an MCP proxy supporting live action screening using existing MCP servers and clients.
-4. 	**HarmActEval** benchmark leveraging a new metric “Harm@k.”
+2. 	**HarmActEval** benchmark leveraging a new metric “Harm@k.”
+3. 	**Action Classifier**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
+4. 	MCP integration supporting live action screening using existing MCP servers and clients.
 
 
 ## Special features:
@@ -69,88 +66,17 @@ https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
 - Allows safe actions to proceed normally
 
 
-### Usage:
-1. Clone the repository:
+Waiting for feedback and discussions on how this helps you or the AI community.
 
-```bash
-git clone https://github.com/Pro-GenAI/Agent-Action-Guard
-cd Agent-Action-Guard
-```
 
-2. Create a virtual environment and install dependencies:
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-# pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
-```
+### Usage
+For usage instructions, kindly refer [USAGE.md](USAGE.md).
 
-3. Start an MCP server (if not already running):
 
-```bash
-python agent_action_guard/scripts/sample_mcp_server.py
-```
-
-4. Use a guarded proxy protected by ActionGuard.
-```bash
-pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
-mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
-```
-
-5. Start the chat server that uses the guarded proxy:
-```bash
-python agent_action_guard/scripts/chat_server.py
-```
-
-6. To import Action Guard to other projects:
-```python
-from agent_action_guard import is_action_harmful, HarmfulActionException
-is_harmful, confidence = is_action_harmful(action_dict)
-if is_harmful:
-	raise HarmfulActionException(action_dict)
-```
-
-### Docker Compose
-
-Run the whole demo with Docker Compose. Steps:
-
-- Copy the example env file and edit values as needed:
-
-```bash
-cp .env.example .env
-# Edit .env to set BACKEND_API_KEY, OPENAI_MODEL*, and NGROK_AUTHTOKEN if you want a public tunnel
-```
-
-- Build and start the services:
-
-```bash
-docker-compose up --build
-```
-
-- Services exposed locally:
-	- MCP server: `http://localhost:8080`
-	- Guarded proxy: `http://localhost:8081`
-	- API server: `http://localhost:8000`
-	- Chat (Gradio): `http://localhost:7860`
-	- Ngrok web UI: `http://localhost:4040` (optional)
-
-Notes:
-- The `ngrok` service is optional; set `NGROK_AUTHTOKEN` in `.env` if you want a public tunnel. Some ngrok images require an auth token or additional configuration; you can also run `ngrok` locally and point it at `http://localhost:8081`.
-- If you run into permission or package build issues in the image, try building locally or adjusting the base image in `Dockerfile`.
-
-To setup manually without Docker:
-```bash
-python agent_action_guard/scripts/sample_mcp_server.py  # Starts a sample MCP server
-export $(grep -v '^#' ./.env | xargs)  # Load env variables from .env
-mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081  # Start guarded MCP proxy
-ngrok http --url=troll-prime-ultimately.ngrok-free.app 8081  # Start ngrok for guarded MCP server
-python agent_action_guard/scripts/api_server.py  # Start backend
-python agent_action_guard/scripts/chat_server.py  # Start Gradio app
-```
-
-<!-- #### Training
-<img src="./assets/Training.jpg" alt="Training Diagram" height="150"/> -->
+### A2A version:
+While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at: 
+https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
 
 
 ### Citation
@@ -171,21 +97,18 @@ If you find this repository useful in your research, please consider citing:
 ### Limitation
 Personally Identifiable Information (PII) detection is not performed by this project as it can be performed accurately using other existing systems.
 
-
 ### Created based on my past work
-
 Agent-Supervisor: Supervising Actions of Autonomous AI Agents for Ethical Compliance: [GitHub](https://github.com/Pro-GenAI/Agent-Supervisor)
-
-
+<!-- 
 ## Acknowledgements
 - Thanks to [Hugging Face](https://huggingface.co/) for the [Gradio](https://gradio.app/) framework for the interface of the chatbot app.
 - Thanks to [Anthropic](https://www.anthropic.com/news/model-context-protocol) for the Model Context Protocol (MCP) framework.
 - Thanks to [OpenAI](https://openai.com/) for providing a Python package to interact with LLMs.
 - Thanks to [Google](https://google.com/) for the Agent-to-Agent (A2A) protocol.
 
-<!-- logos -->
 [![HuggingFace](https://img.shields.io/badge/Huggingface-FFD21E?style=for-the-badge&logo=Huggingface&logoColor=black "HuggingFace")](https://huggingface.co/)
 [![Gradio](https://img.shields.io/badge/Gradio-FF7C00?style=for-the-badge&logo=gradio&logoColor=white "Gradio")](https://gradio.app/)
 [![Anthropic](https://img.shields.io/badge/Anthropic-000000?style=for-the-badge&logo=anthropic&logoColor=white "MCP")](https://www.anthropic.com/news/model-context-protocol)
 [![OpenAI](https://img.shields.io/badge/OpenAI-74AA9C?style=for-the-badge&logo=openai&logoColor=white "OpenAI")](https://openai.com/)
 [![Google](https://img.shields.io/badge/Google-4285F4?style=for-the-badge&logo=google&logoColor=white "Google")](https://google.com/)
+ -->
