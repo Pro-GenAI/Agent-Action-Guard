@@ -66,8 +66,10 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 - Allows safe actions to proceed normally
 
 
-Waiting for feedback and discussions on how this helps you or the AI community.
+Waiting with excitement for feedback and discussions on how this helps you or the AI community.
 
+Want to use this in your commercial projects or want customization for your use case?
+I can do it for you or guide you. Please contact me at praneeth.vad@gmail.com.
 
 
 ### Usage
