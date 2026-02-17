@@ -29,6 +29,11 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 ### Demo
 <img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
 
+> [!TIP]
+> Please star ⭐ the repository if you find Action Guard is useful!
+
+<img src="assets/star.gif" alt="star" height="70" />
+
 
 ## Common causes of harmful actions by AI agents:
 - User attempting to jailbreak the model.
