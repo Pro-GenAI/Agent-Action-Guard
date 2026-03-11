@@ -8,11 +8,11 @@ allowing seamless evaluation through the HarmActEval framework's Python script.
 
 import os
 from typing import Any
+from urllib.parse import urlparse
 
 from agentor.mcp import LiteMCP
 from agentor.mcp.api_router import ToolMetadata
 from dotenv import load_dotenv
-from urllib.parse import urlparse
 
 load_dotenv()
 mcp = LiteMCP(name="mcp-server")
@@ -36,6 +36,7 @@ async def health_check() -> str:
     print("health_check called")
     return "The server is working correctly."
 
+
 @mcp.tool(
     name="report-no-tool",
     description="A tool to report that no tool can be used for the given query.",
@@ -43,13 +44,14 @@ async def health_check() -> str:
 async def report_no_tool(user_query: str) -> str:
     """A tool to report that no tool can be used for the given query."""
     log_text = f"report_no_tool called with query: {user_query}"
-    print("-"*40)
+    print("-" * 40)
     print(log_text)
-    print("-"*40)
+    print("-" * 40)
     return log_text
 
 
 execution_counts = {}  # tool_name: count
+
 
 def call_tool(tool_name: str, *args, **kwargs) -> Any:
     """Wrapper to call a tool and track execution counts."""
@@ -74,13 +76,22 @@ async def add_tool(tool_definition: dict) -> dict:
     # Validate the tool
     tool_name = tool_definition.get("name", "")
     if not tool_name:
-        return {"status": "error", "message": "Tool definition must include a 'name' field."}
+        return {
+            "status": "error",
+            "message": "Tool definition must include a 'name' field.",
+        }
     tool_description = tool_definition.get("description", "")
     if not tool_description:
-        return {"status": "error", "message": "Tool definition must include a 'description' field."}
+        return {
+            "status": "error",
+            "message": "Tool definition must include a 'description' field.",
+        }
     schema = tool_definition.get("parameters", {})
     if not schema:
-        return {"status": "error", "message": "Tool definition must include a 'parameters' field."}
+        return {
+            "status": "error",
+            "message": "Tool definition must include a 'parameters' field.",
+        }
 
     # Add the tool to the MCP server
     mcp.tools[tool_name] = ToolMetadata(
@@ -95,7 +106,10 @@ async def add_tool(tool_definition: dict) -> dict:
     if tool_name not in mcp.tools:
         return {"status": "error", "message": f"Failed to add tool {tool_name}."}
 
-    return {"status": "success", "message": f"Tool {tool_definition.get('name')} added."}
+    return {
+        "status": "success",
+        "message": f"Tool {tool_definition.get('name')} added.",
+    }
 
 
 @mcp.app.get("/execution-count")
@@ -112,7 +126,10 @@ async def remove_tool(tool_definition: dict) -> dict:
     # print("Received request to remove tool:", tool_definition)
     tool_name = tool_definition.get("name", "")
     if not tool_name:
-        return {"status": "error", "message": "Tool definition must include a 'name' field."}
+        return {
+            "status": "error",
+            "message": "Tool definition must include a 'name' field.",
+        }
     print("Removing tool:", tool_name)
 
     if tool_name not in mcp.tools:

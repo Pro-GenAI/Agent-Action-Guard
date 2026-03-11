@@ -80,6 +80,32 @@ I can do it for you or guide you. Please contact me at praneeth.vad@gmail.com.
 ### Usage
 For usage instructions, kindly refer [USAGE.md](USAGE.md).
 
+PyPI package scope:
+- `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
+- Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
+
+Quick install:
+
+Using `uv`:
+```bash
+uv venv
+source .venv/bin/activate
+uv sync
+```
+
+Using `python` + `pip`:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+For training, evaluation, and demo tooling, install the `dev` extra:
+
+Using `uv`: `uv sync --extra dev`
+
+Using `pip`: `pip install -e ".[dev]"`
+
 
 ### A2A version:
 While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at: 

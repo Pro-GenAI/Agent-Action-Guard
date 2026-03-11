@@ -1,53 +1,148 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
 version = "0.1.0"
-description = "A classifier for AI agent actions to determine if they are harmful or safe."
+description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "CC-BY-4.0"
+license-files = ["LICENSE.md"]
 authors = [
     {name = "Praneeth Vadlapati", email = "praneeth.vad@gmail.com"},
 ]
+keywords = [
+    "ai-agents",
+    "ai-safety",
+    "classification",
+    "llm",
+    "mcp",
+    "tool-calling",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
-    # Core ML and embeddings
-    "torch",
-    "sentence-transformers",
-    # Utilities
     "numpy",
-    "scikit-learn",
-    "joblib",
-    # Integrations with LLMs
-    "agentor",
+    "torch",
     "openai",
-    "python-dotenv",
-    "requests",
-    # Web framework
-    "fastapi",
-    "uvicorn[standard]",
-    "pydantic",
-    "gradio>=6.0.0",
-    # Custom MCP proxy
-    "mcp-proxy-guarded @ git+https://github.com/Pro-GenAI/mcp-proxy-guarded.git",
 ]
 requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/Pro-GenAI/Agent-Action-Guard"
+Issues = "https://github.com/Pro-GenAI/Agent-Action-Guard/issues"
+Repository = "https://github.com/Pro-GenAI/Agent-Action-Guard"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["agent_action_guard*"]
+exclude = ["agent_action_guard.scripts*"]
 
 [tool.setuptools]
-include-package-data = true
+include-package-data = false
 
 [tool.setuptools.package-data]
-agent_action_guard = ["*.pt", "*.json", "requirements.txt"]
+agent_action_guard = ["action_classifier_model.pt"]
 
 [project.optional-dependencies]
 dev = [
-    "pandas",
+    "ruff",
     "black",
     "isort",
     "flake8",
     "pylint",
     "mypy",
+    "pandas",
+    "python-dotenv",
+    "requests",
+    "scikit-learn",
+    "sentence-transformers",
+    "psutil",
+    "pytz",
+    "agentor",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "gradio>=6.0.0",
+    "mcp-proxy-guarded @ git+https://github.com/Pro-GenAI/mcp-proxy-guarded.git",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+extend-exclude = '''
+/(build|dist|unused|agent_action_guard\.egg-info)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = ["build/*", "dist/*", "unused/*", "agent_action_guard.egg-info/*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+extend-exclude = ["build", "dist", "unused", "agent_action_guard.egg-info"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.mypy]
+python_version = "3.10"
+files = [
+    "agent_action_guard",
+    "training",
+    "examples",
+    "tests",
+    "sitecustomize.py",
+]
+exclude = "(^build/|^dist/|^unused/|^agent_action_guard\\.egg-info/)"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+disable_error_code = ["import-untyped"]
+
+[tool.pylint.main]
+ignore-paths = ["^build/.*", "^dist/.*", "^unused/.*", "^agent_action_guard\\.egg-info/.*"]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint."messages control"]
+disable = [
+    "broad-exception-raised",
+    "broad-exception-caught",
+    "duplicate-code",
+    "import-error",
+    "invalid-name",
+    "line-too-long",
+    "missing-class-docstring",
+    "logging-fstring-interpolation",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "no-else-return",
+    "redefined-outer-name",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-locals",
+    "too-many-positional-arguments",
+    "too-many-statements",
+    "unused-argument",
 ]

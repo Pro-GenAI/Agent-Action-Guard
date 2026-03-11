@@ -2,13 +2,12 @@ import os
 import time
 from typing import Any, Optional
 
-from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import APIKeyHeader
 import openai
-from pydantic import BaseModel
 import uvicorn
-
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import APIKeyHeader
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -39,6 +38,7 @@ if not BACKEND_API_KEY:
 API_KEY_NAME = "Authorization"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
+
 async def get_api_key(api_key_header: str = Depends(api_key_header)):
     api_key_header = api_key_header.lstrip("Bearer ").strip()
     if api_key_header == BACKEND_API_KEY:
@@ -61,7 +61,10 @@ class ChatCompletionRequest(BaseModel):
     temperature: Optional[float] = 0.7
 
 
-SYSTEM_MESSAGE_TOOL_USE = "You must use tools for every answer. Send the result to the user."
+SYSTEM_MESSAGE_TOOL_USE = (
+    "You must use tools for every answer. Send the result to the user."
+)
+
 
 def get_response(messages: list[dict[str, str]], model: str) -> dict[str, Any]:
     """Simple response generator for demo purposes.
@@ -91,9 +94,9 @@ def get_response(messages: list[dict[str, str]], model: str) -> dict[str, Any]:
                         "server_label": "mcp_server",
                         "server_url": mcp_url,
                         "require_approval": "never",
-                    }  # type: ignore
+                    }
                 ],
-                reasoning_effort="low" if "gpt-oss" in model.lower() else "minimal",  # type: ignore
+                reasoning_effort="low" if "gpt-oss" in model.lower() else "minimal",
                 tool_choice="auto",
             )
             if not response:
@@ -111,7 +114,9 @@ def get_response(messages: list[dict[str, str]], model: str) -> dict[str, Any]:
 
 
 @app.post("/v1/chat/completions")
-async def create_chat_completion(request: ChatCompletionRequest, api_key: str = Depends(get_api_key)):
+async def create_chat_completion(
+    request: ChatCompletionRequest, api_key: str = Depends(get_api_key)
+):
     # Generate response
     response = get_response(request.messages, request.model)
     print("Tool calls:", response["tool_calls"])
@@ -124,8 +129,11 @@ async def create_chat_completion(request: ChatCompletionRequest, api_key: str = 
         "choices": [
             {
                 "index": 0,
-                "message": {"role": "assistant", "content": response["content"],
-                            "tool_calls": response["tool_calls"]},
+                "message": {
+                    "role": "assistant",
+                    "content": response["content"],
+                    "tool_calls": response["tool_calls"],
+                },
                 "finish_reason": "stop",
             }
         ],
@@ -134,10 +142,13 @@ async def create_chat_completion(request: ChatCompletionRequest, api_key: str = 
 
 @app.get("/v1/models")
 def list_models(api_key: str = Depends(get_api_key)):
-    return {"data": [
-        {"id": model_name_guarded, "object": "model"},
-        {"id": model_name, "object": "model"},
-    ]}
+    return {
+        "data": [
+            {"id": model_name_guarded, "object": "model"},
+            {"id": model_name, "object": "model"},
+        ]
+    }
+
 
 @app.get("/")
 def read_root():
@@ -151,6 +162,7 @@ def start_server(port=8000):
 if __name__ == "__main__":
     # extract port from BACKEND_BASE_URL
     from urllib.parse import urlparse
+
     parsed_url = urlparse(BACKEND_BASE_URL)
     port = parsed_url.port or 8000
 

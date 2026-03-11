@@ -1,10 +1,8 @@
-
-import gradio as gr
 import hashlib
 
-from agent_action_guard.scripts.api_server import get_response, \
-    model_name, model_name_guarded
+import gradio as gr
 
+from examples.scripts.api_server import get_response, model_name, model_name_guarded
 
 model_ids = [model_name_guarded, model_name]
 # Dropdowns for model selection
@@ -69,9 +67,7 @@ demo = gr.ChatInterface(
     fn=chat,
     title="Safe Agent -- powered by Action Guard",
     description="GitHub: https://github.com/Pro-GenAI/Agent-Action-Guard",
-    chatbot=gr.Chatbot(
-        value=[{"role": "assistant", "content": WELCOME_MESSAGE}]
-    ),
+    chatbot=gr.Chatbot(value=[{"role": "assistant", "content": WELCOME_MESSAGE}]),
     additional_inputs=[model_dropdown],
     additional_inputs_accordion=gr.Accordion(label="Additional Inputs", open=True),
     examples=[[example, model] for model in model_ids for example in examples],

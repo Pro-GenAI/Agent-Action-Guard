@@ -3,7 +3,7 @@ __pycache__/
 .env
 .pytest_cache/
 .mypy_cache/
-TODO.md
+TODO*.md
 unused/
 *.egg-info
 *.drawio.bkp

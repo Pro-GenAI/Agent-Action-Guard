@@ -6,33 +6,106 @@ git clone https://github.com/Pro-GenAI/Agent-Action-Guard
 cd Agent-Action-Guard
 ```
 
-2. Create a virtual environment and install dependencies:
+2. Install the runtime package.
+
+Using `uv`:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv sync
+```
+
+Using `python` + `pip`:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
-# pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
 ```
 
-3. Start an MCP server (if not already running):
+To install from Git directly instead of a local clone:
+
+Using `uv`:
 
 ```bash
-python agent_action_guard/scripts/sample_mcp_server.py
+uv venv
+source .venv/bin/activate
+uv pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
 ```
 
-4. Use a guarded proxy protected by ActionGuard.
+Using `python` + `pip`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
+```
+
+3. Install development dependencies only if you need training, evaluation, or demo tooling.
+
+Using `uv`:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv sync --extra dev
+```
+
+Using `python` + `pip`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+4. Start an MCP server (if not already running):
+
+Using `uv`:
+
+```bash
+uv run python examples/scripts/sample_mcp_server.py
+```
+
+Using `python`:
+
+```bash
+python examples/scripts/sample_mcp_server.py
+```
+
+5. Use a guarded proxy protected by ActionGuard.
+
+Using `uv`:
+
+```bash
+uv pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
+uv run mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
+```
+
+Using `python` + `pip`:
+
 ```bash
 pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
 mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
 
-5. Start the chat server that uses the guarded proxy:
+6. Start the chat server that uses the guarded proxy.
+
+Using `uv`:
+
 ```bash
-python agent_action_guard/scripts/chat_server.py
+uv run python examples/scripts/chat_server.py
 ```
 
-6. To import Action Guard to other projects:
+Using `python`:
+
+```bash
+python examples/scripts/chat_server.py
+```
+
+7. To import Action Guard in other projects:
+
 ```python
 from agent_action_guard import is_action_harmful, HarmfulActionException
 is_harmful, confidence = is_action_harmful(action_dict)
@@ -69,11 +142,25 @@ Notes:
 - If you run into permission or package build issues in the image, try building locally or adjusting the base image in `Dockerfile`.
 
 To setup manually without Docker:
+
+Using `uv`:
+
 ```bash
-python agent_action_guard/scripts/sample_mcp_server.py  # Starts a sample MCP server
+uv run python examples/scripts/sample_mcp_server.py  # Starts a sample MCP server
+export $(grep -v '^#' ./.env | xargs)  # Load env variables from .env
+uv run mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081  # Start guarded MCP proxy
+uv run ngrok http --url=troll-prime-ultimately.ngrok-free.app 8081  # Start ngrok for guarded MCP server
+uv run python examples/scripts/api_server.py  # Start backend
+uv run python examples/scripts/chat_server.py  # Start Gradio app
+```
+
+Using `python` + `pip`:
+
+```bash
+python examples/scripts/sample_mcp_server.py  # Starts a sample MCP server
 export $(grep -v '^#' ./.env | xargs)  # Load env variables from .env
 mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081  # Start guarded MCP proxy
 ngrok http --url=troll-prime-ultimately.ngrok-free.app 8081  # Start ngrok for guarded MCP server
-python agent_action_guard/scripts/api_server.py  # Start backend
-python agent_action_guard/scripts/chat_server.py  # Start Gradio app
+python examples/scripts/api_server.py  # Start backend
+python examples/scripts/chat_server.py  # Start Gradio app
 ```

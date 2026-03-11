@@ -3,18 +3,18 @@ Hyperparameter tuning script for the neural network model.
 """
 
 import itertools
+from typing import Any
 
-from sklearn.model_selection import train_test_split
 import pandas as pd
+import torch
+from sklearn.model_selection import train_test_split
 
-from train_nn import (
+from training.train_nn import (  # rl_fine_tune,
+    MODEL_PATH,
     load_texts_and_labels,
     make_embeddings,
     train_one,
-    MODEL_PATH,
-    # rl_fine_tune,
 )
-import torch
 
 # Hyperparameter grid
 PARAM_GRID = {
@@ -33,7 +33,7 @@ def hyperparam_tuning():
     """
     texts, labels, classes, class_weights = load_texts_and_labels()
     # split texts, labels and classes together so we keep class strings for RL
-    xtr_texts, xte_texts, ytr, yte, ctr, cte = train_test_split(
+    xtr_texts, xte_texts, ytr, yte, _, _ = train_test_split(
         texts, labels, classes, test_size=0.25, random_state=42, stratify=classes
     )
 
@@ -42,7 +42,7 @@ def hyperparam_tuning():
     xte_embs = make_embeddings(xte_texts)
 
     # simple grid search
-    best = {"acc": -1, "config": None, "model": None, "preds": None}
+    best: dict[str, Any] = {"acc": -1.0, "config": None, "model": None, "preds": None}
     results = []
     keys, values = zip(*PARAM_GRID.items())
     for combo in itertools.product(*values):
@@ -80,7 +80,8 @@ def hyperparam_tuning():
     if pd is not None:
         df = pd.DataFrame(results)
         df = df.sort_values(
-            by=["acc", "hidden", "lr", "epochs", "weight_decay"], ascending=[False, True, True, True, True]
+            by=["acc", "hidden", "lr", "epochs", "weight_decay"],
+            ascending=[False, True, True, True, True],
         )
         print("\nAll trials sorted by acc:")
         print(df.to_string(index=False))
@@ -96,9 +97,12 @@ def hyperparam_tuning():
     try:
         if best.get("model") is not None:
             torch.save(
-                {"model_state_dict": best["model"].state_dict(), "config": best["config"],
-                    "in_dim": xtr_embs.shape[1]},
-                MODEL_PATH
+                {
+                    "model_state_dict": best["model"].state_dict(),
+                    "config": best["config"],
+                    "in_dim": xtr_embs.shape[1],
+                },
+                MODEL_PATH,
             )
             print(f"Saved best pretrained model to {MODEL_PATH}")
     except Exception as e:

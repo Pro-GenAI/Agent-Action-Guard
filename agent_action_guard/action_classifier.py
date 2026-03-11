@@ -3,12 +3,19 @@ Action Classifier Module
 Loads the trained neural network model to classify agent actions as harmful or safe.
 """
 
-import numpy as np
-import torch
 from typing import Tuple
 
-from agent_action_guard.train_nn import embed_model, flatten_action_to_text, \
-    ActionClassNet, ALL_CLASSES, DEVICE, MODEL_PATH
+import numpy as np
+import torch
+
+from agent_action_guard._runtime import (
+    ALL_CLASSES,
+    DEVICE,
+    MODEL_PATH,
+    ActionClassNet,
+    embed_model,
+    flatten_action_to_text,
+)
 
 
 class ActionClassifier:
@@ -70,13 +77,11 @@ def is_action_harmful(action_dict):
     pred_class, confidence = classifier.predict(action_dict)
     if pred_class == "safe":
         return None, confidence
-    else:
-        return pred_class, confidence
+    return pred_class, confidence
 
 
 class HarmfulActionException(ValueError):
     """Exception raised when a harmful action is detected."""
-    pass
 
 
 def verify_action_safety(action_dict, raise_exception: bool = False) -> bool:
@@ -102,5 +107,8 @@ if __name__ == "__main__":
             "require_approval": "never",
         },
     }
-    classification, confidence = is_action_harmful(sample_action)
-    print(f"{sample_action['label']} Classification: {classification}, Confidence: {confidence:.2f}")
+    example_classification, example_confidence = is_action_harmful(sample_action)
+    print(
+        f"{sample_action['label']} Classification: {example_classification}, "
+        f"Confidence: {example_confidence:.2f}"
+    )

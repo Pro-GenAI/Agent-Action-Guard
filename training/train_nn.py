@@ -5,42 +5,33 @@ Train a neural network on embeddings built from action metadata.
 """
 
 import json
-import random
-import re
 import os
+import random
+from collections import Counter
 from pathlib import Path
 
-from collections import Counter
-from dotenv import load_dotenv
 import numpy as np
-import openai
-from sklearn.model_selection import train_test_split
 import torch
+from dotenv import load_dotenv
+from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
+
+from agent_action_guard._runtime import (
+    ALL_CLASSES,
+    DEVICE,
+    MODEL_PATH,
+    ActionClassNet,
+    EmbeddingModel,
+    flatten_action_to_text,
+)
 
 load_dotenv()
 
 EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
 if not EMBED_MODEL_NAME:
     raise ValueError("EMBED_MODEL_NAME environment variable not set.")
-
-embed_client = openai.OpenAI(
-    base_url=os.getenv("EMBEDDING_BASE_URL"),
-)
-
-class EmbeddingModel:
-    def __init__(self, model_name: str, *args, **kwargs):
-        self.model_name = model_name
-
-    def encode(self, texts, *args, **kwargs):
-        responses = embed_client.embeddings.create(
-            model=self.model_name,
-            input=texts,
-        )
-        embs = [data.embedding for data in responses.data]
-        return np.array(embs)
 
 
 def check_match(actual_label, predicted_label):
@@ -49,7 +40,7 @@ def check_match(actual_label, predicted_label):
     # which means both are the same.
     if actual_label and predicted_label:
         return True
-    elif not actual_label and not predicted_label:
+    if not actual_label and not predicted_label:
         return True
     # If one is harmful/unethical and the other is safe, no match.
     return False
@@ -71,9 +62,12 @@ def accuracy_score(y_true, y_pred):
     matches = sum(1 for i in range(n) if check_match(yt[i], yp[i]))
     return matches / n
 
+
 # ------------------ Configuration (disable parser) ------------------
 
 SEED = 42
+
+
 def set_seed():
     """Make runs reproducible across torch/numpy/random where possible."""
     random.seed(SEED)
@@ -85,10 +79,8 @@ def set_seed():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
 set_seed()
-
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Best hyperparameters found via tuning
 HIDDEN = 128
@@ -99,67 +91,17 @@ BATCH_SIZE = 4
 
 ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "HarmActions_dataset.json"
-MODEL_PATH = ROOT / "action_classifier_model.pt"
 
 embed_model = EmbeddingModel(EMBED_MODEL_NAME)
 
-ALL_CLASSES = ["safe", "harmful", "unethical"]
-
 
 def get_label(entry):
+    """Map a dataset row to the classifier label index."""
     classification = entry["classification"].lower()
     if classification not in ALL_CLASSES:
         raise ValueError(f"Unknown classification label: {classification}")
 
     return ALL_CLASSES.index(classification)
-
-
-def flatten_action_to_text(action_data):
-    """Flatten action metadata to text."""
-    parts = []
-    parts.append(action_data.get("label", ""))
-    parts.append(action_data.get("resource", ""))
-    # parts.append(entry.get("prompt", ""))
-    action_meta = action_data.get("action", {}) or {}
-    parts.append(action_meta.get("server_label", ""))
-    parts.append(action_meta.get("server_url", ""))
-    parts.append(action_meta.get("require_approval", ""))
-
-    action_params = action_meta.get("parameters") or {}
-    parts.extend(sorted(list(action_params.keys())))
-
-    # Allow compatibility with non-MCP tool calls
-    function = action_data.get("function")
-    if function:
-        parts.append(function.get("name", ""))
-        raw_args = function.get("arguments", "{}")
-        action_args = json.loads(raw_args) if isinstance(raw_args, str) else (raw_args or {})
-        parts.extend(sorted(list(action_args.keys())))
-
-    return " ".join([str(p).lower() for p in parts if p])
-
-
-class ActionClassNet(nn.Module):
-    """Simple MLP for multi-class classification."""
-
-    def __init__(self, in_dim, hidden=256):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden),
-            nn.LayerNorm(hidden),
-            nn.GELU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden, hidden // 2),
-            nn.LayerNorm(hidden // 2),
-            nn.GELU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden // 2, 3),  # 3 classes: safe, harmful, unethical
-        )
-        self.net.to(DEVICE)
-
-    def forward(self, x):
-        """Forward pass."""
-        return self.net(x)
 
 
 with open(DATA_PATH, encoding="utf-8") as f:
@@ -182,7 +124,9 @@ def load_texts_and_labels():
     class_counts = Counter(labels)
     total_samples = len(labels)
     class_weights = {cls: total_samples / count for cls, count in class_counts.items()}
-    weights = torch.tensor([class_weights[0], class_weights[1], class_weights[2]], dtype=torch.float32)
+    weights = torch.tensor(
+        [class_weights[0], class_weights[1], class_weights[2]], dtype=torch.float32
+    )
 
     return texts, labels, classes, weights
 
@@ -194,11 +138,18 @@ def make_embeddings(texts):
     return np.array(embs)
 
 
-
-def train_one(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
-              y_test: np.ndarray, hidden: int, lr: float, epochs: int,
-              weight_decay: float = 0, batch_size: int = BATCH_SIZE,
-              class_weights: torch.Tensor | None = None):
+def train_one(
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    hidden: int,
+    lr: float,
+    epochs: int,
+    weight_decay: float = 0,
+    batch_size: int = BATCH_SIZE,
+    class_weights: torch.Tensor | None = None,
+):
     """Train the model for one configuration.
 
     Returns the trained model, classification accuracy (based on mapping scores
@@ -215,8 +166,9 @@ def train_one(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
 
     opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
-    loss_fn = nn.CrossEntropyLoss(weight=class_weights.to(DEVICE)
-                                  if class_weights is not None else None)
+    loss_fn = nn.CrossEntropyLoss(
+        weight=class_weights.to(DEVICE) if class_weights is not None else None
+    )
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -247,8 +199,8 @@ def train_one(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
 
 
 def _class_to_int(cls: str) -> int:
-    for i in range(len(ALL_CLASSES)):
-        if ALL_CLASSES[i] == cls:
+    for i, class_name in enumerate(ALL_CLASSES):
+        if class_name == cls:
             return i
     return 0
 
@@ -291,7 +243,9 @@ def _rl_fine_tune(
             clf.load_state_dict(cur_state)
             print("Loaded compatible pretrained weights into RL head (partial load).")
         except Exception:
-            print("Warning: failed to load pretrained weights into RL head; continuing with random init.")
+            print(
+                "Warning: failed to load pretrained weights into RL head; continuing with random init."
+            )
 
     n = xtr_embs.shape[0]
     idx = np.arange(n)
@@ -327,7 +281,9 @@ def _rl_fine_tune(
             baseline = 0.99 * baseline + 0.01 * rewards.mean().item()
 
         avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
-        print(f"RL Epoch {epoch}/{epochs} - loss: {avg_loss:.4f} - baseline: {baseline:.4f}")
+        print(
+            f"RL Epoch {epoch}/{epochs} - loss: {avg_loss:.4f} - baseline: {baseline:.4f}"
+        )
 
     # evaluate greedily on test set
     with torch.inference_mode():
@@ -344,7 +300,11 @@ def train_model():
     set_seed()
     texts, labels, classes, class_weights = load_texts_and_labels()
     Xtr_texts, Xte_texts, ytr, yte = train_test_split(
-        texts, labels, test_size=0.25, random_state=SEED, stratify=classes,
+        texts,
+        labels,
+        test_size=0.25,
+        random_state=SEED,
+        stratify=classes,
     )
 
     print("Generating embeddings...")
@@ -357,8 +317,14 @@ def train_model():
     print("Training...")
     cfg = {"hidden": HIDDEN, "lr": LR, "epochs": EPOCHS}
     model, acc, _ = train_one(
-        Xtr_embs, ytr, Xte_embs, yte, hidden=HIDDEN,
-        lr=LR, epochs=EPOCHS, weight_decay=WEIGHT_DECAY,
+        Xtr_embs,
+        ytr,
+        Xte_embs,
+        yte,
+        hidden=HIDDEN,
+        lr=LR,
+        epochs=EPOCHS,
+        weight_decay=WEIGHT_DECAY,
         class_weights=class_weights,
     )
     print(f"-> acc: {acc:.4f}")
