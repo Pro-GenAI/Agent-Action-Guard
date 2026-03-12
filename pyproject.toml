@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "0.1.0"
+version = "1.0.0"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "CC-BY-4.0"
@@ -80,7 +80,7 @@ dev = [
     "uvicorn[standard]",
     "pydantic",
     "gradio>=6.0.0",
-    "mcp-proxy-guarded @ git+https://github.com/Pro-GenAI/mcp-proxy-guarded.git",
+    # "mcp-proxy-guarded @ git+https://github.com/Pro-GenAI/mcp-proxy-guarded.git",
 ]
 
 [tool.black]
