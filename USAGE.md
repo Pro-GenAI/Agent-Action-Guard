@@ -17,6 +17,12 @@ source .venv/bin/activate
 pip install agent-action-guard
 ```
 
+Install with HarmActEval CLI support:
+
+```bash
+pip install "agent-action-guard[harmacteval]"
+```
+
 2. Start an embedding server (if not already running).
 
 Sample embedding server script is available at [examples/scripts/host_models.py](examples/scripts/host_models.py).
@@ -112,6 +118,26 @@ python examples/scripts/chat_server.py
 PyPI package scope:
 - `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
+
+### HarmActEval CLI (standalone)
+
+After installing `agent-action-guard[harmacteval]`, run:
+
+```bash
+python -m agent_action_guard.harmacteval --k 3
+```
+
+Common arguments:
+- `--k`: Number of attempts per prompt (Harm@k).
+- `--offset`: Start index within harmful/unethical rows.
+- `--limit`: Maximum number of harmful/unethical rows to evaluate.
+- `--cache-path`: Path to cache JSON file.
+- `--output`: Path to output JSON file.
+- `--log-level`: `DEBUG|INFO|WARNING|ERROR|CRITICAL`.
+
+Environment variables:
+- Required: `OPENAI_MODEL` and provider credentials (`OPENAI_API_KEY` or Azure equivalents).
+- Optional (MCP mode): `MCP_SUPPORTED`, `MCP_EVAL_SERVER_URL`, `MCP_URL_GUARDED`.
 
 ### Docker Compose
 

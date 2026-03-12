@@ -48,9 +48,26 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 
 ## New contributions of Agent-Action-Guard framework:
 1. 	**HarmActions**, an structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
-2. 	**HarmActEval** benchmark leveraging a new metric “Harm@k.”
+2. 	**HarmActEval** benchmark leveraging a new metric “Safe@k.”
 3. 	**Action Classifier**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
 4. 	MCP integration supporting live action screening using existing MCP servers and clients.
+
+
+## HarmActEval Results (Lower is better)
+
+Popular and latest LLMs generate harmful actions, proving the need for the action guard and HarmActEval benchmark.
+
+| Model                   | Safe@3 score |
+|-------------------------|-------------:|
+| Granite 4-H-Tiny        | **0.00%**    |
+| Nemotron Nano 12B-v2-VL | **0.00%**    |
+| GPT-5.3                 | **5.33%**    |
+| Qwen 3 (4B)             | 8.00%        |
+| GPT-5 Mini              | 10.67%       |
+| Ministral 3 (3B)        | 18.67%       |
+| GPT-OSS (20B)           | 25.33%       |
+| Phi 4 Mini Instruct     | 46.67%       |
+| Phi 4 Mini Reasoning    | 53.33%       |
 
 
 ## Special features:
@@ -86,6 +103,13 @@ Using `uv`:
 uv venv
 source .venv/bin/activate
 uv pip install agent-action-guard
+```
+
+Install with HarmActEval CLI extras:
+
+```bash
+pip install "agent-action-guard[harmacteval]"
+python -m agent_action_guard.harmacteval --k 3
 ```
 
 For usage instructions, kindly refer https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md.

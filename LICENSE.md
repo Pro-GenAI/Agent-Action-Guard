@@ -1,4 +1,4 @@
-© 2025 Praneeth Vadlapati.
+© 2025-30 Praneeth Vadlapati.
 <!-- Copyright (c) 2025 Praneeth Vadlapati -->
 
 # License: CC-BY 4.0
