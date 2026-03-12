@@ -13,3 +13,4 @@ dist/
 *.log
 *_cache.json
 posts.*
+test.ipynb

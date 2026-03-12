@@ -1,48 +1,52 @@
 ### Usage:
-1. Clone the repository:
+1. Install the runtime package.
+
+Using `uv`:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install agent-action-guard
+```
+
+Using `python` + `pip`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install agent-action-guard
+```
+
+2. Start an embedding server (if not already running).
+
+Sample embedding server script is available at [examples/scripts/host_models.py](examples/scripts/host_models.py).
+
+3. Import Action Guard in your own project:
+
+```python
+import os
+# Set environment variables for embedding server
+os.environ["EMBED_MODEL_NAME"] = "sentence-transformers/all-MiniLM-L12-v2"
+os.environ["EMBEDDING_BASE_URL"] = "http://localhost:1234/v1"
+os.environ["EMBEDDING_API_KEY"] = "your-embedding-key"
+
+from agent_action_guard import is_action_harmful
+
+is_harmful, confidence = is_action_harmful(action_dict)
+if is_harmful:
+	raise HarmfulActionException(action_dict)
+```
+
+### Advanced Usage:
+
+1. Clone the repository only if you need training, evaluation, or demo tooling:
 
 ```bash
 git clone https://github.com/Pro-GenAI/Agent-Action-Guard
 cd Agent-Action-Guard
 ```
 
-2. Install the runtime package.
-
-Using `uv`:
-
-```bash
-uv venv
-source .venv/bin/activate
-uv sync
-```
-
-Using `python` + `pip`:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
-
-To install from Git directly instead of a local clone:
-
-Using `uv`:
-
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
-```
-
-Using `python` + `pip`:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install git+https://github.com/Pro-GenAI/Agent-Action-Guard
-```
-
-3. Install development dependencies only if you need training, evaluation, or demo tooling.
+2. Install development dependencies for repository-based workflows.
 
 Using `uv`:
 
@@ -60,7 +64,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-4. Start an MCP server (if not already running):
+3. Start an MCP server (if not already running). These demo scripts require a repository checkout.
 
 Using `uv`:
 
@@ -74,7 +78,7 @@ Using `python`:
 python examples/scripts/sample_mcp_server.py
 ```
 
-5. Use a guarded proxy protected by ActionGuard.
+4. Use a guarded proxy protected by ActionGuard.
 
 Using `uv`:
 
@@ -90,7 +94,7 @@ pip install git+https://github.com/Pro-GenAI/mcp-proxy-guarded
 mcp-proxy-guarded --proxy-to http://localhost:8080/mcp --port 8081
 ```
 
-6. Start the chat server that uses the guarded proxy.
+5. Start the chat server that uses the guarded proxy.
 
 Using `uv`:
 
@@ -104,16 +108,14 @@ Using `python`:
 python examples/scripts/chat_server.py
 ```
 
-7. To import Action Guard in other projects:
 
-```python
-from agent_action_guard import is_action_harmful, HarmfulActionException
-is_harmful, confidence = is_action_harmful(action_dict)
-if is_harmful:
-	raise HarmfulActionException(action_dict)
-```
+PyPI package scope:
+- `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
+- Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
 
 ### Docker Compose
+
+The Docker Compose and manual demo setup below also require a repository checkout.
 
 Run the whole demo with Docker Compose. Steps:
 
