@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/project_banner.gif" alt="Project banner" height="250"/>
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_banner.gif" alt="Project banner" height="250"/>
 <!--
 $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 # $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
@@ -10,7 +10,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
 <!-- <h1 align="center">MCP Agent Action Guard</h1>
 <h4 align="center"><em>Safe actions for safe AI</em></h4> -->
-<img src="./assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
 </p>
 
 AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the usage of harmful tools and harmful usage of tools as proven using __HarmActEval__. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on __HarmActions__ dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. Safe AI Agents are made possible by Action Classifier.
@@ -22,17 +22,17 @@ AI is perceived as a threat. Increasing usage of LLM Agents and MCP leads to the
 [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
 [![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]()
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]()
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](./LICENSE.md)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md)
 [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions)
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
 
 ### Demo
-<img src="./assets/demo.gif" alt="Demo GIF" height="330"/>
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" alt="Demo GIF" height="330"/>
 
 > [!TIP]
 > Please star ⭐ the repository if you find Action Guard is useful!
 
-<img src="assets/star.gif" alt="star" height="70" />
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/star.gif" alt="star" height="70" />
 
 
 ## Common causes of harmful actions by AI agents:
@@ -88,7 +88,7 @@ source .venv/bin/activate
 uv pip install agent-action-guard
 ```
 
-For usage instructions, kindly refer [USAGE.md](USAGE.md).
+For usage instructions, kindly refer https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md.
 
 Note: The embedding client accepts an API key via the `EMBEDDING_API_KEY` environment variable (falls back to `OPENAI_API_KEY` if unset). See `.env.example` and `USAGE.md` for examples.
 
@@ -118,6 +118,7 @@ Personally Identifiable Information (PII) detection is not performed by this pro
 
 ### Created based on my past work
 Agent-Supervisor: Supervising Actions of Autonomous AI Agents for Ethical Compliance: [GitHub](https://github.com/Pro-GenAI/Agent-Supervisor)
+
 <!-- 
 ## Acknowledgements
 - Thanks to [Hugging Face](https://huggingface.co/) for the [Gradio](https://gradio.app/) framework for the interface of the chatbot app.
