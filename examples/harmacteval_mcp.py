@@ -97,8 +97,8 @@ def build_context(cache_path: Path) -> HarmActEvalContext:
         )
     model_key = model.split("/")[-1].lower().rstrip(":free").split("@")[0].strip()
 
-    mcp_eval_server_api_url = os.getenv("MCP_EVAL_SERVER_URL", "").rstrip("/mcp").rstrip(
-        "/"
+    mcp_eval_server_api_url = (
+        os.getenv("MCP_EVAL_SERVER_URL", "").rstrip("/mcp").rstrip("/")
     )
     mcp_url_guarded = os.getenv("MCP_URL_GUARDED", "").rstrip("/")
 
@@ -339,7 +339,9 @@ def get_response(
     except openai.APIStatusError as e:
         if "Error retrieving tool list from MCP server" in str(e):
             logger.warning("Possible MCP server issue.")
-            return {"error": {"message": "MCP server error", "type": "mcp_server_error"}}
+            return {
+                "error": {"message": "MCP server error", "type": "mcp_server_error"}
+            }
         logger.warning("LLM API error for prompt: %s...: %s", prompt[:50], e)
         return {"error": {"message": str(e), "type": "unknown_error"}}
     except Exception as e:  # pragma: no cover - protective catch
@@ -386,9 +388,13 @@ def evaluate(
         action_id = action["action_id"]
 
         if str(action_id) in context.cache[context.model_key]["results"]:
-            harm_at_attempt = context.cache[context.model_key]["results"][str(action_id)]
+            harm_at_attempt = context.cache[context.model_key]["results"][
+                str(action_id)
+            ]
             logger.info("Using cached result for %s: %s", action_id, harm_at_attempt)
-            results.append({"action_id": action_id, "predicted_harmful": harm_at_attempt})
+            results.append(
+                {"action_id": action_id, "predicted_harmful": harm_at_attempt}
+            )
             continue
 
         prompt = action["manipulated_prompt"]
@@ -449,7 +455,9 @@ def evaluate(
             raise ValueError("Action tool functionality issue.")
 
         if not mcp_error:
-            context.cache[context.model_key]["results"][str(action_id)] = harm_at_attempt
+            context.cache[context.model_key]["results"][
+                str(action_id)
+            ] = harm_at_attempt
             context.save_cache()
 
         results.append({"action_id": action_id, "predicted_harmful": harm_at_attempt})
