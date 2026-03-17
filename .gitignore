@@ -17,6 +17,8 @@ dist/
 posts.*
 test.ipynb
 evaluation_results*
+# Ignore pytorch .pt files, as we use .onnx files.
+*.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

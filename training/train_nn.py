@@ -12,26 +12,45 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from torch import nn
-from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
 
-from agent_action_guard._utils import (
+from agent_action_guard._runtime_utils import (
     ALL_CLASSES,
-    DEVICE,
     MODEL_PATH,
-    ActionClassNet,
+    ONNX_MODEL_PATH,
     EmbeddingModel,
     flatten_action_to_text,
 )
 
-load_dotenv()
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
 if not EMBED_MODEL_NAME:
     raise ValueError("EMBED_MODEL_NAME environment variable not set.")
+
+
+class ActionClassNet(nn.Module):
+    """Simple MLP for multi-class classification."""
+
+    def __init__(self, in_dim, hidden=256):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_dim, hidden),
+            nn.LayerNorm(hidden),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden, hidden // 2),
+            nn.LayerNorm(hidden // 2),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden // 2, 3),
+        )
+        self.net.to(DEVICE)
+
+    def forward(self, x):
+        return self.net(x)
 
 
 def _check_match(actual_label, predicted_label):
@@ -84,7 +103,7 @@ _set_seed()
 
 # Best hyperparameters found via tuning
 _HIDDEN = 128
-_LR = 0.002
+_LR = 0.001
 _EPOCHS = 2
 _WEIGHT_DECAY = 0.0
 _BATCH_SIZE = 4
@@ -198,108 +217,6 @@ def train_one(
     return model, cls_acc, preds
 
 
-# RL fine-tuning function
-
-# def _class_to_int(cls: str) -> int:
-#     for i, class_name in enumerate(ALL_CLASSES):
-#         if class_name == cls:
-#             return i
-#     return 0
-
-
-# def _rl_fine_tune(
-#     xtr_embs: np.ndarray,
-#     xte_embs: np.ndarray,
-#     ytr_classes: list,
-#     yte_classes: list,
-#     hidden: int = HIDDEN,
-#     lr: float = LR,
-#     epochs: int = EPOCHS,
-#     batch_size: int = BATCH_SIZE,
-#     pretrained_state_dict: dict | None = None,
-# ):
-#     """Simple REINFORCE fine-tuning on a small classifier head.
-
-#     x*_embs: numpy arrto_int(cls: str) -> int:
-#     for i, class_name in enumerate(ALL_CLASSES):
-#         if class_name == cls:
-#             return i
-#     return 0ays of embeddings
-#     y*_classes: list/iterable of string class labels (safe/harmful/unethical)
-#     Returns (model, acc) where acc is classification accuracy on the test set.
-#     """
-#     set_seed()
-#     # convert classes to ints
-#     ytr_int = np.array([_class_to_int(c) for c in ytr_classes])
-#     yte_int = np.array([_class_to_int(c) for c in yte_classes])
-
-#     in_dim = xtr_embs.shape[1]
-#     clf = ActionClassNet(in_dim=in_dim, hidden=hidden)
-#     opt = torch.optim.Adam(clf.parameters(), lr=lr)
-
-#     # If a pretrained supervised model state dict is provided, try to load
-#     # compatible weights (ignore final layer size mismatch).
-#     if pretrained_state_dict is not None:
-#         try:
-#             cur_state = clf.state_dict()
-#             # copy matching tensors
-#             for k, v in pretrained_state_dict.items():
-#                 if k in cur_state and cur_state[k].shape == v.shape:
-#                     cur_state[k] = v
-#             clf.load_state_dict(cur_state)
-#             print("Loaded compatible pretrained weights into RL head (partial load).")
-#         except Exception:
-#             print(
-#                 "Warning: failed to load pretrained weights into RL head; continuing with random init."
-#             )
-
-#     n = xtr_embs.shape[0]
-#     idx = np.arange(n)
-#     baseline = 0.0
-#     for epoch in range(1, epochs + 1):
-#         # shuffle
-#         np.random.shuffle(idx)
-#         total_loss = 0.0
-#         total_samples = 0
-#         for i in range(0, n, batch_size):
-#             batch_idx = idx[i : i + batch_size]
-#             xb = torch.tensor(xtr_embs[batch_idx], dtype=torch.float32).to(DEVICE)
-#             yb = torch.tensor(ytr_int[batch_idx], dtype=torch.long).to(DEVICE)
-
-#             logits = clf(xb)
-#             probs = torch.softmax(logits, dim=1)
-#             dist = Categorical(probs)
-#             actions = dist.sample()
-#             logp = dist.log_prob(actions)
-
-#             rewards = (actions == yb).float()
-#             adv = rewards - baseline
-#             loss = -(logp * adv).mean()
-
-#             opt.zero_grad()
-#             loss.backward()
-#             opt.step()
-
-#             total_loss += loss.item() * xb.size(0)
-#             total_samples += xb.size(0)
-
-#             # update baseline (simple moving average)
-#             baseline = 0.99 * baseline + 0.01 * rewards.mean().item()
-
-#         avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
-#         print(
-#             f"RL Epoch {epoch}/{epochs} - loss: {avg_loss:.4f} - baseline: {baseline:.4f}"
-#         )
-
-#     # evaluate greedily on test set
-#     with torch.inference_mode():
-#         logits = clf(torch.tensor(xte_embs, dtype=torch.float32).to(DEVICE))
-#         preds = torch.argmax(logits, dim=1).cpu().numpy()
-#         acc = (preds == yte_int).mean()
-
-#     return clf, float(acc)
-
-
 def _train_model():
     """Train the model with best hyperparameters."""
     # Ensure reproducible split and training
@@ -345,6 +262,42 @@ def _train_model():
         MODEL_PATH,
     )
     print(f"Saved model to {MODEL_PATH}")
+    # Also export to ONNX for runtime use
+    try:
+        in_dim = Xtr_embs.shape[1]
+        export_model_to_onnx(model, in_dim)
+    except Exception as e:
+        print("ONNX export failed during training save:", e)
+
+
+def export_model_to_onnx(model: torch.nn.Module, in_dim: int, onnx_path: Path = ONNX_MODEL_PATH, opset_version: int = 13):
+    """Export a PyTorch model to ONNX at `onnx_path`.
+
+    The function places the model on CPU and uses a dummy input with shape
+    `(1, in_dim)` so it can be consumed by ONNX runtimes.
+    """
+    try:
+        model_to_export = model.eval().cpu()
+
+        dummy_input = torch.randn(1, in_dim, dtype=torch.float32)
+
+        torch.onnx.export(
+            model_to_export,
+            dummy_input,  # type: ignore
+            str(onnx_path),
+            input_names=["input"],
+            output_names=["logits"],
+            dynamic_axes={
+                "input": {0: "batch_size"},
+                "logits": {0: "batch_size"},
+            },
+            opset_version=opset_version,
+            do_constant_folding=True,
+        )
+
+        print(f"Saved model in ONNX format to {onnx_path}")
+    except Exception as e:
+        print("Failed saving ONNX model:", e)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
-from ._utils import flatten_action_to_text, ActionGuardDecision
+from ._runtime_utils import ActionGuardDecision, flatten_action_to_text
 from .action_classifier import (
     HarmfulActionException,
-    is_action_harmful,
     ensure_action_safety,
+    is_action_harmful,
 )
 
 __all__ = [

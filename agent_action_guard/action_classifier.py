@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 import numpy as np
 import onnxruntime as ort
 
-from agent_action_guard._utils import (
+from agent_action_guard._runtime_utils import (
     ALL_CLASSES,
     ONNX_MODEL_PATH,
     embed_model,
@@ -103,20 +103,25 @@ def ensure_action_safety(action_dict, raise_exception: bool = False) -> bool:
 # Example usage
 if __name__ == "__main__":
     sample_action = {
-        "label": "ping",
-        "resource": "Tool",
+        "action_id": 1,
+        "prompt": "Retrieve current weather data for New York City.",
         "action": {
             "type": "mcp",
-            "server_label": "tool",
-            "server_url": "goodtool.com",
-            "parameters": {
-                "input": "Hello, world!",
-            },
-            "require_approval": "never",
+            "server_label": "weather_api",
+            "server_url": "https://api.weather.com/v1/current",
+            "parameters": {"location": "New York City", "units": "imperial"},
         },
+        "label": "weather_tool",
+        "resource": "external_api",
+        "classification": "safe",
+        "risk_level": "none",
+        "flag_reason": "",
     }
-
     example_classification, example_confidence = is_action_harmful(sample_action)
+    if example_classification:
+        example_classification = "Harmful"
+    else:
+        example_classification = "Safe"
 
     print(
         f"{sample_action['label']} Classification: {example_classification}, "

@@ -3,18 +3,21 @@ Hyperparameter tuning script for the neural network model.
 """
 
 import itertools
+from pathlib import Path
 from typing import Any
 
+import numpy as np
+import onnxruntime as ort
 import pandas as pd
-import torch
 from sklearn.model_selection import train_test_split
 
-from agent_action_guard._utils import ONNX_MODEL_PATH
-from train_nn import (  # rl_fine_tune,
-    MODEL_PATH,
+from agent_action_guard._runtime_utils import ONNX_MODEL_PATH
+from train_nn import (
+    _accuracy_score,
     load_texts_and_labels,
     make_embeddings,
     train_one,
+    export_model_to_onnx,
 )
 
 # Hyperparameter grid
@@ -85,93 +88,68 @@ def hyperparam_tuning():
     )
     print("\nAll trials sorted by acc:")
     print(df.to_string(index=False))
-
-    # Save best supervised/pretrained model
+    # Export best model to ONNX using shared helper
     try:
-        if best.get("model") is not None:
-            torch.save(
-                {
-                    "model_state_dict": best["model"].state_dict(),
-                    "config": best["config"],
-                    "in_dim": xtr_embs.shape[1],
-                },
-                MODEL_PATH,
-            )
-            print(f"Saved best pretrained model to {MODEL_PATH}")
-    except Exception as e:
-        print("Failed saving pretrained model:", e)
-
-    # Save in ONNX
-    try:
-        import torch.onnx
-
         if best.get("model") is None:
             raise ValueError("No trained model available for ONNX export")
 
-        model = best["model"].eval().cpu()
-
-        # Create dummy input (based on embedding dimension)
         in_dim = xtr_embs.shape[1]
-        dummy_input = torch.randn(1, in_dim, dtype=torch.float32)
-
-        # Export to ONNX
-        torch.onnx.export(
-            model,
-            dummy_input,  # type: ignore
-            ONNX_MODEL_PATH,
-            input_names=["input"],
-            output_names=["logits"],
-            dynamic_axes={
-                "input": {0: "batch_size"},
-                "logits": {0: "batch_size"},
-            },
-            opset_version=13,  # safe default
-            do_constant_folding=True,
-        )
-
-        print(f"Saved best model in ONNX format to {ONNX_MODEL_PATH}")
+        export_model_to_onnx(best["model"], in_dim)
     except Exception as e:
-        print("Failed saving ONNX model:", e)
+        print("ONNX export failed:", e)
 
-    # # Run RL fine-tuning on top of embeddings using class strings
-    # try:
-    #     print("Running RL fine-tune on best config (safe defaults)...")
-    #     # use a safer, smaller LR and fewer epochs for RL to avoid degrading pretrained
-    #     cfg = best["config"]
-    #     m = best.get("model")
-    #     pre_state = m.state_dict() if m is not None else None
 
-    #     rl_lr = float(cfg.get("lr", 0.001)) * 0.1
-    #     rl_epochs = max(2, int(cfg.get("epochs", 6) // 2))
-    #     print(f"RL params: hidden={cfg['hidden']} lr={rl_lr:.6f} epochs={rl_epochs}")
+def evaluate_onnx_model(
+    onnx_path: str | Path, X_test: np.ndarray, y_test, batch_size: int = 32
+):
+    """Run inference with an ONNX model using onnxruntime and return coarse accuracy.
 
-    #     clf, rl_acc = rl_fine_tune(
-    #         xtr_embs,
-    #         xte_embs,
-    #         ctr,
-    #         cte,
-    #         hidden=cfg["hidden"],
-    #         lr=rl_lr,
-    #         epochs=rl_epochs,
-    #         batch_size=BATCH_SIZE,
-    #         pretrained_state_dict=pre_state,
-    #     )
-    #     print(f"-> RL acc: {rl_acc:.4f} (supervised: {best['acc']:.4f})")
+    The returned accuracy uses the same coarse matching logic as the PyTorch
+    training code (`_accuracy_score`) which considers labels 1 and 2 as
+    "harmful" (truthy) and 0 as "safe" (falsy).
+    """
+    sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+    in_name = sess.get_inputs()[0].name
+    out_name = sess.get_outputs()[0].name
 
-    #     # Save whichever is better: supervised pretrained or RL head
-    #     if rl_acc > float(best["acc"]):
-    #         try:
-    #             torch.save({"model_state_dict": clf.state_dict(), "config": cfg},
-    #                        MODEL_PATH.with_name(MODEL_PATH.stem + "_rl.pt"))
-    #             print(f"RL improved. Saved RL model to {MODEL_PATH.with_name(MODEL_PATH.stem + '_rl.pt')}")
-    #         except Exception:
-    #             print("RL improved but failed to save RL model file.")
-    #     else:
-    #         print("RL did not improve over supervised model. Keeping pretrained supervised model.")
-    # except Exception as e:
-    #     print("RL fine-tune failed:", e)
+    preds = []
+    n = X_test.shape[0]
+    for i in range(0, n, batch_size):
+        batch = X_test[i : i + batch_size].astype(np.float32)
+        out = sess.run([out_name], {in_name: batch})[0]
+        batch_preds = np.argmax(out, axis=1)
+        preds.extend(batch_preds.tolist())
+
+    preds = np.array(preds, dtype=int)[:n]
+    acc = _accuracy_score(y_test, preds)
+    return float(acc), preds
+
+
+def evaluate_saved_onnx():
+    """Load the test split, compute embeddings, and evaluate the saved ONNX model."""
+    if not ONNX_MODEL_PATH.exists():
+        print(f"No ONNX model found at {ONNX_MODEL_PATH}; skipping ONNX evaluation.")
+        return
+
+    texts, labels, classes, _ = load_texts_and_labels()
+    # Keep the same split seed/stratify to match training evaluation
+    xtr_texts, xte_texts, ytr, yte, _, _ = train_test_split(
+        texts, labels, classes, test_size=0.25, random_state=42, stratify=classes
+    )
+
+    print("Generating embeddings for evaluation...")
+    xte_embs = make_embeddings(xte_texts)
+
+    print(f"Evaluating ONNX model at {ONNX_MODEL_PATH} on {len(xte_embs)} samples...")
+    try:
+        acc, _ = evaluate_onnx_model(ONNX_MODEL_PATH, xte_embs, yte)
+        print(f"ONNX model accuracy (coarse safe/harm match): {acc:.4f}")
+    except Exception as e:
+        print("ONNX evaluation failed:", e)
 
 
 if __name__ == "__main__":
     # Run grid search with top-level configuration variables
     hyperparam_tuning()
+    # Evaluate the saved ONNX model on the test set
+    evaluate_saved_onnx()
