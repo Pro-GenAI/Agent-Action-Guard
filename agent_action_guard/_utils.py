@@ -4,6 +4,7 @@ Runtime helpers for action classification.
 
 import json
 import os
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -15,6 +16,7 @@ from torch import nn
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ALL_CLASSES = ["safe", "harmful", "unethical"]
 MODEL_PATH = Path(__file__).with_name("action_classifier_model.pt")
+ONNX_MODEL_PATH = Path(__file__).with_name("action_classifier_model.onnx")
 
 
 class EmbeddingModel:
@@ -94,3 +96,7 @@ class ActionClassNet(nn.Module):
 
 
 embed_model = EmbeddingModel()
+
+class ActionGuardDecision(str, Enum):
+    ALLOW = "ALLOW"
+    BLOCK = "BLOCK"

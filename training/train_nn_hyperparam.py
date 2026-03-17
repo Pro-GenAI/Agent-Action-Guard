@@ -9,7 +9,8 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 
-from training.train_nn import (  # rl_fine_tune,
+from agent_action_guard._utils import ONNX_MODEL_PATH
+from train_nn import (  # rl_fine_tune,
     MODEL_PATH,
     load_texts_and_labels,
     make_embeddings,
@@ -17,8 +18,8 @@ from training.train_nn import (  # rl_fine_tune,
 )
 
 # Hyperparameter grid
-PARAM_GRID = {
-    # updated search space: focus on mid/large networks and slightly larger lr
+_PARAM_GRID = {
+    # Updated search space: focus on mid/large networks and slightly larger lr
     "hidden": [64, 128, 256, 512],
     "lr": [5e-4, 1e-3, 2e-3],
     "epochs": [2, 3, 4, 6, 8],
@@ -32,7 +33,7 @@ def hyperparam_tuning():
     Perform hyperparameter tuning using grid search on the neural network model.
     """
     texts, labels, classes, class_weights = load_texts_and_labels()
-    # split texts, labels and classes together so we keep class strings for RL
+    # Split texts, labels and classes together so we keep class strings for RL
     xtr_texts, xte_texts, ytr, yte, _, _ = train_test_split(
         texts, labels, classes, test_size=0.25, random_state=42, stratify=classes
     )
@@ -41,10 +42,10 @@ def hyperparam_tuning():
     xtr_embs = make_embeddings(xtr_texts)
     xte_embs = make_embeddings(xte_texts)
 
-    # simple grid search
+    # Simple grid search
     best: dict[str, Any] = {"acc": -1.0, "config": None, "model": None, "preds": None}
     results = []
-    keys, values = zip(*PARAM_GRID.items())
+    keys, values = zip(*_PARAM_GRID.items())
     for combo in itertools.product(*values):
         cfg = dict(zip(keys, combo))
         print(f"Trying config: {cfg}")
@@ -61,7 +62,7 @@ def hyperparam_tuning():
             class_weights=class_weights,
         )
         print(f"-> acc: {acc:.4f}")
-        # store trial result
+        # Store trial result
         results.append(
             {
                 "hidden": cfg["hidden"],
@@ -76,24 +77,16 @@ def hyperparam_tuning():
             best.update({"acc": acc, "config": cfg, "model": model, "preds": preds})
 
     print("Best config:", best["config"], "acc:", best["acc"])
-    # show all results sorted by accuracy
-    if pd is not None:
-        df = pd.DataFrame(results)
-        df = df.sort_values(
-            by=["acc", "hidden", "lr", "epochs", "weight_decay"],
-            ascending=[False, True, True, True, True],
-        )
-        print("\nAll trials sorted by acc:")
-        print(df.to_string(index=False))
-    else:
-        # fallback: pretty-print JSON sorted
-        results_sorted = sorted(
-            results, key=lambda x: (-x["acc"], x["hidden"], x["lr"], x["epochs"])
-        )
-        print("\nAll trials sorted by acc:")
-        for r in results_sorted:
-            print(r)
-    # save best supervised/pretrained model for RL initialization
+    # Show all results sorted by accuracy
+    df = pd.DataFrame(results)
+    df = df.sort_values(
+        by=["acc", "hidden", "lr", "epochs", "weight_decay"],
+        ascending=[False, True, True, True, True],
+    )
+    print("\nAll trials sorted by acc:")
+    print(df.to_string(index=False))
+
+    # Save best supervised/pretrained model
     try:
         if best.get("model") is not None:
             torch.save(
@@ -107,6 +100,38 @@ def hyperparam_tuning():
             print(f"Saved best pretrained model to {MODEL_PATH}")
     except Exception as e:
         print("Failed saving pretrained model:", e)
+
+    # Save in ONNX
+    try:
+        import torch.onnx
+
+        if best.get("model") is None:
+            raise ValueError("No trained model available for ONNX export")
+
+        model = best["model"].eval().cpu()
+
+        # Create dummy input (based on embedding dimension)
+        in_dim = xtr_embs.shape[1]
+        dummy_input = torch.randn(1, in_dim, dtype=torch.float32)
+
+        # Export to ONNX
+        torch.onnx.export(
+            model,
+            dummy_input,  # type: ignore
+            ONNX_MODEL_PATH,
+            input_names=["input"],
+            output_names=["logits"],
+            dynamic_axes={
+                "input": {0: "batch_size"},
+                "logits": {0: "batch_size"},
+            },
+            opset_version=13,  # safe default
+            do_constant_folding=True,
+        )
+
+        print(f"Saved best model in ONNX format to {ONNX_MODEL_PATH}")
+    except Exception as e:
+        print("Failed saving ONNX model:", e)
 
     # # Run RL fine-tuning on top of embeddings using class strings
     # try:

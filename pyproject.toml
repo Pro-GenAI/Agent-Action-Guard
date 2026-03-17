@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "1.0.3"
+version = "1.0.4"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "CC-BY-4.0"
@@ -42,7 +42,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "torch",
+    "onnxruntime",
     "openai",
 ]
 requires-python = ">=3.8"
@@ -70,6 +70,7 @@ harmacteval = [
 ]
 
 dev = [
+    "torch",
     "ruff",
     "black",
     "isort",

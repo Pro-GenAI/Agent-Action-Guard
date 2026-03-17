@@ -11,20 +11,20 @@ from unittest import mock
 
 import pytest
 
-ACTION_CLASSIFIER_MODULE_NAMES = (
+_ACTION_CLASSIFIER_MODULE_NAMES = (
     "numpy",
     "torch",
     "agent_action_guard",
     "agent_action_guard.action_classifier",
     "agent_action_guard._runtime",
 )
-RUNTIME_SOURCE_PATH = (
+_RUNTIME_SOURCE_PATH = (
     Path(__file__).resolve().parents[1] / "agent_action_guard" / "_runtime.py"
 )
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 
 class _FakeModelPath:
@@ -205,7 +205,7 @@ def _build_runtime_import_openai_module():
 @pytest.fixture
 def action_classifier_module(monkeypatch):
     original_modules = {
-        name: sys.modules.get(name) for name in ACTION_CLASSIFIER_MODULE_NAMES
+        name: sys.modules.get(name) for name in _ACTION_CLASSIFIER_MODULE_NAMES
     }
 
     for module_name in (
@@ -248,7 +248,7 @@ def runtime_module(monkeypatch):
     monkeypatch.setitem(sys.modules, "torch", _build_runtime_import_torch_module())
 
     spec = importlib.util.spec_from_file_location(
-        "runtime_under_test", RUNTIME_SOURCE_PATH
+        "runtime_under_test", _RUNTIME_SOURCE_PATH
     )
     assert spec is not None
     assert spec.loader is not None

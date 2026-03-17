@@ -18,7 +18,7 @@ from torch import nn
 from torch.distributions import Categorical
 from torch.utils.data import DataLoader, TensorDataset
 
-from agent_action_guard._runtime import (
+from agent_action_guard._utils import (
     ALL_CLASSES,
     DEVICE,
     MODEL_PATH,
@@ -34,7 +34,7 @@ if not EMBED_MODEL_NAME:
     raise ValueError("EMBED_MODEL_NAME environment variable not set.")
 
 
-def check_match(actual_label, predicted_label):
+def _check_match(actual_label, predicted_label):
     """Check if predicted label matches actual label."""
     # The agent's action gets blocked if label is 1 or 2 (harmful/unethical),
     # which means both are the same.
@@ -46,56 +46,56 @@ def check_match(actual_label, predicted_label):
     return False
 
 
-def accuracy_score(y_true, y_pred):
+def _accuracy_score(y_true, y_pred):
     """Lightweight accuracy scorer used when sklearn is not available.
 
     Returns fraction of matching labels between y_true and y_pred.
     Works for iterables of hashable items (strings, ints).
     """
-    # convert to lists to allow multiple iterator types
+    # Convert to lists to allow multiple iterator types
     yt = list(y_true)
     yp = list(y_pred)
     if len(yt) == 0:
         return 0.0
-    # only compare up to the shorter length to avoid throwing
+    # Only compare up to the shorter length to avoid throwing
     n = min(len(yt), len(yp))
-    matches = sum(1 for i in range(n) if check_match(yt[i], yp[i]))
+    matches = sum(1 for i in range(n) if _check_match(yt[i], yp[i]))
     return matches / n
 
 
 # ------------------ Configuration (disable parser) ------------------
 
-SEED = 42
+_SEED = 42
 
 
-def set_seed():
+def _set_seed():
     """Make runs reproducible across torch/numpy/random where possible."""
-    random.seed(SEED)
-    np.random.seed(SEED)
-    torch.manual_seed(SEED)
+    random.seed(_SEED)
+    np.random.seed(_SEED)
+    torch.manual_seed(_SEED)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(SEED)
-    # deterministic behaviour for cuDNN (may slow down)
+        torch.cuda.manual_seed_all(_SEED)
+    # Deterministic behaviour for cuDNN (may slow down)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
 
-set_seed()
+_set_seed()
 
 # Best hyperparameters found via tuning
-HIDDEN = 128
-LR = 0.002
-EPOCHS = 2
-WEIGHT_DECAY = 0.0
-BATCH_SIZE = 4
+_HIDDEN = 128
+_LR = 0.002
+_EPOCHS = 2
+_WEIGHT_DECAY = 0.0
+_BATCH_SIZE = 4
 
-ROOT = Path(__file__).parent
-DATA_PATH = ROOT / "HarmActions_dataset.json"
+_ROOT = Path(__file__).parent
+_DATA_PATH = _ROOT / "HarmActions_dataset.json"
 
-embed_model = EmbeddingModel(EMBED_MODEL_NAME)
+_embed_model = EmbeddingModel(EMBED_MODEL_NAME)
 
 
-def get_label(entry):
+def _get_label(entry):
     """Map a dataset row to the classifier label index."""
     classification = entry["classification"].lower()
     if classification not in ALL_CLASSES:
@@ -104,7 +104,7 @@ def get_label(entry):
     return ALL_CLASSES.index(classification)
 
 
-with open(DATA_PATH, encoding="utf-8") as f:
+with open(_DATA_PATH, encoding="utf-8") as f:
     dataset: list[dict] = json.load(f)
 
 
@@ -115,7 +115,7 @@ def load_texts_and_labels():
     classes = []
     for row in dataset:
         texts.append(flatten_action_to_text(row))
-        lbl = get_label(row)
+        lbl = _get_label(row)
         labels.append(lbl)
         cls = row["classification"]
         classes.append(cls)
@@ -133,8 +133,8 @@ def load_texts_and_labels():
 
 def make_embeddings(texts):
     """Generate embeddings for texts."""
-    # sentence-transformers returns numpy arrays
-    embs = embed_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+    # Sentence-transformers returns numpy arrays
+    embs = _embed_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
     return np.array(embs)
 
 
@@ -147,7 +147,7 @@ def train_one(
     lr: float,
     epochs: int,
     weight_decay: float = 0,
-    batch_size: int = BATCH_SIZE,
+    batch_size: int = _BATCH_SIZE,
     class_weights: torch.Tensor | None = None,
 ):
     """Train the model for one configuration.
@@ -155,7 +155,7 @@ def train_one(
     Returns the trained model, classification accuracy (based on mapping scores
     back to class labels), and the raw predicted scores for the test set.
     """
-    set_seed()
+    _set_seed()
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
@@ -193,143 +193,149 @@ def train_one(
         logits = model(torch.tensor(X_test, dtype=torch.float32).to(DEVICE))
         preds = torch.argmax(logits, dim=1).cpu().numpy()
         yte_np = np.array(y_test)
-        cls_acc = accuracy_score(yte_np, preds)
+        cls_acc = _accuracy_score(yte_np, preds)
 
     return model, cls_acc, preds
 
 
-def _class_to_int(cls: str) -> int:
-    for i, class_name in enumerate(ALL_CLASSES):
-        if class_name == cls:
-            return i
-    return 0
+# RL fine-tuning function
+
+# def _class_to_int(cls: str) -> int:
+#     for i, class_name in enumerate(ALL_CLASSES):
+#         if class_name == cls:
+#             return i
+#     return 0
 
 
-def _rl_fine_tune(
-    xtr_embs: np.ndarray,
-    xte_embs: np.ndarray,
-    ytr_classes: list,
-    yte_classes: list,
-    hidden: int = HIDDEN,
-    lr: float = LR,
-    epochs: int = EPOCHS,
-    batch_size: int = BATCH_SIZE,
-    pretrained_state_dict: dict | None = None,
-):
-    """Simple REINFORCE fine-tuning on a small classifier head.
+# def _rl_fine_tune(
+#     xtr_embs: np.ndarray,
+#     xte_embs: np.ndarray,
+#     ytr_classes: list,
+#     yte_classes: list,
+#     hidden: int = HIDDEN,
+#     lr: float = LR,
+#     epochs: int = EPOCHS,
+#     batch_size: int = BATCH_SIZE,
+#     pretrained_state_dict: dict | None = None,
+# ):
+#     """Simple REINFORCE fine-tuning on a small classifier head.
 
-    x*_embs: numpy arrays of embeddings
-    y*_classes: list/iterable of string class labels (safe/harmful/unethical)
-    Returns (model, acc) where acc is classification accuracy on the test set.
-    """
-    set_seed()
-    # convert classes to ints
-    ytr_int = np.array([_class_to_int(c) for c in ytr_classes])
-    yte_int = np.array([_class_to_int(c) for c in yte_classes])
+#     x*_embs: numpy arrto_int(cls: str) -> int:
+#     for i, class_name in enumerate(ALL_CLASSES):
+#         if class_name == cls:
+#             return i
+#     return 0ays of embeddings
+#     y*_classes: list/iterable of string class labels (safe/harmful/unethical)
+#     Returns (model, acc) where acc is classification accuracy on the test set.
+#     """
+#     set_seed()
+#     # convert classes to ints
+#     ytr_int = np.array([_class_to_int(c) for c in ytr_classes])
+#     yte_int = np.array([_class_to_int(c) for c in yte_classes])
 
-    in_dim = xtr_embs.shape[1]
-    clf = ActionClassNet(in_dim=in_dim, hidden=hidden)
-    opt = torch.optim.Adam(clf.parameters(), lr=lr)
+#     in_dim = xtr_embs.shape[1]
+#     clf = ActionClassNet(in_dim=in_dim, hidden=hidden)
+#     opt = torch.optim.Adam(clf.parameters(), lr=lr)
 
-    # If a pretrained supervised model state dict is provided, try to load
-    # compatible weights (ignore final layer size mismatch).
-    if pretrained_state_dict is not None:
-        try:
-            cur_state = clf.state_dict()
-            # copy matching tensors
-            for k, v in pretrained_state_dict.items():
-                if k in cur_state and cur_state[k].shape == v.shape:
-                    cur_state[k] = v
-            clf.load_state_dict(cur_state)
-            print("Loaded compatible pretrained weights into RL head (partial load).")
-        except Exception:
-            print(
-                "Warning: failed to load pretrained weights into RL head; continuing with random init."
-            )
+#     # If a pretrained supervised model state dict is provided, try to load
+#     # compatible weights (ignore final layer size mismatch).
+#     if pretrained_state_dict is not None:
+#         try:
+#             cur_state = clf.state_dict()
+#             # copy matching tensors
+#             for k, v in pretrained_state_dict.items():
+#                 if k in cur_state and cur_state[k].shape == v.shape:
+#                     cur_state[k] = v
+#             clf.load_state_dict(cur_state)
+#             print("Loaded compatible pretrained weights into RL head (partial load).")
+#         except Exception:
+#             print(
+#                 "Warning: failed to load pretrained weights into RL head; continuing with random init."
+#             )
 
-    n = xtr_embs.shape[0]
-    idx = np.arange(n)
-    baseline = 0.0
-    for epoch in range(1, epochs + 1):
-        # shuffle
-        np.random.shuffle(idx)
-        total_loss = 0.0
-        total_samples = 0
-        for i in range(0, n, batch_size):
-            batch_idx = idx[i : i + batch_size]
-            xb = torch.tensor(xtr_embs[batch_idx], dtype=torch.float32).to(DEVICE)
-            yb = torch.tensor(ytr_int[batch_idx], dtype=torch.long).to(DEVICE)
+#     n = xtr_embs.shape[0]
+#     idx = np.arange(n)
+#     baseline = 0.0
+#     for epoch in range(1, epochs + 1):
+#         # shuffle
+#         np.random.shuffle(idx)
+#         total_loss = 0.0
+#         total_samples = 0
+#         for i in range(0, n, batch_size):
+#             batch_idx = idx[i : i + batch_size]
+#             xb = torch.tensor(xtr_embs[batch_idx], dtype=torch.float32).to(DEVICE)
+#             yb = torch.tensor(ytr_int[batch_idx], dtype=torch.long).to(DEVICE)
 
-            logits = clf(xb)
-            probs = torch.softmax(logits, dim=1)
-            dist = Categorical(probs)
-            actions = dist.sample()
-            logp = dist.log_prob(actions)
+#             logits = clf(xb)
+#             probs = torch.softmax(logits, dim=1)
+#             dist = Categorical(probs)
+#             actions = dist.sample()
+#             logp = dist.log_prob(actions)
 
-            rewards = (actions == yb).float()
-            adv = rewards - baseline
-            loss = -(logp * adv).mean()
+#             rewards = (actions == yb).float()
+#             adv = rewards - baseline
+#             loss = -(logp * adv).mean()
 
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
+#             opt.zero_grad()
+#             loss.backward()
+#             opt.step()
 
-            total_loss += loss.item() * xb.size(0)
-            total_samples += xb.size(0)
+#             total_loss += loss.item() * xb.size(0)
+#             total_samples += xb.size(0)
 
-            # update baseline (simple moving average)
-            baseline = 0.99 * baseline + 0.01 * rewards.mean().item()
+#             # update baseline (simple moving average)
+#             baseline = 0.99 * baseline + 0.01 * rewards.mean().item()
 
-        avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
-        print(
-            f"RL Epoch {epoch}/{epochs} - loss: {avg_loss:.4f} - baseline: {baseline:.4f}"
-        )
+#         avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
+#         print(
+#             f"RL Epoch {epoch}/{epochs} - loss: {avg_loss:.4f} - baseline: {baseline:.4f}"
+#         )
 
-    # evaluate greedily on test set
-    with torch.inference_mode():
-        logits = clf(torch.tensor(xte_embs, dtype=torch.float32).to(DEVICE))
-        preds = torch.argmax(logits, dim=1).cpu().numpy()
-        acc = (preds == yte_int).mean()
+#     # evaluate greedily on test set
+#     with torch.inference_mode():
+#         logits = clf(torch.tensor(xte_embs, dtype=torch.float32).to(DEVICE))
+#         preds = torch.argmax(logits, dim=1).cpu().numpy()
+#         acc = (preds == yte_int).mean()
 
-    return clf, float(acc)
+#     return clf, float(acc)
 
 
-def train_model():
+def _train_model():
     """Train the model with best hyperparameters."""
     # Ensure reproducible split and training
-    set_seed()
+    _set_seed()
     texts, labels, classes, class_weights = load_texts_and_labels()
     Xtr_texts, Xte_texts, ytr, yte = train_test_split(
         texts,
         labels,
         test_size=0.25,
-        random_state=SEED,
+        random_state=_SEED,
         stratify=classes,
     )
 
     print("Generating embeddings...")
-    # embeddings should be deterministic given seed and model
-    set_seed()
+    # Embeddings should be deterministic given seed and model
+    _set_seed()
     Xtr_embs = make_embeddings(Xtr_texts)
     Xte_embs = make_embeddings(Xte_texts)
 
     # Use best values discovered interactively
     print("Training...")
-    cfg = {"hidden": HIDDEN, "lr": LR, "epochs": EPOCHS}
+    cfg = {"hidden": _HIDDEN, "lr": _LR, "epochs": _EPOCHS}
     model, acc, _ = train_one(
         Xtr_embs,
         ytr,
         Xte_embs,
         yte,
-        hidden=HIDDEN,
-        lr=LR,
-        epochs=EPOCHS,
-        weight_decay=WEIGHT_DECAY,
+        hidden=_HIDDEN,
+        lr=_LR,
+        epochs=_EPOCHS,
+        weight_decay=_WEIGHT_DECAY,
         class_weights=class_weights,
     )
     print(f"-> acc: {acc:.4f}")
 
-    # save best model and embedding info
+    # Save best model and embedding info
     torch.save(
         {
             "model_state_dict": model.state_dict(),
@@ -343,4 +349,4 @@ def train_model():
 
 if __name__ == "__main__":
     # Run grid search with top-level configuration variables
-    train_model()
+    _train_model()
