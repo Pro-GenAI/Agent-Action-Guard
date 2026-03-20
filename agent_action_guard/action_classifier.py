@@ -127,3 +127,14 @@ if __name__ == "__main__":
         f"{sample_action['label']} Classification: {example_classification}, "
         f"Confidence: {example_confidence:.2f}"
     )
+
+    # Latency test
+    import time
+    start_time = time.time()
+    attempts = 500
+    for _ in range(attempts):
+        is_action_harmful(sample_action)
+    end_time = time.time()
+    avg_latency_sec = (end_time - start_time) / attempts
+    avg_latency_ms = avg_latency_sec * 1000
+    print(f"Average latency over {attempts} runs: {avg_latency_ms:.2f} ms")

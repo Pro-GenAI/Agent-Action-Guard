@@ -43,6 +43,42 @@ if is_harmful:
 	raise HarmfulActionException(action_dict)
 ```
 
+### Usage with OpenAI Agents
+
+```python
+import json
+from agents import (
+    Agent,
+    Runner,
+    ToolGuardrailFunctionOutput,
+    function_tool,
+    tool_input_guardrail,
+)
+from agent_action_guard import is_action_harmful
+
+@tool_input_guardrail
+def block_harmful(data):
+    args = json.loads(data.context.tool_arguments or "{}")
+    is_harmful, confidence = is_action_harmful(args)
+    if is_harmful:
+        return ToolGuardrailFunctionOutput.reject_content(
+            message="Harmful action detected",
+            output_info={"confidence": confidence}
+        )
+    return ToolGuardrailFunctionOutput.allow()
+
+
+@function_tool(tool_input_guardrails=[block_harmful])
+def classify_text(text: str) -> str:
+    """Classify text for internal routing."""
+    return f"length:{len(text)}"
+
+
+agent = Agent(name="Classifier", tools=[classify_text])
+result = Runner.run_sync(agent, "hello world")
+print(result.final_output)
+```
+
 ### Advanced Usage:
 
 1. Clone the repository only if you need training, evaluation, or demo tooling:
