@@ -3,7 +3,7 @@
 
 This script provides an MCP server through an HTTP Stream transport server.
 The server allows dynamic addition and removal of tools via HTTP endpoints,
-allowing seamless evaluation through the HarmActEval framework's Python script.
+allowing seamless evaluation through the AgentHarmBench framework's Python script.
 """
 
 import os

@@ -64,7 +64,7 @@ include-package-data = true
 agent_action_guard = ["action_classifier_model.pt", "harmactions_dataset.json"]
 
 [project.optional-dependencies]
-harmacteval = [
+agentharmbench = [
     "python-dotenv",
     "requests",
 ]
