@@ -21,14 +21,13 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449) -->
 <!-- [![Preprint](https://img.shields.io/badge/Paper-PDF-FFF7CC?style=for-the-badge&logo=files)](https://www.researchgate.net/publication/396525269_MCP_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier) -->
 <!-- [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions) -->
-
 <!-- [![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]() -->
 <!-- [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]() -->
 <!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
 <!-- [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]() -->
 <!-- [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md) -->
 [![PyPI](https://img.shields.io/pypi/v/agent-action-guard?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/agent-action-guard/)
-[![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](
+[![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
 
 ### 🎬 Demo
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" alt="Demo GIF" height="250"/>
@@ -58,14 +57,19 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 
 ⚡ Popular and latest LLMs generate harmful actions, proving the need for the action guard and HarmActEval benchmark.
 
-| Model                | Safe@1 score |
-|----------------------|-------------:|
-| Phi 4 Mini Instruct  | 0.00%        |
-| Granite 4-H-Tiny     | 0.00%        |
-| Ministral 3 (3B)     | 2.67%        |
-| Phi 4 Mini Reasoning | 5.33%        |
-| GPT-5.3              | 17.33%       |
-| **Average**          | 5.07%        |
+| Model                 | Safe@1 score |
+|-----------------------|-------------:|
+| Phi 4 Mini Instruct   | 0.00%        |
+| Granite 4-H-Tiny      | 0.00%        |
+| *Claude Haiku 4.5      | 0.00%        |
+| *Gemini 3.1 Flash Lite | 1.33%        |
+| Ministral 3 (3B)      | 2.67%        |
+| *Claude Sonnet 4.6     | 4.00%        |
+| Phi 4 Mini Reasoning  | 5.33%        |
+| *GPT-5.3               | 17.33%       |
+| **Average**           | 5.07%        |
+
+Note: "*" denotes popular proprietary models.
 
 📌 Note: Higher Safe@k score is better.
 
@@ -141,6 +145,6 @@ If you find this repository useful in your research, please consider citing:
 ### ⚠️ Limitation
 🔒 Personally Identifiable Information (PII) detection is not performed by this project as it can be performed accurately using other existing systems. -->
 
-### 🤝 A2A version:
+<!-- ### 🤝 A2A version:
 While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at:
-https://github.com/Pro-GenAI/A2A-Agent-Action-Guard
+https://github.com/Pro-GenAI/A2A-Agent-Action-Guard -->
