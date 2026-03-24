@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "1.0.5"
+version = "1.0.7"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "CC-BY-4.0"
@@ -64,7 +64,7 @@ include-package-data = true
 agent_action_guard = ["action_classifier_model.pt", "harmactions_dataset.json"]
 
 [project.optional-dependencies]
-harmacteval = [
+harmactionsbench = [
     "python-dotenv",
     "requests",
 ]

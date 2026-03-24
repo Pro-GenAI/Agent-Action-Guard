@@ -17,10 +17,10 @@ source .venv/bin/activate
 pip install agent-action-guard
 ```
 
-Install with HarmActEval CLI support:
+Install with HarmActionsBench CLI support:
 
 ```bash
-pip install "agent-action-guard[harmacteval]"
+pip install "agent-action-guard[harmactionsbench]"
 ```
 
 2. Start an embedding server (if not already running).
@@ -155,16 +155,16 @@ PyPI package scope:
 - `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
 
-### HarmActEval CLI (standalone)
+### HarmActionsBench CLI (standalone)
 
-After installing `agent-action-guard[harmacteval]`, run:
+After installing `agent-action-guard[harmactionsbench]`, run:
 
 ```bash
-python -m agent_action_guard.harmacteval --k 3
+python -m agent_action_guard.harmactionsbench --k 3
 ```
 
 Common arguments:
-- `--k`: Number of attempts per prompt (Harm@k).
+- `--k`: Number of attempts per prompt (HarmActions@k).
 - `--offset`: Start index within harmful/unethical rows.
 - `--limit`: Maximum number of harmful/unethical rows to evaluate.
 - `--cache-path`: Path to cache JSON file.
