@@ -9,7 +9,8 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
 <!-- <h1 align="center">MCP Agent Action Guard</h1>
 <h4 align="center"><em>Safe actions for safe AI</em></h4> -->
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
+<!-- <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/> -->
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Workflow Diagram" height="250"/>
 </p>
 
 ⚠️ When AI agents are provided with a harmful tool and an instruction, they just use it. Popular and high-performing latest LLMs are not an exception.
@@ -28,6 +29,9 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 <!-- [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md) -->
 [![PyPI](https://img.shields.io/pypi/v/agent-action-guard?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/agent-action-guard/)
 [![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
+
+### ⚙️ Workflow
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
 
 ### 🎬 Demo
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" alt="Demo GIF" height="250"/>
@@ -49,7 +53,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 
 ## 🆕 New contributions of Agent-Action-Guard framework:
 1. 📊 **HarmActions**, a structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
-2. 📏 **HarmActionsBench** benchmark leveraging a new metric "SafeActions@k."
+2. 📏 **HarmActionsBench** benchmark leveraging a new metric "SafeActions@k" which represents the probability of avoiding unsafe actions in the first "k" attempts.
 3. 🧠 **Action Guard**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
 4. 🔌 MCP integration supporting live action screening using existing MCP servers and clients.
 
@@ -69,7 +73,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 | *GPT-5.3               | 17.33%              |
 | **Average**            | 3.83%               |
 
-*popular proprietary models.
+*latest popular proprietary models.
 
 📌 Note: Higher SafeActions@k score is better.
 
