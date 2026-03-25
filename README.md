@@ -43,8 +43,8 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 - 💭 Model being overconfident in its incorrect knowledge.
 - 🚧 Lack of proper constraints or guidelines for the agent.
 - 📉 Inadequate training data for specific scenarios.
-- 🛠️ MCP server providing incorrect tool descriptions that mislead the agent.
-- 🎭 Harmful MCP servers returning manipulative text to mislead the model.
+- 🛠️ Tools with incorrect descriptions that mislead the agent.
+- 🎭 Harmful tools descriptions including manipulative text to mislead the model.
 - 😬 The experiments proved that the model performs a harmful action and still responds "Sorry, I can't help with that."
 
 ## 🆕 New contributions of Agent-Action-Guard framework:
@@ -76,13 +76,13 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 ## ✨ Special features:
 - This project introduces "HarmActionsBench" dataset and benchmark to evaluate an AI agent's probability of generating harmful actions.
 - The dataset has been used to train a lightweight neural network model that classifies actions as safe, harmful, or unethical.
-- ⚡ The model is lightweight and can be easily integrated into existing AI agent frameworks like MCP.
-- 🔌 Supports MCP (Model Context Protocol) to allow real-time action classification.
+- ⚡ The model is lightweight and can be easily integrated into existing AI agent frameworks.
+<!-- - 🔌 Supports MCP (Model Context Protocol) to allow real-time action classification. -->
 <!-- - Unlike OpenAI's `"require_approval": "always"` flag, this blocks harmful actions without human intervention. -->
 <!-- - 🤝 A2A-compatible version: https://github.com/Pro-GenAI/A2A-Agent-Action-Guard. -->
 
 🛡️ **Safety Features:**
-- 🔍 Automatically classifies MCP tool calls before execution.
+- 🔍 Automatically classifies tool calls before execution.
 - 🚫 Blocks harmful actions based on the outputs of the trained model.
 - 📋 Provides detailed classification results.
 - ✅ Allows safe actions to proceed normally.
