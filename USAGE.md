@@ -25,7 +25,12 @@ pip install "agent-action-guard[harmactionsbench]"
 
 2. Start an embedding server (if not already running).
 
-Sample embedding server script is available at [examples/scripts/host_models.py](examples/scripts/host_models.py).
+```bash
+pip install "agent-action-guard[all]"
+python examples/scripts/host_models.py
+```
+Note: Alternative OpenAI-compatible embedding servers can be used.
+Alternative Llama-CPP script is available at [examples/scripts/host-llamacpp-embedding-model.sh](examples/scripts/host-llamacpp-embedding-model.sh) for local CPU-based hosting.
 
 3. Import Action Guard in your own project:
 

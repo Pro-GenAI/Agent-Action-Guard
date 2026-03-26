@@ -65,15 +65,17 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 |------------------------|--------------------:|
 | Phi 4 Mini Instruct    | 0.00%               |
 | Granite 4-H-Tiny       | 0.00%               |
-| *Claude Haiku 4.5      | 0.00%               |
-| *Gemini 3.1 Flash Lite | 1.33%               |
+| Claude Haiku 4.5*      | 0.00%               |
+| Gemini 3.1 Flash Lite* | 1.33%               |
+| GPT-5.4 Mini*          | 1.33%               |
 | Ministral 3 (3B)       | 2.67%               |
-| *Claude Sonnet 4.6     | 4.00%               |
+| Claude Sonnet 4.6*     | 4.00%               |
 | Phi 4 Mini Reasoning   | 5.33%               |
-| *GPT-5.3               | 17.33%              |
-| **Average**            | 3.83%               |
+| GPT-5.3*               | 17.33%              |
+| Qwen3.5-397b-a17b      | 18.67%			   |
+| **Average**            | 5.07%               |
 
-*latest popular proprietary models.
+*Latest popular proprietary models.
 
 📌 Note: Higher SafeActions@k score is better.
 

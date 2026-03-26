@@ -69,6 +69,17 @@ harmactionsbench = [
     "requests",
 ]
 
+all = [
+    "python-dotenv",
+    "requests",
+    "sentence-transformers",
+    "psutil",
+    "pytz",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+]
+
 dev = [
     "torch",
     "ruff",
