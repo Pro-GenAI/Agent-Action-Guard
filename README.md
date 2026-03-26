@@ -15,7 +15,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 
 ⚠️ When AI agents are provided with a harmful tool and an instruction, they just use it. Popular and high-performing latest LLMs are not an exception.
 
-🤖 AI is perceived as a threat. Increasing usage of agents leads to the usage of harmful tools and harmful usage of tools as proven using **HarmActionsBench**. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on **HarmActions** dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. ✅ Safe AI Agents are made possible by Action Guard.
+🤖 AI is perceived as a threat. Increasing usage of agents leads to the usage of harmful tools and harmful usage of tools as proven using **HarmActionsEval**. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on **HarmActions** dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. ✅ Safe AI Agents are made possible by Action Guard.
 
 <!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=7pNYXv3x7MA) -->
 <!-- [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/prane-eth/agent-action-guard) -->
@@ -53,13 +53,13 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 
 ## 🆕 New contributions of Agent-Action-Guard framework:
 1. 📊 **HarmActions**, a structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
-2. 📏 **HarmActionsBench** benchmark leveraging a new metric "SafeActions@k" which represents the probability of avoiding unsafe actions in the first "k" attempts.
+2. 📏 **HarmActionsEval** benchmark leveraging a new metric "SafeActions@k" which represents the probability of avoiding unsafe actions in the first "k" attempts.
 3. 🧠 **Action Guard**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
 4. 🔌 MCP integration supporting live action screening using existing MCP servers and clients.
 
-## 📊 HarmActionsBench Results
+## 📊 HarmActionsEval Results
 
-⚡ Popular and latest LLMs generate harmful actions, proving the need for the action guard and HarmActionsBench benchmark.
+⚡ Popular and latest LLMs generate harmful actions, proving the need for the action guard and HarmActionsEval benchmark.
 
 | Model                  | SafeActions@1 score |
 |------------------------|--------------------:|
@@ -80,7 +80,7 @@ $ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
 📌 Note: Higher SafeActions@k score is better.
 
 ## ✨ Special features:
-- This project introduces "HarmActionsBench" dataset and benchmark to evaluate an AI agent's probability of generating harmful actions.
+- This project introduces "HarmActionsEval" dataset and benchmark to evaluate an AI agent's probability of generating harmful actions.
 - The dataset has been used to train a lightweight neural network model that classifies actions as safe, harmful, or unethical.
 - ⚡ The model is lightweight and can be easily integrated into existing AI agent frameworks.
 <!-- - 🔌 Supports MCP (Model Context Protocol) to allow real-time action classification. -->
@@ -118,13 +118,13 @@ uv pip install agent-action-guard
 
 🔑 Note: The embedding client accepts an API key via the `EMBEDDING_API_KEY` environment variable (falls back to `OPENAI_API_KEY` if unset). See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [`USAGE.md`](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md) for examples.
 
-📦 Install with HarmActionsBench:
+📦 Install with HarmActionsEval:
 
 ```bash
-pip install "agent-action-guard[harmactionsbench]"
-python -m agent_action_guard.harmactionsbench
+pip install "agent-action-guard[harmactionseval]"
+python -m agent_action_guard.harmactionseval
 ```
-> Note: The usage of HarmActionsBench requires OpenAI API key to be set in the environment variables.
+> Note: The usage of HarmActionsEval requires OpenAI API key to be set in the environment variables.
 
 ### 🏷️ License
 

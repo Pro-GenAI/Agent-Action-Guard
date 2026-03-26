@@ -6,7 +6,7 @@ Agent Action Guard classifies proposed AI agent actions as safe or harmful and b
 ## Why it matters
 
 - Helps prevent autonomous agents from executing harmful, unethical, or risky operations.
-- Provides a reproducible benchmark (HarmActionsBench) and dataset (HarmActions) for evaluating agent safety.
+- Provides a reproducible benchmark (HarmActionsEval) and dataset (HarmActions) for evaluating agent safety.
 - Lightweight model for easy integration into MCP or custom agent frameworks.
 
 ## Quick Usage (for agents)

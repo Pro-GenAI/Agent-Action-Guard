@@ -1,7 +1,7 @@
-"""HarmActionsBench CLI.
+"""HarmActionsEval CLI.
 
 Run with:
-    python -m agent_action_guard.harmactionsbench
+    python -m agent_action_guard.harmactionseval
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ execution_counts: Dict[str, int] = {}
 tools: Dict[str, Dict[str, Any]] = {}
 
 
-class HarmActionsBenchContext:
+class HarmActionsEvalContext:
     """Container for runtime settings and cache state."""
 
     def __init__(
@@ -83,7 +83,7 @@ def parse_bool_env(value: str) -> bool:
     return value.upper().startswith("T") or value.startswith("1")
 
 
-def build_context(cache_path: Path) -> HarmActionsBenchContext:
+def build_context(cache_path: Path) -> HarmActionsEvalContext:
     """Initialize API client and runtime config from environment variables."""
     if os.getenv("AZURE_OPENAI_ENDPOINT"):
         client = openai.AzureOpenAI()
@@ -116,7 +116,7 @@ def build_context(cache_path: Path) -> HarmActionsBenchContext:
             "MCP_SUPPORTED not set; defaulting to False (local tool emulation)."
         )
 
-    return HarmActionsBenchContext(
+    return HarmActionsEvalContext(
         client=client,
         model=model,
         model_key=model_key,
@@ -142,7 +142,7 @@ def call_tool(*args: Any, tool_name: str = "", **kwargs: Any) -> Any:
     return log_text
 
 
-def add_tool(context: HarmActionsBenchContext, tool_definition: Dict[str, Any]) -> None:
+def add_tool(context: HarmActionsEvalContext, tool_definition: Dict[str, Any]) -> None:
     if not context.mcp_supported:
         tools[tool_definition["name"]] = tool_definition
         return
@@ -158,7 +158,7 @@ def add_tool(context: HarmActionsBenchContext, tool_definition: Dict[str, Any]) 
         raise ValueError(f"Error adding tool: {data['message']}")
 
 
-def get_execution_count(context: HarmActionsBenchContext, tool_name: str) -> int:
+def get_execution_count(context: HarmActionsEvalContext, tool_name: str) -> int:
     if not context.mcp_supported:
         return execution_counts.get(tool_name, 0)
 
@@ -172,7 +172,7 @@ def get_execution_count(context: HarmActionsBenchContext, tool_name: str) -> int
     return data.get("execution_count", 0)
 
 
-def remove_tool(context: HarmActionsBenchContext, tool_definition: Dict[str, Any]) -> None:
+def remove_tool(context: HarmActionsEvalContext, tool_definition: Dict[str, Any]) -> None:
     if not context.mcp_supported:
         tool_name = tool_definition["name"]
         tools.pop(tool_name, None)
@@ -250,7 +250,7 @@ def create_tool_from_action(action: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def get_response(
-    context: HarmActionsBenchContext,
+    context: HarmActionsEvalContext,
     prompt: str,
     attempt: int = 0,
     tool: Optional[Dict[str, Any]] = None,
@@ -351,13 +351,13 @@ def get_response(
 
 
 def evaluate(
-    context: HarmActionsBenchContext,
+    context: HarmActionsEvalContext,
     k: int = 2,
     offset: int = 0,
     limit: Optional[int] = None,
     output_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
-    """Run HarmActionsBench and return a summary dictionary."""
+    """Run HarmActionsEval and return a summary dictionary."""
     all_harmful_actions = load_dataset()
     actions = slice_actions(all_harmful_actions, offset=offset, limit=limit)
     logger.info(
@@ -498,7 +498,7 @@ def evaluate(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run HarmActionsBench to measure harmful tool-call behavior (HarmActions@k)."
+        description="Run HarmActionsEval to measure harmful tool-call behavior (HarmActions@k)."
     )
     parser.add_argument(
         "--k",
@@ -521,8 +521,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--cache-path",
         type=Path,
-        default=Path.cwd() / ".cache" / "harmactionsbench_cache.json",
-        help="Cache file path (default: ./.cache/harmactionsbench_cache.json).",
+        default=Path.cwd() / ".cache" / "harmactionseval_cache.json",
+        help="Cache file path (default: ./.cache/harmactionseval_cache.json).",
     )
     parser.add_argument(
         "--output",

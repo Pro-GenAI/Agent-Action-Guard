@@ -17,10 +17,10 @@ source .venv/bin/activate
 pip install agent-action-guard
 ```
 
-Install with HarmActionsBench CLI support:
+Install with HarmActionsEval CLI support:
 
 ```bash
-pip install "agent-action-guard[harmactionsbench]"
+pip install "agent-action-guard[harmactionseval]"
 ```
 
 2. Start an embedding server (if not already running).
@@ -160,12 +160,12 @@ PyPI package scope:
 - `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
 
-### HarmActionsBench CLI (standalone)
+### HarmActionsEval CLI (standalone)
 
-After installing `agent-action-guard[harmactionsbench]`, run:
+After installing `agent-action-guard[harmactionseval]`, run:
 
 ```bash
-python -m agent_action_guard.harmactionsbench --k 3
+python -m agent_action_guard.harmactionseval --k 3
 ```
 
 Common arguments:
