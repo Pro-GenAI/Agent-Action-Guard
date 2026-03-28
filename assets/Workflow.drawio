@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
   <diagram name="Page-1" id="pgBwbJMMUdWOns-yFG1h">
-    <mxGraphModel dx="504" dy="330" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+    <mxGraphModel dx="420" dy="275" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
       <root>
         <UserObject label="" animation="" id="0">
           <mxCell />
@@ -137,6 +137,9 @@
         </mxCell>
         <mxCell id="d9nS6NbmE245vOHi3HcA-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=10;fontStyle=1;fontColor=#CC0000;" value="80-100%" vertex="1">
           <mxGeometry height="14" width="47" x="489" y="303" as="geometry" />
+        </mxCell>
+        <mxCell id="O77nY4rysDeHQygO68UG-1" parent="1" style="text;whiteSpace=wrap;align=center;labelBackgroundColor=none;fontColor=#143642;fontSize=8;verticalAlign=middle;" value="15ms" vertex="1">
+          <mxGeometry height="11" width="19.5" x="433.5" y="439" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

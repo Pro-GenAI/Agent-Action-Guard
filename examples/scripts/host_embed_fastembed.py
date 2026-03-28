@@ -14,9 +14,9 @@ import psutil
 import pytz
 import uvicorn
 from dotenv import load_dotenv
+from fastembed import TextEmbedding
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -33,7 +33,7 @@ EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
 if not EMBED_MODEL_NAME:
     raise Exception("EMBED_MODEL_NAME is not set in the environment variables")
 
-embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+embed_model = TextEmbedding(model_name=EMBED_MODEL_NAME)
 
 
 class EmbedRequest(BaseModel):
@@ -46,10 +46,8 @@ class EmbedRequest(BaseModel):
 
 @app.post("/v1/embeddings")
 def embed_texts(req: EmbedRequest):  # OpenAI-compatible endpoint
-    # To embed texts using the sentence-transformer model.
-    embeddings = embed_model.encode(
-        req.inputs, normalize_embeddings=True, show_progress_bar=False
-    )
+    """To embed texts using the FastEmbed model."""
+    embeddings = list(embed_model.embed(req.inputs))
     return {
         "data": [
             {"index": idx, "object": "embedding", "embedding": embedding.tolist()}

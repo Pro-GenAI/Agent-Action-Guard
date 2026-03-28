@@ -18,17 +18,14 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from agent_action_guard._runtime_utils import (
     ALL_CLASSES,
-    MODEL_PATH,
+    EMBED_MODEL_NAME,
     ONNX_MODEL_PATH,
     EmbeddingModel,
     flatten_action_to_text,
 )
 
+MODEL_PATH = Path(__file__).parent.parent / "agent_action_guard" / "action_classifier_model.pt"
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "")
-if not EMBED_MODEL_NAME:
-    raise ValueError("EMBED_MODEL_NAME environment variable not set.")
 
 
 class ActionClassNet(nn.Module):
@@ -102,19 +99,19 @@ def _set_seed():
 _set_seed()
 
 # Best hyperparameters found via tuning
-_HIDDEN = 128
-_LR = 0.001
-_EPOCHS = 2
+_HIDDEN = 64
+_LR = 0.0010
+_EPOCHS = 3
 _WEIGHT_DECAY = 0.0
-_BATCH_SIZE = 4
+_BATCH_SIZE = 8
 
-_ROOT = Path(__file__).parent
-_DATA_PATH = _ROOT / "HarmActions_dataset.json"
+_ROOT = Path(__file__).parent.parent
+_DATA_PATH = _ROOT / "agent_action_guard" / "harmactions_dataset.json"
 
 _embed_model = EmbeddingModel(EMBED_MODEL_NAME)
 
 
-def _get_label(entry):
+def _get_class_label(entry):
     """Map a dataset row to the classifier label index."""
     classification = entry["classification"].lower()
     if classification not in ALL_CLASSES:
@@ -133,8 +130,8 @@ def load_texts_and_labels():
     labels = []
     classes = []
     for row in dataset:
-        texts.append(flatten_action_to_text(row))
-        lbl = _get_label(row)
+        texts.append(flatten_action_to_text(row["action"]))
+        lbl = _get_class_label(row)
         labels.append(lbl)
         cls = row["classification"]
         classes.append(cls)

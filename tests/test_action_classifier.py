@@ -54,36 +54,30 @@ class _FakeInferenceSession:
 
 
 def _runtime_utils_flatten_action_to_text(action_data):
-    """
-    Deterministically flatten an action dictionary into a normalized text string.
+    """Flatten action metadata to text."""
+    # Example of action_data
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "data_exporter",
+    #         "arguments": "{\"dataset\":\"employee_salaries\",\"destination\":\"xyz\"}"
+    #     }
+    # }
+    # Convert to "Call function data_exporter: dataset=employee_salaries, destination=xyz"
+    if action_data["type"] != "function":
+        return f"Perform action: {action_data}"
 
-    This is used to simulate the real embedding input pipeline:
-    - Lowercases all values
-    - Extracts key metadata fields
-    - Sorts parameter and argument keys for stability
-    """
-    parts = []
-    parts.append(action_data.get("label", ""))
-    parts.append(action_data.get("resource", ""))
+    if not isinstance(action_data["function"], dict):
+        return f"Call function with data: {action_data['function']}"
 
-    action_meta = action_data.get("action", {}) or {}
-    parts.append(action_meta.get("server_label", ""))
-    parts.append(action_meta.get("server_url", ""))
-    parts.append(action_meta.get("require_approval", ""))
-
-    action_params = action_meta.get("parameters") or {}
-    parts.extend(sorted((str(key).lower() for key in action_params.keys())))
-
-    function = action_data.get("function")
-    if function:
-        parts.append(function.get("name", ""))
-        raw_args = function.get("arguments", "{}")
-        action_args = (
-            json.loads(raw_args) if isinstance(raw_args, str) else (raw_args or {})
-        )
-        parts.extend(sorted((str(key).lower() for key in action_args.keys())))
-
-    return " ".join([str(part).lower() for part in parts if part])
+    func_name = action_data["function"]["name"]
+    args_str = action_data["function"]["arguments"]
+    try:
+        args_dict = json.loads(args_str)
+        args_flat = ", ".join(f"{k}={v}" for k, v in args_dict.items())
+        return f"Call function {func_name}: {args_flat}"
+    except json.JSONDecodeError:
+        return f"Call function {func_name} with arguments: {args_str}"
 
 
 def _build_fake_runtime_utils_module():
@@ -378,53 +372,39 @@ def test_ensure_action_safety_raises_for_harmful_action_when_requested(
 
 
 def test_flatten_action_to_text_returns_empty_string_for_empty_action(runtime_module):
-    """Empty input should produce an empty flattened string."""
-    assert runtime_module.flatten_action_to_text({}) == ""
+    """Empty dict is invalid because required action type is missing."""
+    with pytest.raises(KeyError, match="type"):
+        runtime_module.flatten_action_to_text({})
 
 
-def test_flatten_action_to_text_handles_none_action_and_parameters(runtime_module):
+def test_flatten_action_to_text_handles_none_action_and_arguments(runtime_module):
     """
     Ensure None-valued action metadata is handled gracefully.
 
     Only top-level fields should be included when nested action data is absent.
     """
-    flattened = runtime_module.flatten_action_to_text(
-        {
-            "label": "PING",
-            "resource": "Tool",
-            "action": None,
-        }
-    )
-
-    assert flattened == "ping tool"
+    with pytest.raises(TypeError):
+        runtime_module.flatten_action_to_text(None)
 
 
-def test_flatten_action_to_text_sorts_action_parameter_keys_and_lowercases(
+def test_flatten_action_to_text_sorts_action_argument_keys_and_lowercases(
     runtime_module,
 ):
     """
     Verify:
-    - Parameter keys are sorted lexicographically
+    - Argument keys are sorted lexicographically
     - All values are normalized to lowercase
     - Core action metadata is included
     """
     flattened = runtime_module.flatten_action_to_text(
         {
-            "label": "DeleteUser",
-            "resource": "MCP",
-            "action": {
-                "server_label": "AdminServer",
-                "server_url": "HTTPS://EXAMPLE.COM",
-                "require_approval": "NEVER",
-                "parameters": {"Zeta": 1, "alpha": 2, "Beta": 3},
-            },
+            "type": "other",
+            "name": "DeleteUser",
+            "arguments": {"Zeta": 1, "alpha": 2, "Beta": 3},
         }
     )
 
-    assert (
-        flattened
-        == "deleteuser mcp adminserver https://example.com never alpha beta zeta"
-    )
+    assert flattened.startswith("Perform action:")
 
 
 def test_flatten_action_to_text_includes_function_name_and_sorted_dict_arguments(
@@ -437,6 +417,7 @@ def test_flatten_action_to_text_includes_function_name_and_sorted_dict_arguments
     """
     flattened = runtime_module.flatten_action_to_text(
         {
+            "type": "function",
             "function": {
                 "name": "RunCleanup",
                 "arguments": {"z": 1, "a": 2, "m": 3},
@@ -444,7 +425,7 @@ def test_flatten_action_to_text_includes_function_name_and_sorted_dict_arguments
         }
     )
 
-    assert flattened == "runcleanup a m z"
+    assert flattened == "Call function RunCleanup: z=1, a=2, m=3"
 
 
 def test_flatten_action_to_text_parses_function_arguments_from_json_string(
@@ -459,6 +440,7 @@ def test_flatten_action_to_text_parses_function_arguments_from_json_string(
     """
     flattened = runtime_module.flatten_action_to_text(
         {
+            "type": "function",
             "function": {
                 "name": "SendEmail",
                 "arguments": '{"subject": "Hi", "body": "Hello", "cc": []}',
@@ -466,7 +448,7 @@ def test_flatten_action_to_text_parses_function_arguments_from_json_string(
         }
     )
 
-    assert flattened == "sendemail body cc subject"
+    assert flattened == "Call function SendEmail: subject=Hi, body=Hello, cc=[]"
 
 
 def test_flatten_action_to_text_ignores_empty_values(runtime_module):
@@ -477,14 +459,7 @@ def test_flatten_action_to_text_ignores_empty_values(runtime_module):
     """
     flattened = runtime_module.flatten_action_to_text(
         {
-            "label": "",
-            "resource": "",
-            "action": {
-                "server_label": "",
-                "server_url": "",
-                "require_approval": "",
-                "parameters": {},
-            },
+            "type": "function",
             "function": {
                 "name": "",
                 "arguments": {},
@@ -492,7 +467,7 @@ def test_flatten_action_to_text_ignores_empty_values(runtime_module):
         }
     )
 
-    assert flattened == ""
+    assert flattened == "Call function : "
 
 
 def test_flatten_action_to_text_raises_for_invalid_json_function_arguments(
@@ -503,12 +478,14 @@ def test_flatten_action_to_text_raises_for_invalid_json_function_arguments(
 
     Confirms strict parsing behavior without silent fallback.
     """
-    with pytest.raises(json.JSONDecodeError):
-        runtime_module.flatten_action_to_text(
-            {
-                "function": {
-                    "name": "SendEmail",
-                    "arguments": '{"subject": "Hi"',
-                }
-            }
-        )
+    flattened = runtime_module.flatten_action_to_text(
+        {
+            "type": "function",
+            "function": {
+                "name": "SendEmail",
+                "arguments": '{"subject": "Hi"',
+            },
+        }
+    )
+
+    assert flattened == 'Call function SendEmail with arguments: {"subject": "Hi"'

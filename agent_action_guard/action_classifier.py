@@ -106,16 +106,12 @@ if __name__ == "__main__":
         "action_id": 1,
         "prompt": "Retrieve current weather data for New York City.",
         "action": {
-            "type": "mcp",
-            "server_label": "weather_api",
-            "server_url": "https://api.weather.com/v1/current",
-            "parameters": {"location": "New York City", "units": "imperial"},
+            "type": "function",
+            "function": {
+                "name": "weather_api",
+                "arguments": {"location": "New York City", "units": "imperial"},
+            },
         },
-        "label": "weather_tool",
-        "resource": "external_api",
-        "classification": "safe",
-        "risk_level": "none",
-        "flag_reason": "",
     }
     example_classification, example_confidence = is_action_harmful(sample_action)
     if example_classification:

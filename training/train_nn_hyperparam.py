@@ -23,11 +23,11 @@ from train_nn import (
 # Hyperparameter grid
 _PARAM_GRID = {
     # Updated search space: focus on mid/large networks and slightly larger lr
-    "hidden": [64, 128, 256, 512],
+    "hidden": [32, 64, 128, 256, 512],
     "lr": [5e-4, 1e-3, 2e-3],
     "epochs": [2, 3, 4, 6, 8],
     "weight_decay": [0],  # , 1e-4
-    "batch_size": [4, 8, 16],  # , 32
+    "batch_size": [4, 8, 12, 16],  # , 32
 }
 
 

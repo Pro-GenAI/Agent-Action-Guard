@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "1.0.7"
+version = "1.0.8"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "CC-BY-4.0"
@@ -36,9 +36,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Security",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Creative Commons Attribution 4.0 International (CC-BY-4.0)",
 ]
 dependencies = [
     "numpy",
@@ -67,17 +69,19 @@ agent_action_guard = ["action_classifier_model.pt", "harmactions_dataset.json"]
 harmactionseval = [
     "python-dotenv",
     "requests",
+    "rich",
 ]
 
 all = [
-    "python-dotenv",
-    "requests",
-    "sentence-transformers",
-    "psutil",
-    "pytz",
     "fastapi",
-    "uvicorn[standard]",
+    "fastembed",
+    "psutil",
     "pydantic",
+    "python-dotenv",
+    "pytz",
+    "requests",
+    "rich",
+    "uvicorn[standard]",
 ]
 
 dev = [
@@ -91,8 +95,9 @@ dev = [
     "pandas",
     "python-dotenv",
     "requests",
+    "rich",
     "scikit-learn",
-    "sentence-transformers",
+    "fastembed",
     "psutil",
     "pytz",
     "agentor",
@@ -100,7 +105,6 @@ dev = [
     "uvicorn[standard]",
     "pydantic",
     "gradio>=6.0.0",
-    # "mcp-proxy-guarded @ git+https://github.com/Pro-GenAI/mcp-proxy-guarded.git",
 ]
 
 [tool.black]

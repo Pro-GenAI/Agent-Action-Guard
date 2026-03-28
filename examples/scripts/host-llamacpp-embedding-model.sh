@@ -35,8 +35,8 @@ else
 fi
 
 # Model setup
-gguf_file="all-MiniLM-L12-v2.Q4_K_M.gguf"
-gguf_url="https://huggingface.co/leliuga/all-MiniLM-L12-v2-GGUF/resolve/main/all-MiniLM-L12-v2.Q4_K_M.gguf?download=true"
+gguf_file="all-MiniLM-L6-v2.Q4_K_M.gguf"
+gguf_url="https://huggingface.co/leliuga/all-MiniLM-L6-v2-GGUF/resolve/main/all-MiniLM-L6-v2.Q4_K_M.gguf?download=true"
 # Download model if not present
 if [ ! -f "$gguf_file" ]; then
 	echo "Downloading $gguf_file..."

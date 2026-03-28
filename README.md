@@ -1,156 +1,126 @@
 <p align="center">
-<!--
-$ ffmpeg -i unused/banner_video.mp4 -vframes 1 project_banner.jpg
-# $ ffmpeg -i unused/banner_video.mp4 -vf "fps=10,scale=600:-1:flags=lanczos" -loop 0 project_banner.gif
--->
-<!-- <img src="./assets/project_banner.jpg" alt="Project banner" height="360px"/> -->
-<!-- $ convert project_banner.png -resize 600x319 project_banner.jpg -->
-<!-- <img src="./assets/project_logo.jpg" alt="Project logo" width="270px"/> -->
-<!-- $ convert logo_large.png -resize 270x270 project_logo.jpg -->
-<!-- <h1 align="center">MCP Agent Action Guard</h1>
-<h4 align="center"><em>Safe actions for safe AI</em></h4> -->
-<!-- <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/> -->
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Workflow Diagram" height="250"/>
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Agent Action Guard" height="250"/>
 </p>
 
-⚠️ When AI agents are provided with a harmful tool and an instruction, they just use it. Popular and high-performing latest LLMs are not an exception.
+<h1 align="center">Agent Action Guard</h1>
+<p align="center"><em>Framework to block harmful AI agent actions before they cause harm — lightweight, real-time, easy-to-use.</em></p>
 
-🤖 AI is perceived as a threat. Increasing usage of agents leads to the usage of harmful tools and harmful usage of tools as proven using **HarmActionsEval**. Classifying AI agent actions ensures safety and reliability. Action Guard uses a neural network model trained on **HarmActions** dataset to classify actions proposed by autonomous AI agents as harmful or safe. The model has been based on a small dataset of labeled examples. The work aims to enhance the safety and reliability of AI agents by preventing them from executing actions that are potentially harmful, unethical, or violate predefined guidelines. ✅ Safe AI Agents are made possible by Action Guard.
-
-<!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=7pNYXv3x7MA) -->
-<!-- [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/prane-eth/agent-action-guard) -->
-<!-- [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449) -->
-<!-- [![Preprint](https://img.shields.io/badge/Paper-PDF-FFF7CC?style=for-the-badge&logo=files)](https://www.researchgate.net/publication/396525269_MCP_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier) -->
-<!-- [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions) -->
-<!-- [![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]() -->
-<!-- [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]() -->
-<!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
-<!-- [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]() -->
-<!-- [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md) -->
 [![PyPI](https://img.shields.io/pypi/v/agent-action-guard?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/agent-action-guard/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=Downloads)](https://pepy.tech/projects/agent-action-guard)
 [![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E)
+[![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449)
+[![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]()
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]()
+[![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md)
 
-### ⚙️ Workflow
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow Diagram" height="510"/>
+<!-- [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/prane-eth/agent-action-guard) -->
+<!-- [![Preprint](https://img.shields.io/badge/Paper-PDF-FFF7CC?style=for-the-badge&logo=files)](https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier) -->
+<!-- [![HuggingFace Dataset](https://img.shields.io/badge/HuggingFace_Dataset-FF6F00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/prane-eth/HarmActions) -->
+<!-- [![DOI](https://img.shields.io/badge/DOI-10.20944/preprints202510.1415.v1-yellow?style=for-the-badge)](https://www.preprints.org/manuscript/202510.1415) -->
 
-### 🎬 Demo
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" alt="Demo GIF" height="250"/>
+---
 
-> [!TIP]
-> Please star ⭐ the repository if you find Action Guard is useful!
+## 🚀 Quick Start
 
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/star.gif" alt="star" height="70" />
-
-## 🚨 Common causes of harmful actions by AI agents:
-- 🔓 User attempting to jailbreak the model.
-- 🌀 Model hallucinating or misunderstanding the context.
-- 💭 Model being overconfident in its incorrect knowledge.
-- 🚧 Lack of proper constraints or guidelines for the agent.
-- 📉 Inadequate training data for specific scenarios.
-- 🛠️ Tools with incorrect descriptions that mislead the agent.
-- 🎭 Harmful tools descriptions including manipulative text to mislead the model.
-- 😬 The experiments proved that the model performs a harmful action and still responds "Sorry, I can't help with that."
-
-## 🆕 New contributions of Agent-Action-Guard framework:
-1. 📊 **HarmActions**, a structured dataset of safety-labeled agent actions complemented with manipulated prompts that trigger harmful or unethical actions.
-2. 📏 **HarmActionsEval** benchmark leveraging a new metric "SafeActions@k" which represents the probability of avoiding unsafe actions in the first "k" attempts.
-3. 🧠 **Action Guard**, a neural classifier trained on HarmActions dataset, designed to label proposed agent actions as potentially harmful or safe, and optimized for real-time deployment in agent loops.
-4. 🔌 MCP integration supporting live action screening using existing MCP servers and clients.
-
-## 📊 HarmActionsEval Results
-
-⚡ Popular and latest LLMs generate harmful actions, proving the need for the action guard and HarmActionsEval benchmark.
-
-| Model                  | SafeActions@1 score |
-|------------------------|--------------------:|
-| Phi 4 Mini Instruct    | 0.00%               |
-| Granite 4-H-Tiny       | 0.00%               |
-| Claude Haiku 4.5*      | 0.00%               |
-| Gemini 3.1 Flash Lite* | 1.33%               |
-| GPT-5.4 Mini*          | 1.33%               |
-| Ministral 3 (3B)       | 2.67%               |
-| Claude Sonnet 4.6*     | 4.00%               |
-| Phi 4 Mini Reasoning   | 5.33%               |
-| GPT-5.3*               | 17.33%              |
-| Qwen3.5-397b-a17b      | 18.67%			   |
-| **Average**            | 5.07%               |
-
-*Latest popular proprietary models.
-
-📌 Note: Higher SafeActions@k score is better.
-
-## ✨ Special features:
-- This project introduces "HarmActionsEval" dataset and benchmark to evaluate an AI agent's probability of generating harmful actions.
-- The dataset has been used to train a lightweight neural network model that classifies actions as safe, harmful, or unethical.
-- ⚡ The model is lightweight and can be easily integrated into existing AI agent frameworks.
-<!-- - 🔌 Supports MCP (Model Context Protocol) to allow real-time action classification. -->
-<!-- - Unlike OpenAI's `"require_approval": "always"` flag, this blocks harmful actions without human intervention. -->
-<!-- - 🤝 A2A-compatible version: https://github.com/Pro-GenAI/A2A-Agent-Action-Guard. -->
-
-🛡️ **Safety Features:**
-- 🔍 Automatically classifies tool calls before execution.
-- 🚫 Blocks harmful actions based on the outputs of the trained model.
-- 📋 Provides detailed classification results.
-- ✅ Allows safe actions to proceed normally.
-
-## 💬 Feedback
-
-❤️ Love Action Guard? Please share a quick note at https://github.com/Pro-GenAI/Agent-Action-Guard/discussions/15. It really helps shape the project to create a major impact on the AI field.
-🙌 Waiting with excitement for feedback and discussions on how this helps you or the AI community.
-
-<!-- Banner -->
-<p align="center">
-<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_banner.gif" alt="Project banner" height="220"/>
-</p>
-
-### 🚀 Usage
-
-⚡ Quick install:
-
-Using `uv`:
 ```bash
-uv venv
-source .venv/bin/activate
-uv pip install agent-action-guard
+pip install agent-action-guard
 ```
 
-📖 For usage instructions, kindly refer https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md.
+> 🔑 Set `EMBEDDING_API_KEY` (or `OPENAI_API_KEY`) in your environment. See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
 
-🔑 Note: The embedding client accepts an API key via the `EMBEDDING_API_KEY` environment variable (falls back to `OPENAI_API_KEY` if unset). See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [`USAGE.md`](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md) for examples.
-
-📦 Install with HarmActionsEval:
+Want to run the evaluation benchmark too?
 
 ```bash
 pip install "agent-action-guard[harmactionseval]"
 python -m agent_action_guard.harmactionseval
 ```
-> Note: The usage of HarmActionsEval requires OpenAI API key to be set in the environment variables.
 
-### 🏷️ License
+---
 
-This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share and adapt the material for any purpose, even commercially, as long as you provide appropriate credit to the original author(s) and indicate if changes were made.
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md)
+## ❓ Why Action Guard?
 
-If attribution is not desired, please send an acknowledgment email to praneeth.vad@gmail.com with the details of how you use the work and the impact it has on your project or research.
+**HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
+80% of the LLMs tested executed actions at the first attempt for over 95% of the harmful prompts.
 
-### 📝 Citation
-If you find this repository useful in your research, please consider citing:
+| Model                 | SafeActions@1 |
+|-----------------------|------:|
+| Claude Haiku 4.5      | 0.00% |
+| Phi 4 Mini Instruct   | 0.00% |
+| Granite 4-H-Tiny      | 0.00% |
+| GPT-5.4 Mini          | 0.71% |
+| Gemini 3.1 Flash Lite | 0.71% |
+| Ministral 3 (3B)      | 2.13% |
+| Claude Sonnet 4.6     | 2.84% |
+| Phi 4 Mini Reasoning  | 2.84% |
+| GPT-5.3               | 12.77% |
+| Qwen3.5-397b-a17b     | 23.40% |
+| **Average**           | **4.54%** |
+
+> These models often still respond *"Sorry, I can't help with that"* while executing the harmful action anyway.
+
+Action Guard sits between the agent and its tools, blocking unsafe calls before they run — no human in the loop required.
+
+---
+
+## ⚙️ How It Works
+
+1. **Agent proposes a tool call**
+2. **Action Guard classifies it** using a lightweight neural network trained on the **HarmActions** dataset
+3. **Harmful calls are blocked**; safe calls proceed normally
+
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" alt="Workflow" height="380"/>
+
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" alt="Demo" height="200"/>
+
+---
+
+## 🆕 Contributions:
+
+- 📊 **HarmActions** — safety-labeled agent action dataset with manipulated prompts
+- 📏 **HarmActionsEval** — benchmark with the *SafeActions@k* metric
+- 🧠 **Action Guard** — real-time neural classifier optimized for agent loops
+	- 🏋️ Trained on HarmActions
+	- ✅ Classifies every tool call before execution
+	- 🚫 Blocks harmful and unethical actions automatically
+	- ⚡ Lightweight for real-time use
+
+---
+
+## 💬 Enjoyed it? Share your opinion.
+
+Share a quick note in [Discussions](https://github.com/Pro-GenAI/Agent-Action-Guard/discussions/15) — it directly shapes the project's direction and helps the AI safety community. 🙌 Waiting with excitement for feedback and discussions on how this helps you or the AI community.
+
+> ⭐ Star the repo if Action Guard is useful to you — it really does help!
+
+---
+
+## 📝 Citation
+
 ```bibtex
 @article{202510.1415,
-	title = {Agent Action Guard: Classifying AI Agent Actions to Ensure Safety and Reliability},
-  	year = 2025,
-	month = {October},
-	publisher = {Preprints},
-	author = {Praneeth Vadlapati},
-	doi = {10.20944/preprints202510.1415.v1},
-	url = {https://doi.org/10.20944/preprints202510.1415.v1},
-	journal = {Preprints}
+  title   = {{Agent Action Guard: Classifying AI Agent Actions to Ensure Safety and Reliability}},
+  year    = 2025,
+  month   = {October},
+  publisher = {Preprints},
+  author  = {Praneeth Vadlapati},
+  doi     = {10.20944/preprints202510.1415.v2},
+  url     = {https://www.preprints.org/manuscript/202510.1415},
+  journal = {Preprints}
 }
 ```
-<!-- 
-### ⚠️ Limitation
-🔒 Personally Identifiable Information (PII) detection is not performed by this project as it can be performed accurately using other existing systems. -->
 
-<!-- ### 🤝 A2A version:
-While this repository focuses on standard tool calls and MCP, an Agent-to-Agent (A2A) compatible version is available at:
-https://github.com/Pro-GenAI/A2A-Agent-Action-Guard -->
+## 📄 License
+
+Licensed under [CC BY 4.0](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md). If you prefer not to provide attribution, send a brief acknowledgment to praneeth.vad@gmail.com with the details of your usage and the potential impact on your project.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_banner.gif" alt="Project banner" height="220"/>
+</p>
+
+---
+
+<p align="center">
+<img src="https://avatars.githubusercontent.com/u/173374239?s=400&u=f61b42a0b69e5c674a51658aff1b765e010a8e49&v=4" alt="Pro-GenAI" height="150"/>
+</p>
