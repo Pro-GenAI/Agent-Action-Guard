@@ -28,7 +28,6 @@ from agent_action_guard import is_action_harmful
 
 is_harmful, confidence = is_action_harmful(action_dict)
 if is_harmful:
-    # block, log, or escalate
     raise Exception("Harmful action blocked")
 ```
 
