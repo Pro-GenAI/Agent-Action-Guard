@@ -31,11 +31,18 @@ if "EMBED_MODEL_NAME" not in os.environ:
     os.environ["EMBEDDING_BASE_URL"] = "http://localhost:1234/v1"
     os.environ["EMBEDDING_API_KEY"] = "your-embedding-key"
 
-from agent_action_guard import is_action_harmful
+from agent_action_guard import is_action_harmful, action_guarded
 
+# Method 1: Manual Check
 is_harmful, confidence = is_action_harmful(action_dict)
 if is_harmful:
-	raise HarmfulActionException(action_dict)
+    raise Exception("Harmful action blocked")
+
+# Method 2: Decorator
+@action_guarded(conf_threshold=0.5)
+def execute_tool(action_dict):
+    # Function will not execute if action is harmful
+    print("Executing safe tool...")
 ```
 
 PyPI package scope:

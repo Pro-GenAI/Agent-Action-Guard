@@ -24,11 +24,17 @@ pip install agent-action-guard
 3. In your agent runtime, call the convenience API to check actions before execution:
 
 ```python
-from agent_action_guard import is_action_harmful
+from agent_action_guard import is_action_harmful, action_guarded
 
+# Manual Check
 is_harmful, confidence = is_action_harmful(action_dict)
 if is_harmful:
     raise Exception("Harmful action blocked")
+
+# Decorator
+@action_guarded(conf_threshold=0.5)
+def execute_action(action_dict, *args, **kwargs):
+    pass
 ```
 
 ## Key Files & Structure

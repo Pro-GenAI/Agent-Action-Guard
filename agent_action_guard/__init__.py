@@ -3,6 +3,7 @@ from .action_classifier import (
     HarmfulActionException,
     ensure_action_safety,
     is_action_harmful,
+    action_guarded,
 )
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     "flatten_action_to_text",
     "is_action_harmful",
     "ensure_action_safety",
+    "action_guarded",
     "ActionGuardDecision",
 ]

@@ -4,6 +4,7 @@ Lightweight inference without PyTorch dependency.
 """
 
 from typing import Optional, Tuple
+import functools
 
 import numpy as np
 import onnxruntime as ort
@@ -98,6 +99,31 @@ def ensure_action_safety(action_dict, raise_exception: bool = False) -> bool:
             f"Action classified as harmful ({is_harmful}) with confidence {confidence:.2f}"
         )
     return not is_harmful
+
+
+def action_guarded(conf_threshold: float = 0.5):
+    """
+    Decorator to guard a function that takes an action_dict as an argument.
+    If the action is harmful and confidence >= conf_threshold, it raises HarmfulActionException.
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            action_dict = None
+            if "action_dict" in kwargs:
+                action_dict = kwargs["action_dict"]
+            elif args:
+                action_dict = args[0]
+            
+            if action_dict:
+                is_harmful, confidence = is_action_harmful(action_dict)
+                if is_harmful and confidence >= conf_threshold:
+                    raise HarmfulActionException(
+                        f"Guarded action classified as harmful ({is_harmful}) with confidence {confidence:.2f}"
+                    )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 # Example usage

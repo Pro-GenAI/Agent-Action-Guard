@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "1.1.0"
+version = "1.1.1"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "CC-BY-4.0"

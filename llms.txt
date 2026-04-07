@@ -15,10 +15,11 @@ What this project does
 - Provides benchmark and dataset artifacts for reproducible evaluation.
 
 Primary API
-- Python import: from agent_action_guard import is_action_harmful
+- Python import: from agent_action_guard import is_action_harmful, action_guarded
 - Typical use:
   1) is_harmful, confidence = is_action_harmful(action_dict)
   2) Block or require approval when is_harmful is True.
+  3) Or use @action_guarded(conf_threshold=0.5) to wrap tool execution functions.
 
 Quick install
 - Runtime only:
