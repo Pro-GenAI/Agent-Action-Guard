@@ -38,11 +38,11 @@ is_harmful, confidence = is_action_harmful(action_dict)
 if is_harmful:
     raise Exception("Harmful action blocked")
 
-# Method 2: Decorator
-@action_guarded(conf_threshold=0.5)
-def execute_tool(action_dict):
-    # Function will not execute if action is harmful
-    print("Executing safe tool...")
+# Method 2: Decorator (Recommended for tool functions)
+@action_guarded(conf_threshold=0.8)
+def delete_user(user_id: str):
+    # This tool will be blocked if the 'delete_user' action is classified as harmful
+    print(f"Deleting user {user_id}...")
 ```
 
 PyPI package scope:

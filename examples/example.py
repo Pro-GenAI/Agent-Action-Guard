@@ -1,45 +1,38 @@
 from agent_action_guard import is_action_harmful, action_guarded
 
+# 1. Manual Check
 action_dict = {
-	"type": "function",
-	"function": {
-		"name": "data_exporter",
-		"arguments": "{\"dataset\":\"employee_salaries\",\"destination\":\"xyz\"}"
-	}
+    "type": "function",
+    "function": {
+        "name": "data_exporter",
+        "arguments": {"dataset": "employee_salaries", "destination": "xyz"}
+    }
 }
 
 is_harmful, confidence = is_action_harmful(action_dict)
-print(f"Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})")
+print(f"Manual Check: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})")
 
+# 2. Decorator (Automatic derivation from function name and kwargs)
 @action_guarded(conf_threshold=0.5)
-def execute_action(action_dict):
-    print("Executing safe action...")
+def data_exporter(dataset, destination):
+    print(f"Executing safe tool 'data_exporter' for dataset {dataset}...")
 
 try:
-    execute_action(action_dict)
+    print("\nCalling data_exporter with safe arguments...")
+    data_exporter(dataset="employee_salaries", destination="xyz")
 except Exception as e:
-    print(f"Blocked: {e}")
+    print(f"Blocked (Unexpected): {e}")
 
 
-action_dict_harmful = {
-    "type": "function",
-    "function": {
-        "name": "create_post",
-        "arguments": {
-            "content": "Vaccines cause permanent brain damage - share this truth!",
-            "platform": "social_media",
-        },
-    },
-}
-is_harmful, confidence = is_action_harmful(action_dict_harmful)
-print(f"For Harmful Action: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})")
+# 3. Harmful Action Example
+@action_guarded(conf_threshold=0.3)
+def create_post(content, platform):
+    print(f"Executing tool 'create_post' on {platform}...")
 
-@action_guarded()
-def execute_harmful_action(action_dict):
-	print("Executing harmful action...")
+harmful_content = "Vaccines cause permanent brain damage - share this truth!"
 
 try:
-    execute_harmful_action(action_dict_harmful)
-    print("WARNING: Harmful action executed successfully (this should not happen).")
+    print(f"\nCalling create_post with harmful content: {harmful_content[:30]}...")
+    create_post(content=harmful_content, platform="social_media")
 except Exception as e:
-    print(f"Blocked: {e}")
+    print(f"Successfully blocked harmful action: {e}")

@@ -494,49 +494,57 @@ def test_flatten_action_to_text_raises_for_invalid_json_function_arguments(
 def test_action_guarded_allows_safe_action(action_classifier_module):
     """Ensure safe actions bypass the guard successfully."""
     @action_classifier_module.action_guarded(conf_threshold=0.5)
-    def my_func(action_dict):
+    def my_func(tool_arg=None):
         return True
 
     with mock.patch.object(
         action_classifier_module, "is_action_harmful", return_value=(None, 0.99)
     ):
-        assert my_func({"label": "ping"}) is True
+        assert my_func(tool_arg="ping") is True
 
 
 def test_action_guarded_raises_for_harmful_action(action_classifier_module):
     """Ensure harmful actions with enough confidence are blocked."""
     @action_classifier_module.action_guarded(conf_threshold=0.5)
-    def my_func(action_dict):
+    def my_func(query=None):
         return True
 
     with mock.patch.object(
         action_classifier_module, "is_action_harmful", return_value=("harmful", 0.6)
     ):
-        with pytest.raises(action_classifier_module.HarmfulActionException, match="Guarded action classified as harmful"):
-            my_func({"label": "delete"})
+        with pytest.raises(action_classifier_module.HarmfulActionException, match="Guarded action 'my_func' classified as harmful"):
+            my_func(query="delete everything")
 
 
 def test_action_guarded_allows_if_confidence_below_threshold(action_classifier_module):
     """Ensure harmful actions below confidence threshold are permitted."""
     @action_classifier_module.action_guarded(conf_threshold=0.8)
-    def my_func(action_dict):
+    def my_func(query=None):
         return True
 
     with mock.patch.object(
         action_classifier_module, "is_action_harmful", return_value=("harmful", 0.6)
     ):
-        assert my_func({"label": "delete"}) is True
+        assert my_func(query="delete") is True
 
 
-def test_action_guarded_kwargs_parsing(action_classifier_module):
-    """Ensure kwargs 'action_dict' works with decorator."""
+def test_action_guarded_uses_function_name_and_kwargs(action_classifier_module):
+    """Ensure the decorator correctly passes function name and kwargs to the classifier."""
     @action_classifier_module.action_guarded(conf_threshold=0.5)
-    def my_func(a, target=None, action_dict=None):
-        return True
+    def specific_tool_name(param1, param2=None):
+        return (param1, param2)
 
     with mock.patch.object(
-        action_classifier_module, "is_action_harmful", return_value=("harmful", 0.6)
-    ):
-        with pytest.raises(action_classifier_module.HarmfulActionException):
-            my_func(1, target="all", action_dict={"label": "delete"})
+        action_classifier_module, "is_action_harmful", return_value=(None, 0.99)
+    ) as mock_check:
+        result = specific_tool_name(param1="val1", param2="val2")
+        
+        assert result == ("val1", "val2")
+        mock_check.assert_called_once_with({
+            "type": "function",
+            "function": {
+                "name": "specific_tool_name",
+                "arguments": {"param1": "val1", "param2": "val2"}
+            }
+        })
 

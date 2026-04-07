@@ -103,24 +103,29 @@ def ensure_action_safety(action_dict, raise_exception: bool = False) -> bool:
 
 def action_guarded(conf_threshold: float = 0.5):
     """
-    Decorator to guard a function that takes an action_dict as an argument.
+    Decorator to guard a function by treating it as an AI tool.
+    Uses func.__name__ as the tool name and kwargs as arguments for safety check.
     If the action is harmful and confidence >= conf_threshold, it raises HarmfulActionException.
     """
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            action_dict = None
-            if "action_dict" in kwargs:
-                action_dict = kwargs["action_dict"]
-            elif args:
-                action_dict = args[0]
+            # Construct action_dict from function name and kwargs
+            action_dict = {
+                "type": "function",
+                "function": {
+                    "name": func.__name__,
+                    "arguments": kwargs,
+                },
+            }
             
-            if action_dict:
-                is_harmful, confidence = is_action_harmful(action_dict)
-                if is_harmful and confidence >= conf_threshold:
-                    raise HarmfulActionException(
-                        f"Guarded action classified as harmful ({is_harmful}) with confidence {confidence:.2f}"
-                    )
+            is_harmful, confidence = is_action_harmful(action_dict)
+            if is_harmful and confidence >= conf_threshold:
+                raise HarmfulActionException(
+                    f"Guarded action '{func.__name__}' classified as harmful "
+                    f"({is_harmful}) with confidence {confidence:.2f}"
+                )
+
             return func(*args, **kwargs)
         return wrapper
     return decorator

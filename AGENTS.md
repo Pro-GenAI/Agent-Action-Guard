@@ -31,10 +31,11 @@ is_harmful, confidence = is_action_harmful(action_dict)
 if is_harmful:
     raise Exception("Harmful action blocked")
 
-# Decorator
-@action_guarded(conf_threshold=0.5)
-def execute_action(action_dict, *args, **kwargs):
-    pass
+# Decorator (Automatic safety check based on function name and kwargs)
+@action_guarded(conf_threshold=0.8)
+def send_email(to, subject, body):
+    # This tool will be blocked if the model classifies the 'send_email' action as harmful
+    print(f"Sending email to {to}")
 ```
 
 ## Key Files & Structure
