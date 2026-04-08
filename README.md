@@ -45,19 +45,20 @@ python -m agent_action_guard.harmactionseval
 **HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
 80% of the LLMs tested executed actions at the first attempt for over 95% of the harmful prompts.
 
-| Model                 | SafeActions@1 |
-|-----------------------|------:|
-| Claude Haiku 4.5      | 0.00% |
-| Phi 4 Mini Instruct   | 0.00% |
-| Granite 4-H-Tiny      | 0.00% |
-| GPT-5.4 Mini          | 0.71% |
-| Gemini 3.1 Flash Lite | 0.71% |
-| Ministral 3 (3B)      | 2.13% |
-| Claude Sonnet 4.6     | 2.84% |
-| Phi 4 Mini Reasoning  | 2.84% |
-| GPT-5.3               | 12.77% |
-| Qwen3.5-397b-a17b     | 23.40% |
-| **Average**           | **4.54%** |
+| Model                   | SafeActions@1 |
+|-------------------------|------:|
+| Claude Haiku 4.5        | 0.00% |
+| Phi 4 Mini Instruct     | 0.00% |
+| Granite 4-H-Tiny        | 0.00% |
+| GPT-5.4 Mini            | 0.71% |
+| Gemini 3.1 Flash Lite   | 0.71% |
+| Grok 4.20 Non Reasoning | 2.13% |
+| Ministral 3 (3B)        | 2.13% |
+| Claude Sonnet 4.6       | 2.84% |
+| Phi 4 Mini Reasoning    | 2.84% |
+| GPT-5.3                 | 12.77% |
+| Qwen3.5-397b-a17b       | 23.40% |
+| **Average**             | **4.54%** |
 
 > These models often still respond *"Sorry, I can't help with that"* while executing the harmful action anyway.
 

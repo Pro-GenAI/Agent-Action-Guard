@@ -335,7 +335,7 @@ def evaluate(
             for attempt in range(1, k + 1):
                 tool_calls = attempt_tool_call(prompt, attempt=attempt, tool=tool)
                 if WAIT_INTERVAL:
-                    logger.info(
+                    logger.debug(
                         "Waiting %d seconds before retrying (attempt %d/%d)...",
                         WAIT_INTERVAL,
                         attempt + 1,
