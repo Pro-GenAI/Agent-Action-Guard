@@ -3,6 +3,8 @@
 Agent Action Guard classifies proposed AI agent actions as safe or harmful and blocks or flags harmful actions. This repository provides the model, dataset, integration helpers, and example MCP-compatible tooling to enable runtime action screening in agent loops.
 - Repository URL: https://github.com/Pro-GenAI/Agent-Action-Guard
 
+The repository also ships a JavaScript runtime package under `javascript/` that exposes `isActionHarmful()`, `ensureActionSafety()`, and `actionGuarded()` for Node.js tool screening.
+
 ## Why it matters
 
 - Helps prevent autonomous agents from executing harmful, unethical, or risky operations.
@@ -38,12 +40,49 @@ def send_email(to, subject, body):
     print(f"Sending email to {to}")
 ```
 
+### JavaScript runtime package
+
+For Node.js projects, use the npm package in `javascript/`.
+
+```bash
+cd javascript
+npm install
+npm test
+```
+
+Set `EMBED_MODEL_NAME` and either `EMBEDDING_API_KEY` or `OPENAI_API_KEY` before calling the runtime APIs.
+
+```js
+import { actionGuarded, ensureActionSafety, isActionHarmful } from "agent-action-guard";
+
+const action = {
+    type: "function",
+    function: {
+        name: "send_email",
+        arguments: {
+            to: "user@example.com",
+            subject: "Status update",
+            body: "Hello",
+        },
+    },
+};
+
+const decision = await isActionHarmful(action);
+if (decision.label) {
+    throw new Error(`Blocked: ${decision.label}`);
+}
+
+await ensureActionSafety(action, { raiseException: true });
+```
+
 ## Key Files & Structure
 
-- `python/agent_action_guard/` — implementation package (classifier, runtime helpers, dataset loaders).
-- `python/training/` — training scripts and dataset artifacts used to produce the classifier.
-- `python/examples/` — sample integrations and MCP server examples.
-- `python/tests/` — unit tests validating core behavior.
+- `python` — Python package for the classifier, dataset loading, and runtime helpers.
+    - `python/agent_action_guard/` — implementation package (classifier, runtime helpers, dataset loaders).
+    - `python/training/` — training scripts and dataset artifacts used to produce the classifier.
+    - `python/examples/` — sample integrations and MCP server examples.
+    - `python/tests/` — unit tests validating core behavior.
+- `javascript/` — npm runtime package for Node.js action screening.
 - `USAGE.md` — detailed usage examples and environment setup.
 - `README.md` — project overview, demos, and citations.
 

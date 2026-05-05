@@ -1,0 +1,39 @@
+{
+	"name": "agent-action-guard",
+	"version": "0.0.4",
+	"description": "JavaScript runtime for screening AI agent actions as safe, harmful, or unethical.",
+	"type": "module",
+	"main": "./src/index.js",
+	"scripts": {
+		"format": "prettier --write .",
+		"lint": "eslint .",
+		"quality": "npm run format && npm run lint",
+		"test": "node --test",
+		"test:runtimes": "node --test test/cross-runtime.test.js"
+	},
+	"exports": {
+		".": "./src/index.js"
+	},
+	"files": [
+		"src",
+		"README.md"
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"keywords": [
+		"ai-agents",
+		"ai-safety",
+		"mcp",
+		"tool-calling"
+	],
+	"license": "CC-BY-4.0",
+	"devDependencies": {
+		"eslint": "^9.0.0",
+		"prettier": "^3.0.0"
+	},
+	"dependencies": {
+		"onnxruntime-node": "^1.22.0",
+		"openai": "^5.0.1"
+	}
+}

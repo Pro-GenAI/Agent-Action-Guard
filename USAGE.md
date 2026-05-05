@@ -119,3 +119,51 @@ agent = Agent(name="Classifier", tools=[classify_text])
 result = Runner.run_sync(agent, "hello world")
 print(result.final_output)
 ```
+
+### JavaScript Runtime Package
+
+The repository also includes an npm package in [javascript/package.json](javascript/package.json) that exposes the same action-screening runtime for Node.js.
+
+Install and test it from the package directory:
+
+```bash
+cd javascript
+npm install
+npm test
+```
+
+Use it in a Node.js agent loop:
+
+```js
+import { actionGuarded, ensureActionSafety, isActionHarmful } from "agent-action-guard";
+
+const action = {
+    type: "function",
+    function: {
+        name: "send_email",
+        arguments: {
+            to: "user@example.com",
+            subject: "Status update",
+            body: "Hello",
+        },
+    },
+};
+
+const { label, confidence } = await isActionHarmful(action);
+if (label) {
+    throw new Error(`Blocked: ${label} (${confidence.toFixed(2)})`);
+}
+
+await ensureActionSafety(action, { raiseException: true });
+
+const guardedSendEmail = actionGuarded(async function sendEmail(params) {
+    return `sending to ${params.to}`;
+});
+```
+
+Environment variables:
+- `EMBED_MODEL_NAME`
+- `EMBEDDING_BASE_URL`
+- `EMBEDDING_API_KEY` or `OPENAI_API_KEY`
+
+The JavaScript runtime uses the packaged ONNX model in [javascript/src/action_classifier_model.onnx](javascript/src/action_classifier_model.onnx) and depends on `onnxruntime-node` and `openai`.
