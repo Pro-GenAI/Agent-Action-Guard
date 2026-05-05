@@ -14,6 +14,17 @@ function softmax(logits) {
 	return exps.map((value) => value / sum);
 }
 
+function getExpectedEmbeddingDimension(session) {
+	const inputName = session.inputNames?.[0] ?? 'input';
+	const metadata = Array.isArray(session.inputMetadata)
+		? (session.inputMetadata.find((item) => item.name === inputName) ??
+			session.inputMetadata[0])
+		: session.inputMetadata?.[inputName];
+	const dimension = metadata?.shape?.[1] ?? metadata?.dimensions?.[1];
+
+	return Number.isInteger(dimension) ? dimension : null;
+}
+
 export class ActionClassifier {
 	constructor({
 		modelPath = ONNX_MODEL_PATH,
@@ -65,9 +76,10 @@ export class ActionClassifier {
 		}
 
 		const vector = Float32Array.from(embeddings[0]);
-		if (vector.length !== 384) {
+		const expectedDimension = getExpectedEmbeddingDimension(session);
+		if (expectedDimension && vector.length !== expectedDimension) {
 			throw new Error(
-				`Expected embedding dimension 384, received ${vector.length}.`,
+				`Expected embedding dimension ${expectedDimension}, received ${vector.length}.`,
 			);
 		}
 

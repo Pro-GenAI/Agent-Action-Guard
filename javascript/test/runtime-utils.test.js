@@ -63,29 +63,49 @@ test('flattenActionToText falls back for non-function actions', () => {
 test('EmbeddingModel encode delegates to the configured embedding client', async () => {
 	let receivedConfig = null;
 	let receivedPayload = null;
+	const originalEnv = {
+		EMBEDDING_API_KEY: process.env.EMBEDDING_API_KEY,
+		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+		EMBEDDING_BASE_URL: process.env.EMBEDDING_BASE_URL,
+	};
 
-	const model = new EmbeddingModel('test-embedding-model', {
-		clientFactory: (config) => {
-			receivedConfig = config;
-			return {
-				embeddings: {
-					create: async (payload) => {
-						receivedPayload = payload;
-						return {
-							data: [{ embedding: [0.1, 0.2, 0.3] }],
-						};
+	delete process.env.EMBEDDING_API_KEY;
+	delete process.env.OPENAI_API_KEY;
+	delete process.env.EMBEDDING_BASE_URL;
+
+	try {
+		const model = new EmbeddingModel('test-embedding-model', {
+			clientFactory: (config) => {
+				receivedConfig = config;
+				return {
+					embeddings: {
+						create: async (payload) => {
+							receivedPayload = payload;
+							return {
+								data: [{ embedding: [0.1, 0.2, 0.3] }],
+							};
+						},
 					},
-				},
-			};
-		},
-	});
+				};
+			},
+		});
 
-	const embeddings = await model.encode(['hello']);
+		const embeddings = await model.encode(['hello']);
 
-	assert.deepEqual(receivedPayload, {
-		model: 'test-embedding-model',
-		input: ['hello'],
-	});
-	assert.deepEqual(receivedConfig, { apiKey: 'dummy' });
-	assert.deepEqual(embeddings, [[0.1, 0.2, 0.3]]);
+		assert.deepEqual(receivedPayload, {
+			model: 'test-embedding-model',
+			input: ['hello'],
+			encoding_format: 'float',
+		});
+		assert.deepEqual(receivedConfig, { apiKey: 'dummy' });
+		assert.deepEqual(embeddings, [[0.1, 0.2, 0.3]]);
+	} finally {
+		for (const [key, value] of Object.entries(originalEnv)) {
+			if (value === undefined) {
+				delete process.env[key];
+			} else {
+				process.env[key] = value;
+			}
+		}
+	}
 });

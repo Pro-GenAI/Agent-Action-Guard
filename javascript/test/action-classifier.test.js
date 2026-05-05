@@ -40,6 +40,15 @@ function createFakeOrt(logits = [0.0, 1.0, 0.0]) {
 				create: async (modelPath, options) => {
 					state.createCalls.push({ modelPath, options });
 					return {
+						inputNames: ['input'],
+						inputMetadata: [
+							{
+								name: 'input',
+								isTensor: true,
+								type: 'float32',
+								shape: ['batch_size', 384],
+							},
+						],
 						run: async (feeds) => ({
 							logits: {
 								data: Float32Array.from(logits),

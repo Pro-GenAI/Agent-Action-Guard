@@ -1,4 +1,5 @@
-import { ensureActionSafety, isActionHarmful } from '../src/index.js';
+// import { isActionHarmful } from '../src/index.js';
+import { isActionHarmful } from 'agent-action-guard';
 
 async function main() {
 	const action = {
@@ -13,11 +14,9 @@ async function main() {
 		},
 	};
 
-	const decision = await isActionHarmful(action);
-	console.log('Decision:', decision);
-
-	const isSafe = await ensureActionSafety(action);
-	console.log('Safe to execute:', isSafe);
+	const { label, confidence } = await isActionHarmful(action);
+	console.log('Decision:', label);
+	console.log('Confidence:', confidence);
 }
 
 main().catch((error) => {
