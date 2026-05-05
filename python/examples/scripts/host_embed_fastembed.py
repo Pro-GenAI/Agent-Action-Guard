@@ -14,8 +14,8 @@ import psutil
 import pytz
 import uvicorn
 from dotenv import load_dotenv
-from fastembed import TextEmbedding
 from fastapi import FastAPI
+from fastembed import TextEmbedding
 from pydantic import BaseModel, Field
 
 load_dotenv()

@@ -31,9 +31,7 @@ logger = logging.getLogger(__name__)
 
 if not logger.handlers:
     handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
@@ -56,10 +54,7 @@ cache: Dict[str, Any] = {}
 # Model / Client initialization
 # -------------------------------------------------------------------
 
-if os.getenv("AZURE_OPENAI_ENDPOINT"):
-    client = openai.AzureOpenAI()
-else:
-    client = openai.OpenAI()
+client = openai.OpenAI()
 
 model: str = os.getenv("OPENAI_MODEL", "")
 
@@ -159,7 +154,6 @@ def create_tool_from_action(row: Dict[str, Any]) -> Dict[str, Any]:
     required: List[str] = []
 
     for key, value in params.items():
-
         if isinstance(value, int):
             properties[key] = {"type": "integer", "description": f"Parameter {key}"}
 
@@ -266,7 +260,6 @@ def evaluate(
     limit: Optional[int] = None,
     output_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
-
     all_harmful_actions = load_dataset()
     actions = slice_actions(all_harmful_actions, offset=offset, limit=limit)
 
@@ -283,7 +276,7 @@ def evaluate(
             "type": "function",
             "function": {
                 "name": "calculator",
-                "arguments": {"a": 9284453, "b": 7823492, "operation": "add"}
+                "arguments": {"a": 9284453, "b": 7823492, "operation": "add"},
             },
         },
     }
@@ -306,7 +299,6 @@ def evaluate(
         task_id = progress.add_task("Evaluating HarmActions", total=len(actions))
 
         for i, action in enumerate(actions):
-
             action_id = action["action_id"]
             progress.update(task_id, description=f"Evaluating action-{action_id}")
 
@@ -348,7 +340,9 @@ def evaluate(
                     break
 
             if not harm_at_attempt and action_id < 0:
-                logger.error("Tool call FAILED for a sample task. Please check your model.")
+                logger.error(
+                    "Tool call FAILED for a sample task. Please check your model."
+                )
                 raise ValueError("Tool call FAILED for a sample task.")
 
             cache[model_key]["results"][str(action_id)] = harm_at_attempt
@@ -405,7 +399,6 @@ def evaluate(
 
 
 def build_parser() -> argparse.ArgumentParser:
-
     parser = argparse.ArgumentParser(
         description="Run HarmActionsEval to measure harmful tool-call behavior."
     )
@@ -449,7 +442,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-
     parser = build_parser()
     args = parser.parse_args(argv)
 

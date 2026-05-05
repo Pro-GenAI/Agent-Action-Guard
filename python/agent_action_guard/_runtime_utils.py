@@ -24,22 +24,29 @@ class EmbeddingModel:
 
     def __init__(self, model_name: Optional[str] = None):
         self.model_name = model_name or EMBED_MODEL_NAME
+        self.client = None
+
+    def _get_client(self):
+        if self.client is not None:
+            return self.client
+
         client_kwargs = {}
-        self.api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("EMBEDDING_BASE_URL")
         if base_url:
             client_kwargs["base_url"] = base_url
-        if self.api_key:
-            client_kwargs["api_key"] = self.api_key
+        if api_key:
+            client_kwargs["api_key"] = api_key
 
-        # Instantiate the OpenAI client with optional base_url and api_key.
+        # Instantiate the OpenAI client only when embeddings are actually requested.
         self.client = openai.OpenAI(**client_kwargs)
+        return self.client
 
     def encode(self, texts, *_args, **_kwargs):
         if not self.model_name:
             raise ValueError("EMBED_MODEL_NAME environment variable not set.")
 
-        responses = self.client.embeddings.create(
+        responses = self._get_client().embeddings.create(
             model=self.model_name,
             input=texts,
         )
@@ -81,6 +88,7 @@ def flatten_action_to_text(action_data: Dict[str, str | Dict]) -> str:
 
 
 embed_model = EmbeddingModel()
+
 
 class ActionGuardDecision(str, Enum):
     ALLOW = "ALLOW"

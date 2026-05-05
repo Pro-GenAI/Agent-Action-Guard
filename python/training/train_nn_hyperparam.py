@@ -12,12 +12,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from agent_action_guard._runtime_utils import ONNX_MODEL_PATH
-from train_nn import (
+from training.train_nn import (
     _accuracy_score,
+    export_model_to_onnx,
     load_texts_and_labels,
     make_embeddings,
     train_one,
-    export_model_to_onnx,
 )
 
 # Hyperparameter grid

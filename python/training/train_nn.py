@@ -5,7 +5,6 @@ Train a neural network on embeddings built from action metadata.
 """
 
 import json
-import os
 import random
 from collections import Counter
 from pathlib import Path
@@ -24,7 +23,9 @@ from agent_action_guard._runtime_utils import (
     flatten_action_to_text,
 )
 
-MODEL_PATH = Path(__file__).parent.parent / "agent_action_guard" / "action_classifier_model.pt"
+MODEL_PATH = (
+    Path(__file__).parent.parent / "agent_action_guard" / "action_classifier_model.pt"
+)
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
@@ -150,7 +151,9 @@ def load_texts_and_labels():
 def make_embeddings(texts):
     """Generate embeddings for texts."""
     # Sentence-transformers returns numpy arrays
-    embs = _embed_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+    embs = _embed_model.encode(
+        texts, normalize_embeddings=True, show_progress_bar=False
+    )
     return np.array(embs)
 
 
@@ -267,7 +270,12 @@ def _train_model():
         print("ONNX export failed during training save:", e)
 
 
-def export_model_to_onnx(model: torch.nn.Module, in_dim: int, onnx_path: Path = ONNX_MODEL_PATH, opset_version: int = 13):
+def export_model_to_onnx(
+    model: torch.nn.Module,
+    in_dim: int,
+    onnx_path: Path = ONNX_MODEL_PATH,
+    opset_version: int = 13,
+):
     """Export a PyTorch model to ONNX at `onnx_path`.
 
     The function places the model on CPU and uses a dummy input with shape

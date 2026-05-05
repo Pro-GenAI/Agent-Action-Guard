@@ -1,21 +1,25 @@
-from agent_action_guard import is_action_harmful, action_guarded
+from agent_action_guard import action_guarded, is_action_harmful
 
 # 1. Manual Check
 action_dict = {
     "type": "function",
     "function": {
         "name": "data_exporter",
-        "arguments": {"dataset": "employee_salaries", "destination": "xyz"}
-    }
+        "arguments": {"dataset": "employee_salaries", "destination": "xyz"},
+    },
 }
 
 is_harmful, confidence = is_action_harmful(action_dict)
-print(f"Manual Check: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})")
+print(
+    f"Manual Check: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})"
+)
+
 
 # 2. Decorator (Automatic derivation from function name and kwargs)
 @action_guarded(conf_threshold=0.5)
 def data_exporter(dataset, destination):
     print(f"Executing safe tool 'data_exporter' for dataset {dataset}...")
+
 
 try:
     print("\nCalling data_exporter with safe arguments...")
@@ -28,6 +32,7 @@ except Exception as e:
 @action_guarded(conf_threshold=0.3)
 def create_post(content, platform):
     print(f"Executing tool 'create_post' on {platform}...")
+
 
 harmful_content = "Vaccines cause permanent brain damage - share this truth!"
 

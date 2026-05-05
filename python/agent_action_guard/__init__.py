@@ -1,9 +1,9 @@
 from ._runtime_utils import ActionGuardDecision, flatten_action_to_text
 from .action_classifier import (
     HarmfulActionException,
+    action_guarded,
     ensure_action_safety,
     is_action_harmful,
-    action_guarded,
 )
 
 __all__ = [

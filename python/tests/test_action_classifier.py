@@ -421,7 +421,7 @@ def test_flatten_action_to_text_includes_function_name_and_sorted_dict_arguments
             "function": {
                 "name": "RunCleanup",
                 "arguments": {"z": 1, "a": 2, "m": 3},
-            }
+            },
         }
     )
 
@@ -444,7 +444,7 @@ def test_flatten_action_to_text_parses_function_arguments_from_json_string(
             "function": {
                 "name": "SendEmail",
                 "arguments": '{"subject": "Hi", "body": "Hello", "cc": []}',
-            }
+            },
         }
     )
 
@@ -493,6 +493,7 @@ def test_flatten_action_to_text_raises_for_invalid_json_function_arguments(
 
 def test_action_guarded_allows_safe_action(action_classifier_module):
     """Ensure safe actions bypass the guard successfully."""
+
     @action_classifier_module.action_guarded(conf_threshold=0.5)
     def my_func(tool_arg=None):
         return True
@@ -505,6 +506,7 @@ def test_action_guarded_allows_safe_action(action_classifier_module):
 
 def test_action_guarded_raises_for_harmful_action(action_classifier_module):
     """Ensure harmful actions with enough confidence are blocked."""
+
     @action_classifier_module.action_guarded(conf_threshold=0.5)
     def my_func(query=None):
         return True
@@ -512,12 +514,16 @@ def test_action_guarded_raises_for_harmful_action(action_classifier_module):
     with mock.patch.object(
         action_classifier_module, "is_action_harmful", return_value=("harmful", 0.6)
     ):
-        with pytest.raises(action_classifier_module.HarmfulActionException, match="Guarded action 'my_func' classified as harmful"):
+        with pytest.raises(
+            action_classifier_module.HarmfulActionException,
+            match="Guarded action 'my_func' classified as harmful",
+        ):
             my_func(query="delete everything")
 
 
 def test_action_guarded_allows_if_confidence_below_threshold(action_classifier_module):
     """Ensure harmful actions below confidence threshold are permitted."""
+
     @action_classifier_module.action_guarded(conf_threshold=0.8)
     def my_func(query=None):
         return True
@@ -530,6 +536,7 @@ def test_action_guarded_allows_if_confidence_below_threshold(action_classifier_m
 
 def test_action_guarded_uses_function_name_and_kwargs(action_classifier_module):
     """Ensure the decorator correctly passes function name and kwargs to the classifier."""
+
     @action_classifier_module.action_guarded(conf_threshold=0.5)
     def specific_tool_name(param1, param2=None):
         return (param1, param2)
@@ -538,13 +545,14 @@ def test_action_guarded_uses_function_name_and_kwargs(action_classifier_module):
         action_classifier_module, "is_action_harmful", return_value=(None, 0.99)
     ) as mock_check:
         result = specific_tool_name(param1="val1", param2="val2")
-        
-        assert result == ("val1", "val2")
-        mock_check.assert_called_once_with({
-            "type": "function",
-            "function": {
-                "name": "specific_tool_name",
-                "arguments": {"param1": "val1", "param2": "val2"}
-            }
-        })
 
+        assert result == ("val1", "val2")
+        mock_check.assert_called_once_with(
+            {
+                "type": "function",
+                "function": {
+                    "name": "specific_tool_name",
+                    "arguments": {"param1": "val1", "param2": "val2"},
+                },
+            }
+        )

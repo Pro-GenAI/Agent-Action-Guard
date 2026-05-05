@@ -16,6 +16,13 @@ export EMBEDDING_API_KEY="your-embedding-key"
 
 python examples/scripts/host_embed_fastembed.py
 ```
+If you are running from this repository checkout, use:
+
+```bash
+cd python
+python examples/scripts/host_embed_fastembed.py
+```
+
 **Alternatives:**
 Any OpenAI-compatible embedding server such as [LMStudio](https://lmstudio.ai/download) can be used.
 
@@ -48,6 +55,15 @@ def delete_user(user_id: str):
 PyPI package scope:
 - `pip install agent-action-guard` installs only the runtime classifier modules and model file needed for action classification.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
+
+Repository-local development commands run from `python/`:
+
+```bash
+cd python
+make format
+make lint
+pytest
+```
 
 ### HarmActionsEval CLI (standalone)
 

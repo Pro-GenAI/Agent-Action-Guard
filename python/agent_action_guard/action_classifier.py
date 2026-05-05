@@ -3,13 +3,13 @@ Action Classifier Module (ONNX Runtime)
 Lightweight inference without PyTorch dependency.
 """
 
-from typing import Optional, Tuple
 import functools
+from typing import Optional, Tuple
 
 import numpy as np
 import onnxruntime as ort
 
-from agent_action_guard._runtime_utils import (
+from ._runtime_utils import (
     ALL_CLASSES,
     ONNX_MODEL_PATH,
     embed_model,
@@ -107,6 +107,7 @@ def action_guarded(conf_threshold: float = 0.5):
     Uses func.__name__ as the tool name and kwargs as arguments for safety check.
     If the action is harmful and confidence >= conf_threshold, it raises HarmfulActionException.
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -118,7 +119,7 @@ def action_guarded(conf_threshold: float = 0.5):
                     "arguments": kwargs,
                 },
             }
-            
+
             is_harmful, confidence = is_action_harmful(action_dict)
             if is_harmful and confidence >= conf_threshold:
                 raise HarmfulActionException(
@@ -127,7 +128,9 @@ def action_guarded(conf_threshold: float = 0.5):
                 )
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -157,6 +160,7 @@ if __name__ == "__main__":
 
     # Latency test
     import time
+
     start_time = time.time()
     attempts = 500
     for _ in range(attempts):

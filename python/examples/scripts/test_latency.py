@@ -1,5 +1,5 @@
-import time
 import json
+import time
 from pathlib import Path
 
 from agent_action_guard import is_action_harmful
@@ -7,7 +7,11 @@ from agent_action_guard import is_action_harmful
 
 def _load_dataset() -> list[dict]:
     """Load dataset from the package JSON file without training-module side effects."""
-    dataset_path = Path(__file__).resolve().parents[2] / "agent_action_guard" / "harmactions_dataset.json"
+    dataset_path = (
+        Path(__file__).resolve().parents[2]
+        / "agent_action_guard"
+        / "harmactions_dataset.json"
+    )
     with open(dataset_path, encoding="utf-8") as f:
         return json.load(f)
 

@@ -40,10 +40,10 @@ def send_email(to, subject, body):
 
 ## Key Files & Structure
 
-- `agent_action_guard/` — implementation package (classifier, runtime helpers, dataset loaders).
-- `training/` — training scripts and dataset artifacts used to produce the classifier.
-- `examples/` — sample integrations and MCP server examples.
-- `tests/` — unit tests validating core behavior.
+- `python/agent_action_guard/` — implementation package (classifier, runtime helpers, dataset loaders).
+- `python/training/` — training scripts and dataset artifacts used to produce the classifier.
+- `python/examples/` — sample integrations and MCP server examples.
+- `python/tests/` — unit tests validating core behavior.
 - `USAGE.md` — detailed usage examples and environment setup.
 - `README.md` — project overview, demos, and citations.
 
@@ -56,18 +56,18 @@ def send_email(to, subject, body):
 
 ## Development & CI
 
-- Formatting and linting: `make format` and `make lint` (created through `Makefile`).
-- Tests: run `pytest` (configured by `pytest.ini`) to run test cases in [`tests/`](tests/) directory.
+- Formatting and linting: run `make format` and `make lint` from `python/`.
+- Tests: run `pytest` from `python/` (configured by `python/pytest.ini`) to run test cases in `python/tests/`.
 
 ## Guidance for AI agents reading this repo
 
-- Use `USAGE.md` and `examples/` for integration patterns rather than reproducing code.
+- Use `USAGE.md` and `python/examples/` for integration patterns rather than reproducing code.
 - Prefer runtime API `is_action_harmful()` for decision making.
 - Respect model limitations: the classifier is trained on a limited dataset; combine with rule-based checks for high-risk systems.
 
 ## Where to look next (quick links)
 
 - Full details and demo: [README.md](README.md)
-- Integration and examples: [USAGE.md](USAGE.md) and `examples/`
-- Implementation: `agent_action_guard/`
-- Training scripts & dataset: `training/`
+- Integration and examples: [USAGE.md](USAGE.md) and `python/examples/`
+- Implementation: `python/agent_action_guard/`
+- Training scripts & dataset: `python/training/`
