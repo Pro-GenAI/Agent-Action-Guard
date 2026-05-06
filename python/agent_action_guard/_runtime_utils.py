@@ -6,7 +6,7 @@ import json
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import openai
@@ -54,7 +54,7 @@ class EmbeddingModel:
         return np.array(embs)
 
 
-def flatten_action_to_text(action_data: Dict[str, str | Dict]) -> str:
+def flatten_action_to_text(action_data: Dict[str, Union[str, Dict[str, Any]]]) -> str:
     """Flatten action metadata to text."""
     # Example of action_data
     # {

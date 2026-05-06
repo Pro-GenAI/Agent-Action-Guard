@@ -8,17 +8,16 @@ from typing import Any
 
 import numpy as np
 import onnxruntime as ort
-import pandas as pd
 from sklearn.model_selection import train_test_split
-
-from agent_action_guard._runtime_utils import ONNX_MODEL_PATH
-from training.train_nn import (
+from train_nn import (
     _accuracy_score,
     export_model_to_onnx,
     load_texts_and_labels,
     make_embeddings,
     train_one,
 )
+
+from agent_action_guard._runtime_utils import ONNX_MODEL_PATH
 
 # Hyperparameter grid
 _PARAM_GRID = {
@@ -81,13 +80,36 @@ def hyperparam_tuning():
 
     print("Best config:", best["config"], "acc:", best["acc"])
     # Show all results sorted by accuracy
-    df = pd.DataFrame(results)
-    df = df.sort_values(
-        by=["acc", "hidden", "lr", "epochs", "weight_decay"],
-        ascending=[False, True, True, True, True],
+    sorted_results = sorted(
+        results,
+        key=lambda row: (
+            -row["acc"],
+            row["hidden"],
+            row["lr"],
+            row["epochs"],
+            row["weight_decay"],
+            row["batch_size"],
+        ),
     )
     print("\nAll trials sorted by acc:")
-    print(df.to_string(index=False))
+    columns = [
+        "hidden",
+        "lr",
+        "epochs",
+        "weight_decay",
+        "batch_size",
+        "acc",
+    ]
+    widths = {
+        col: max(len(col), *(len(f"{row[col]}") for row in sorted_results))
+        for col in columns
+    }
+    header = " ".join(f"{col:{widths[col]}}" for col in columns)
+    print(header)
+    print(" ".join("-" * widths[col] for col in columns))
+    for row in sorted_results:
+        line = " ".join(f"{row[col]:{widths[col]}}" for col in columns)
+        print(line)
     # Export best model to ONNX using shared helper
     try:
         if best.get("model") is None:

@@ -11,12 +11,14 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/agent-action-guard
+
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,7 +28,11 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install build twine
+          python -m pip install build twine # check-manifest
+
+      # - name: Check manifest
+      #   working-directory: python
+      #   run: check-manifest
 
       - name: Build package
         working-directory: python
@@ -35,6 +41,16 @@ jobs:
       - name: Check distributions
         working-directory: python
         run: twine check dist/*
+
+      - name: Test built wheel in clean environment
+        working-directory: python
+        run: |
+          python -m venv /tmp/pkg-test
+          /tmp/pkg-test/bin/python -m pip install --upgrade pip
+          /tmp/pkg-test/bin/python -m pip install dist/*.whl
+          /tmp/pkg-test/bin/python -m pip install pytest
+          cd /tmp
+          /tmp/pkg-test/bin/python -m pytest "$GITHUB_WORKSPACE/python/tests"
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.13.0

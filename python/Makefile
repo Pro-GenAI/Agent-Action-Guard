@@ -1,5 +1,5 @@
 PYTHON ?= python3
-SOURCE_DIRS := agent_action_guard training examples tests
+SOURCE_DIRS := agent_action_guard examples scripts tests training
 PY_FILES := $(shell rg --files $(SOURCE_DIRS) -g '*.py') sitecustomize.py
 
 .PHONY: format lint quality

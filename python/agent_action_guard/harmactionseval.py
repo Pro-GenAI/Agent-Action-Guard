@@ -13,7 +13,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import openai
 from rich.progress import (
@@ -302,6 +302,8 @@ def evaluate(
             action_id = action["action_id"]
             progress.update(task_id, description=f"Evaluating action-{action_id}")
 
+            harm_at_attempt: Union[bool, int] = False
+
             if str(action_id) in cache[model_key]["results"]:
                 harm_at_attempt = cache[model_key]["results"][str(action_id)]
                 results.append(
@@ -321,8 +323,6 @@ def evaluate(
             )
 
             tool = create_tool_from_action(action["action"])
-
-            harm_at_attempt: bool | int = False
 
             for attempt in range(1, k + 1):
                 tool_calls = attempt_tool_call(prompt, attempt=attempt, tool=tool)

@@ -1,14 +1,19 @@
 [build-system]
-requires = ["setuptools>=77.0.0", "wheel"]
+requires = [
+    "setuptools>=69.0.0,<77.0.0; python_version < '3.9'",
+    "setuptools>=77.0.0; python_version >= '3.9'",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-action-guard"
-version = "1.1.4"
+version = "1.1.5"
 description = "Runtime classifier for screening AI agent actions as safe, harmful, or unethical."
 readme = {file = "README.md", content-type = "text/markdown"}
-license = "CC-BY-4.0"
-license-files = ["LICENSE.md"]
+# Commented due to unsupported fields for specific versions of setuptools
+# license = "CC-BY-4.0"
+# license-files = ["LICENSE.md"]
 authors = [
     {name = "Praneeth Vadlapati", email = "praneeth.vad@gmail.com"},
 ]
@@ -42,14 +47,14 @@ classifiers = [
     "Topic :: Security",
 ]
 dependencies = [
-    "numpy",
-    "onnxruntime",
-    "openai",
+    "numpy>=1.21.6,<3.0.0",
+    "onnxruntime>=1.14.0,<2.0.0",
+    "openai>=1.0.0,<2.0.0",
 ]
 requires-python = ">=3.8"
 
 [project.urls]
-Homepage = "https://github.com/Pro-GenAI/Agent-Action-Guard"
+Homepage = "https://action-guard.github.io/"
 Issues = "https://github.com/Pro-GenAI/Agent-Action-Guard/issues"
 Repository = "https://github.com/Pro-GenAI/Agent-Action-Guard"
 
@@ -69,9 +74,9 @@ agent_action_guard = [
 
 [project.optional-dependencies]
 harmactionseval = [
-    "python-dotenv",
-    "requests",
-    "rich",
+    "python-dotenv>=0.21.0,<2.0.0",
+    "requests>=2.28.0,<3.0.0",
+    "rich>=12.0.0,<15.0.0",
 ]
 
 all = [
@@ -79,10 +84,10 @@ all = [
     "fastembed",
     "psutil",
     "pydantic",
-    "python-dotenv",
+    "python-dotenv>=0.21.0,<2.0.0",
     "pytz",
-    "requests",
-    "rich",
+    "requests>=2.28.0,<3.0.0",
+    "rich>=12.0.0,<15.0.0",
     "uvicorn[standard]",
 ]
 
@@ -94,19 +99,16 @@ dev = [
     "flake8",
     "pylint",
     "mypy",
-    "pandas",
-    "python-dotenv",
-    "requests",
-    "rich",
+    "python-dotenv>=0.21.0,<2.0.0",
+    "requests>=2.28.0,<3.0.0",
+    "rich>=12.0.0,<15.0.0",
     "scikit-learn",
     "fastembed",
     "psutil",
     "pytz",
-    "agentor",
     "fastapi",
     "uvicorn[standard]",
     "pydantic",
-    "gradio>=6.0.0",
 ]
 
 [tool.black]

@@ -10,9 +10,7 @@ action_dict = {
 }
 
 is_harmful, confidence = is_action_harmful(action_dict)
-print(
-    f"Manual Check: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})"
-)
+print(f"Result: Is the action harmful? {is_harmful} (Confidence: {confidence:.2f})")
 
 
 # 2. Decorator (Automatic derivation from function name and kwargs)
