@@ -1,6 +1,6 @@
-# Agent Action Guard for JavaScript
+# Agent Action Guard
 
-JavaScript runtime for screening proposed AI agent actions as `safe`, `harmful`, or `unethical` using the packaged ONNX classifier in this folder.
+Framework to block harmful AI agent actions before they cause harm — lightweight, real-time, easy-to-use
 
 ## Install
 
