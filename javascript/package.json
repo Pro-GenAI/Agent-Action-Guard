@@ -1,6 +1,6 @@
 {
 	"name": "agent-action-guard",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"description": "JavaScript runtime for screening AI agent actions as safe, harmful, or unethical.",
 	"type": "module",
 	"main": "./src/index.js",
@@ -9,6 +9,7 @@
 		"lint": "eslint .",
 		"quality": "npm run format && npm run lint",
 		"test": "node --test",
+		"test:all-versions": "node scripts/test-all-versions.js",
 		"test:runtimes": "node --test test/cross-runtime.test.js"
 	},
 	"exports": {

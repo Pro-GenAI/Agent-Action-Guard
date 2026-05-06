@@ -9,6 +9,7 @@
 [![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E)
 [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449)
+[![npm](https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/agent-action-guard)
 
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=Downloads)](https://pepy.tech/projects/agent-action-guard)
 [![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
@@ -28,6 +29,11 @@
 ```bash
 pip install agent-action-guard
 ```
+<!-- 
+If you use pepip:
+```bash
+pepip install agent-action-guard
+``` -->
 
 > 🔑 Set `EMBEDDING_API_KEY` (or `OPENAI_API_KEY`) in your environment. See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
 
@@ -36,6 +42,20 @@ Want to run the evaluation benchmark too?
 ```bash
 pip install "agent-action-guard[harmactionseval]"
 python -m agent_action_guard.harmactionseval
+```
+
+### JavaScript Runtime
+
+The repository also ships an npm package in [javascript/package.json](javascript/package.json) for screening agent actions in Node.js.
+
+```bash
+npm install agent-action-guard
+```
+
+If you use pnpm, the equivalent commands are:
+
+```bash
+pnpm install agent-action-guard
 ```
 
 ---
@@ -87,10 +107,10 @@ Action Guard sits between the agent and its tools, blocking unsafe calls before 
 - 📊 **HarmActions** — safety-labeled agent action dataset with manipulated prompts
 - 📏 **HarmActionsEval** — benchmark with the *SafeActions@k* metric
 - 🧠 **Action Guard** — real-time neural classifier optimized for agent loops
-	- 🏋️ Trained on HarmActions
-	- ✅ Classifies every tool call before execution
-	- 🚫 Blocks harmful and unethical actions automatically
-	- ⚡ Lightweight for real-time use
+  - 🏋️ Trained on HarmActions
+  - ✅ Classifies every tool call before execution
+  - 🚫 Blocks harmful and unethical actions automatically
+  - ⚡ Lightweight for real-time use
 
 ---
 

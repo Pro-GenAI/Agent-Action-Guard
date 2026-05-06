@@ -127,8 +127,8 @@ if [[ "$PACKAGE_MANAGER" == "pnpm" ]]; then
   echo "Installing dependencies from lockfile"
   pnpm install --frozen-lockfile
 
-  echo "Running test suite"
-  pnpm test
+  echo "Running test suite across supported Node versions"
+  pnpm run test:all-versions
 
   echo "Previewing publish contents"
   pnpm publish --dry-run --no-git-checks
@@ -136,8 +136,8 @@ else
   echo "Installing dependencies from lockfile"
   npm ci
 
-  echo "Running test suite"
-  npm test
+  echo "Running test suite across supported Node versions"
+  npm run test:all-versions
 
   echo "Previewing publish contents"
   npm pack --dry-run

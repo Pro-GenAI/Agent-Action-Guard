@@ -164,10 +164,16 @@ def action_classifier_module(monkeypatch):
 
 
 @pytest.fixture
-def runtime_module():
+def runtime_module(monkeypatch):
     """
     Load the real runtime_utils module dynamically for isolated testing.
     """
+    monkeypatch.setenv("EMBED_MODEL_NAME", "test-embedding-model")
+    return _load_runtime_utils_module()
+
+
+def _load_runtime_utils_module():
+    """Load the real runtime_utils module dynamically for isolated testing."""
     spec = importlib.util.spec_from_file_location(
         "runtime_under_test", _RUNTIME_UTILS_SOURCE_PATH
     )
@@ -489,6 +495,34 @@ def test_flatten_action_to_text_raises_for_invalid_json_function_arguments(
     )
 
     assert flattened == 'Call function SendEmail with arguments: {"subject": "Hi"'
+
+
+def test_embedding_model_uses_default_env_values_when_no_values_are_passed(
+    monkeypatch,
+):
+    """EmbeddingModel should fall back to environment defaults when args are omitted."""
+    monkeypatch.setenv("EMBED_MODEL_NAME", "env-default-embedding-model")
+    monkeypatch.setenv("OPENAI_API_KEY", "env-openai-key")
+    monkeypatch.delenv("EMBEDDING_API_KEY", raising=False)
+    monkeypatch.delenv("EMBEDDING_BASE_URL", raising=False)
+
+    fake_client = mock.Mock()
+    fake_client.embeddings.create.return_value = types.SimpleNamespace(
+        data=[types.SimpleNamespace(embedding=[0.4, 0.5, 0.6])]
+    )
+    fake_openai_factory = mock.Mock(return_value=fake_client)
+
+    runtime_module = _load_runtime_utils_module()
+    monkeypatch.setattr(runtime_module.openai, "OpenAI", fake_openai_factory)
+
+    embeddings = runtime_module.EmbeddingModel().encode(["hello"])
+
+    fake_openai_factory.assert_called_once_with(api_key="env-openai-key")
+    fake_client.embeddings.create.assert_called_once_with(
+        model="env-default-embedding-model",
+        input=["hello"],
+    )
+    np.testing.assert_array_equal(embeddings, np.array([[0.4, 0.5, 0.6]]))
 
 
 def test_action_guarded_allows_safe_action(action_classifier_module):

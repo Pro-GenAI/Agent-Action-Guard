@@ -29,6 +29,11 @@
 ```bash
 pip install agent-action-guard
 ```
+<!-- 
+If you use pepip:
+```bash
+pepip install agent-action-guard
+``` -->
 
 > 🔑 Set `EMBEDDING_API_KEY` (or `OPENAI_API_KEY`) in your environment. See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
 
@@ -44,45 +49,14 @@ python -m agent_action_guard.harmactionseval
 The repository also ships an npm package in [javascript/package.json](javascript/package.json) for screening agent actions in Node.js.
 
 ```bash
-cd javascript
-npm install
-npm test
+npm install agent-action-guard
 ```
 
 If you use pnpm, the equivalent commands are:
 
 ```bash
-cd javascript
-pnpm install
-pnpm test
+pnpm install agent-action-guard
 ```
-
-Runtime usage:
-
-```js
-import { ensureActionSafety, isActionHarmful } from "agent-action-guard";
-
-const action = {
-  type: "function",
-  function: {
-    name: "send_email",
-    arguments: {
-      to: "user@example.com",
-      subject: "Status update",
-      body: "Hello",
-    },
-  },
-};
-
-const decision = await isActionHarmful(action);
-if (decision.label) {
-  throw new Error(`Blocked: ${decision.label}`);
-}
-
-await ensureActionSafety(action, { raiseException: true });
-```
-
-Set `EMBED_MODEL_NAME` and either `EMBEDDING_API_KEY` or `OPENAI_API_KEY` before using the JavaScript runtime.
 
 ---
 
