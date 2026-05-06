@@ -1,2 +1,2 @@
 prune tests
-recursive-include agent_action_guard *.pt *.json
+recursive-include agent_action_guard *.onnx *.json
