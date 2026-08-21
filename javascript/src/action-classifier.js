@@ -5,6 +5,7 @@ import {
 	ONNX_MODEL_PATH,
 	embedModel,
 	flattenActionToText,
+	normalizeOnnxRuntimeModule,
 } from './runtime-utils.js';
 
 function softmax(logits) {
@@ -41,10 +42,13 @@ export class ActionClassifier {
 
 	async getOrt() {
 		if (this.ortModule) {
+			this.ortModule = normalizeOnnxRuntimeModule(this.ortModule);
 			return this.ortModule;
 		}
 
-		this.ortModule = await import('onnxruntime-node');
+		this.ortModule = normalizeOnnxRuntimeModule(
+			await import('onnxruntime-node'),
+		);
 		return this.ortModule;
 	}
 
@@ -65,54 +69,116 @@ export class ActionClassifier {
 	}
 
 	async predict(actionDict) {
-		const session = await this.loadModel();
-		const text = flattenActionToText(actionDict);
-		const embeddings = await this.embeddingModel.encode([text]);
+		return (await this.predictBatch([actionDict]))[0];
+	}
 
-		if (!Array.isArray(embeddings) || !Array.isArray(embeddings[0])) {
-			throw new Error(
-				'Embedding model returned an invalid embedding payload.',
-			);
+	async predictBatch(actionDicts, { batchSize = null } = {}) {
+		if (!Array.isArray(actionDicts)) {
+			throw new TypeError('predictBatch expects an array of actions.');
 		}
-
-		const vector = Float32Array.from(embeddings[0]);
-		const expectedDimension = getExpectedEmbeddingDimension(session);
-		if (expectedDimension && vector.length !== expectedDimension) {
-			throw new Error(
-				`Expected embedding dimension ${expectedDimension}, received ${vector.length}.`,
-			);
-		}
-
-		const ort = await this.getOrt();
-		const inputTensor = new ort.Tensor('float32', vector, [
-			1,
-			vector.length,
-		]);
-		const outputs = await session.run({ input: inputTensor });
-		const logitsTensor = outputs.logits;
-
 		if (
-			!logitsTensor ||
-			(!Array.isArray(logitsTensor.data) &&
-				!ArrayBuffer.isView(logitsTensor.data))
+			batchSize !== null &&
+			(!Number.isInteger(batchSize) || batchSize <= 0)
 		) {
-			throw new Error('Model did not return logits output.');
+			throw new RangeError('batchSize must be a positive integer.');
+		}
+		if (actionDicts.length === 0) {
+			return [];
 		}
 
-		const logits = Array.from(logitsTensor.data);
-		const probabilities = softmax(logits);
+		const session = await this.loadModel();
+		const ort = await this.getOrt();
+		const chunkSize = batchSize ?? actionDicts.length;
+		const predictions = [];
 
-		let predClassIdx = 0;
-		for (let index = 1; index < logits.length; index += 1) {
-			if (logits[index] > logits[predClassIdx]) {
-				predClassIdx = index;
+		for (let start = 0; start < actionDicts.length; start += chunkSize) {
+			const chunk = actionDicts.slice(start, start + chunkSize);
+			const texts = chunk.map((actionDict) =>
+				flattenActionToText(actionDict),
+			);
+			const embeddings = await this.embeddingModel.encode(texts);
+			if (
+				!Array.isArray(embeddings) ||
+				embeddings.length !== chunk.length
+			) {
+				throw new Error(
+					'Embedding model returned an invalid batch payload.',
+				);
+			}
+
+			const firstVector = embeddings[0];
+			if (
+				!Array.isArray(firstVector) &&
+				!ArrayBuffer.isView(firstVector)
+			) {
+				throw new Error(
+					'Embedding model returned an invalid batch payload.',
+				);
+			}
+			const dimension = firstVector.length;
+			const expectedDimension = getExpectedEmbeddingDimension(session);
+			if (expectedDimension && dimension !== expectedDimension) {
+				throw new Error(
+					`Expected embedding dimension ${expectedDimension}, received ${dimension}.`,
+				);
+			}
+
+			const flattened = new Float32Array(chunk.length * dimension);
+			for (let index = 0; index < embeddings.length; index += 1) {
+				const vector = embeddings[index];
+				if (
+					(!Array.isArray(vector) && !ArrayBuffer.isView(vector)) ||
+					vector.length !== dimension
+				) {
+					throw new Error(
+						'Embedding model returned inconsistent vector dimensions.',
+					);
+				}
+				flattened.set(vector, index * dimension);
+			}
+
+			const inputTensor = new ort.Tensor('float32', flattened, [
+				chunk.length,
+				dimension,
+			]);
+			const outputs = await session.run({ input: inputTensor });
+			const logitsTensor = outputs.logits;
+			if (
+				!logitsTensor ||
+				(!Array.isArray(logitsTensor.data) &&
+					!ArrayBuffer.isView(logitsTensor.data))
+			) {
+				throw new Error('Model did not return logits output.');
+			}
+
+			const logits = Array.from(logitsTensor.data);
+			const classCount = ALL_CLASSES.length;
+			if (logits.length !== chunk.length * classCount) {
+				throw new Error(
+					'Classifier returned an invalid batch logits payload.',
+				);
+			}
+
+			for (let row = 0; row < chunk.length; row += 1) {
+				const rowLogits = logits.slice(
+					row * classCount,
+					(row + 1) * classCount,
+				);
+				const probabilities = softmax(rowLogits);
+				let predClassIdx = 0;
+				for (let index = 1; index < rowLogits.length; index += 1) {
+					if (rowLogits[index] > rowLogits[predClassIdx]) {
+						predClassIdx = index;
+					}
+				}
+				predictions.push({
+					label: ALL_CLASSES[predClassIdx],
+					confidence: probabilities[predClassIdx],
+				});
 			}
 		}
 
-		return {
-			label: ALL_CLASSES[predClassIdx],
-			confidence: probabilities[predClassIdx],
-		};
+		return predictions;
 	}
 }
 
@@ -135,6 +201,19 @@ export async function isActionHarmful(
 	}
 
 	return { label, confidence };
+}
+
+export async function isActionsHarmful(
+	actionDicts,
+	{ actionClassifier = classifier, batchSize = null } = {},
+) {
+	const predictions = await actionClassifier.predictBatch(actionDicts, {
+		batchSize,
+	});
+	return predictions.map(({ label, confidence }) => ({
+		label: label === 'safe' ? null : label,
+		confidence,
+	}));
 }
 
 export async function ensureActionSafety(

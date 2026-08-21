@@ -3,8 +3,9 @@ Action Classifier Module (ONNX Runtime)
 Lightweight inference without PyTorch dependency.
 """
 
+from __future__ import annotations
+
 import functools
-from typing import Optional, Tuple
 
 import numpy as np
 import onnxruntime as ort
@@ -20,8 +21,11 @@ from ._runtime_utils import (
 class ActionClassifier:
     """Classifier for AI agent actions using embeddings and ONNX model."""
 
-    def __init__(self):
-        self.session: Optional[ort.InferenceSession] = None
+    def __init__(self, embedding_model=None):
+        self.embedding_model = (
+            embed_model if embedding_model is None else embedding_model
+        )
+        self.session: ort.InferenceSession | None = None
         self.load_model()
 
     def load_model(self):
@@ -35,56 +39,78 @@ class ActionClassifier:
             providers=["CPUExecutionProvider"],
         )
 
-    def predict(self, action_dict: dict) -> Tuple[str, float]:
-        """
-        Predict the class of an action.
-        Returns: (class: str, confidence: float)
-        """
+    def predict(self, action_dict: dict) -> tuple[str, float]:
+        """Predict the class and confidence of one action."""
+        return self.predict_batch([action_dict])[0]
+
+    def predict_batch(
+        self, action_dicts: list[dict], batch_size: int | None = None
+    ) -> list[tuple[str, float]]:
+        """Predict classes for multiple actions using vectorized embedding/inference."""
         if self.session is None:
             raise RuntimeError("ONNX model not loaded")
+        if batch_size is not None and batch_size <= 0:
+            raise ValueError("batch_size must be greater than zero")
+        if not action_dicts:
+            return []
 
-        # Convert action → text
-        text = flatten_action_to_text(action_dict)
+        chunk_size = batch_size or len(action_dicts)
+        predictions: list[tuple[str, float]] = []
+        for start in range(0, len(action_dicts), chunk_size):
+            chunk = action_dicts[start : start + chunk_size]
+            texts = [flatten_action_to_text(action_dict) for action_dict in chunk]
+            embedding_model = getattr(self, "embedding_model", embed_model)
+            embeddings = embedding_model.encode(
+                texts,
+                normalize_embeddings=True,
+                show_progress_bar=False,
+            )
+            embedding_array = np.asarray(embeddings, dtype=np.float32)
+            if embedding_array.ndim != 2 or embedding_array.shape[0] != len(chunk):
+                raise ValueError("Embedding model returned an invalid batch payload")
 
-        # Generate embedding
-        embedding = embed_model.encode(
-            [text],
-            normalize_embeddings=True,
-            show_progress_bar=False,
-        )
+            outputs = self.session.run(None, {"input": embedding_array})
+            logits = np.asarray(outputs[0])
+            if logits.ndim != 2 or logits.shape[0] != len(chunk):
+                raise ValueError("Classifier returned an invalid batch logits payload")
 
-        # Ensure correct dtype/shape
-        embedding = np.asarray(embedding, dtype=np.float32)
+            exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+            probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+            pred_class_indices = np.argmax(logits, axis=1)
 
-        # Run inference
-        outputs = self.session.run(
-            None,
-            {"input": embedding},
-        )
+            predictions.extend(
+                (
+                    ALL_CLASSES[int(pred_class_idx)],
+                    float(probs[row_index, int(pred_class_idx)]),
+                )
+                for row_index, pred_class_idx in enumerate(pred_class_indices)
+            )
 
-        logits = outputs[0]  # shape: [batch, num_classes]
-
-        # Softmax (manual, since ONNX output is logits)
-        exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
-        probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-
-        pred_class_idx = int(np.argmax(logits, axis=1)[0])
-        confidence = float(probs[0, pred_class_idx])
-
-        pred_class = ALL_CLASSES[pred_class_idx]
-        return pred_class, confidence
+        return predictions
 
 
 # Lazy global classifier accessor
 classifier = ActionClassifier()
 
 
-def is_action_harmful(action_dict) -> Tuple[Optional[str], float]:
+def is_action_harmful(action_dict) -> tuple[str | None, float]:
     """Convenience function to check if an action is harmful."""
     pred_class, confidence = classifier.predict(action_dict)
     if pred_class == "safe":
         return None, confidence
     return pred_class, confidence
+
+
+def is_actions_harmful(
+    action_dicts: list[dict], batch_size: int | None = None
+) -> list[tuple[str | None, float]]:
+    """Classify multiple actions, returning ``None`` for safe action labels."""
+    return [
+        (None if pred_class == "safe" else pred_class, confidence)
+        for pred_class, confidence in classifier.predict_batch(
+            action_dicts, batch_size=batch_size
+        )
+    ]
 
 
 class HarmfulActionException(ValueError):

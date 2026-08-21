@@ -1,7 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { EmbeddingModel, flattenActionToText } from '../src/runtime-utils.js';
+import {
+	EmbeddingModel,
+	flattenActionToText,
+	normalizeOnnxRuntimeModule,
+} from '../src/runtime-utils.js';
+
+test('normalizeOnnxRuntimeModule supports legacy default-only ESM wrappers', () => {
+	const runtime = { InferenceSession: { create() {} }, Tensor: class {} };
+
+	assert.equal(normalizeOnnxRuntimeModule(runtime), runtime);
+	assert.equal(normalizeOnnxRuntimeModule({ default: runtime }), runtime);
+});
 
 test('flattenActionToText flattens function arguments from objects', () => {
 	const text = flattenActionToText({

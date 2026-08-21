@@ -14,6 +14,8 @@ If you prefer pnpm:
 pnpm install agent-action-guard
 ```
 
+For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The package also installs `aag-classify` for direct JSON, JSON arrays, and JSONL batch classification.
+
 ## Usage
 
 ```js
@@ -58,21 +60,26 @@ await guardedSendEmail({
 
 See [examples/basic-usage.js](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js) for a minimal runnable example.
 
-## Required environment
+## Compatibility testing
 
-The classifier expects embeddings from the same embedding model used during training.
+The JavaScript package keeps runtime-version and dependency-version coverage separate:
 
 ```bash
-export EMBED_MODEL_NAME="sentence-transformers/all-MiniLM-L6-v2"
-export EMBEDDING_BASE_URL="http://localhost:1234/v1"
-export EMBEDDING_API_KEY="your-embedding-key"
+npm run test:all-versions
+npm run test:all-versions -- 18 24
+NODE_TEST_VERSIONS="20,22" npm run test:all-versions
+npm run test:dependency-matrix-bounds
+npm run test:dependency-matrix
 ```
 
-`EMBEDDING_BASE_URL` should point to any OpenAI-compatible embeddings endpoint. `EMBEDDING_API_KEY` falls back to `OPENAI_API_KEY`.
+`test:all-versions` uses [nvm](https://github.com/nvm-sh/nvm) to install/select each requested Node.js version, runs `npm ci` under that runtime, and then runs the JavaScript test suite. By default it tests Node.js 18, 20, 22, and 24. Pass versions after `--` or set `NODE_TEST_VERSIONS`; set `NVM_DIR` or `NVM_SH` when nvm is installed somewhere other than `~/.nvm`. The runner continues through failures by default and returns non-zero after the matrix; set `CONTINUE_ON_FAILURE=0` to stop at the first failure.
+
+The dependency matrix remains separate: it packs the local package and installs it into isolated scenario projects so the smoke test uses the selected dependency releases rather than the repository lockfile. It explicitly checks npm's current `latest` release for every runtime dependency and fails if `latest` falls outside the declared support range. The bounds command checks the oldest and newest supported dependency profiles; the full matrix additionally samples intermediate releases and varies one dependency at a time against the oldest supported companion-dependency baseline.
 
 ## Notes
 
 - This folder implements only the Action Guard runtime.
 - Benchmark, dataset, and training code remain in the Python side of the repository.
-- The ONNX model expects a 384-dimensional embedding vector.
+- Local embedding inference uses `onnxruntime-node` and `@huggingface/tokenizers`.
+- The Action Guard classifier expects a 384-dimensional embedding vector.
 - The model training script is at [../python/training/](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/python/training/train_nn.py).

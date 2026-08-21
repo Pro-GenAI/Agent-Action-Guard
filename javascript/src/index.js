@@ -5,6 +5,7 @@ export {
 	classifier,
 	ensureActionSafety,
 	isActionHarmful,
+	isActionsHarmful,
 } from './action-classifier.js';
 
 export {

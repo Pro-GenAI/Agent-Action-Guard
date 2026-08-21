@@ -26,6 +26,8 @@
 
 ## 🚀 Quick Start
 
+Python package support: **Python 3.8 through Python 3.14**.
+
 ```bash
 pip install agent-action-guard
 ```
@@ -35,7 +37,7 @@ If you use pepip:
 pepip install agent-action-guard
 ``` -->
 
-> 🔑 Set `EMBEDDING_API_KEY` (or `OPENAI_API_KEY`) in your environment. See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
+> For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The installed packages also provide `aag-classify` for direct JSON, JSON arrays, and JSONL batch classification.
 
 Want to run the evaluation benchmark too?
 

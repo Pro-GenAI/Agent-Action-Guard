@@ -26,6 +26,8 @@
 
 ## 🚀 Quick Start
 
+Supported Python versions: **3.8 through 3.14**.
+
 ```bash
 pip install agent-action-guard
 ```
@@ -35,7 +37,33 @@ If you use pepip:
 pepip install agent-action-guard
 ``` -->
 
-> 🔑 Set `EMBEDDING_API_KEY` (or `OPENAI_API_KEY`) in your environment. See [.env.example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/.env.example) and [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
+> If no embedding configuration is provided, the runtime automatically downloads and caches the ONNX `sentence-transformers/all-MiniLM-L6-v2` embedding model and tokenizer, then uses them locally. Set `AAG_EMBED_ONNX` to a local ONNX filename/filepath to override it, or use the existing OpenAI-compatible API environment variables. See [USAGE.md](../USAGE.md).
+
+### ONNX embeddings
+
+The default Python setup needs no embedding server or embedding environment variables. On the first classification call, Agent Action Guard downloads the default MiniLM ONNX model and tokenizer into the local cache; later calls reuse the cached files.
+
+```python
+from agent_action_guard import is_action_harmful
+
+is_harmful, confidence = is_action_harmful({
+    "type": "function",
+    "function": {
+        "name": "send_email",
+        "arguments": {"to": "user@example.com"},
+    },
+})
+
+print(is_harmful, confidence)
+```
+
+To use a local ONNX model instead of the auto-downloaded default:
+
+```bash
+export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+```
+
+`AAG_EMBED_ONNX` may also point to a directory containing `model.onnx`. Keep the matching `tokenizer.json` beside the model.
 
 Want to run the evaluation benchmark too?
 

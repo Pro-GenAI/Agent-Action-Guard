@@ -10,6 +10,7 @@ import {
 	actionGuarded,
 	ensureActionSafety,
 	isActionHarmful,
+	isActionsHarmful,
 } from '../src/action-classifier.js';
 
 function createTempModelPath() {
@@ -118,6 +119,51 @@ test('predict returns the top class and confidence from logits', async () => {
 	]);
 	assert.equal(fakeOrt.state.lastTensor.type, 'float32');
 	assert.deepEqual(fakeOrt.state.lastTensor.dims, [1, 384]);
+});
+
+test('predictBatch vectorizes embedding and classifier inference', async () => {
+	const fakeOrt = createFakeOrt([3.0, 0.1, 0.2, 0.1, 2.5, 0.2]);
+	const embeddingCalls = [];
+	const classifier = new ActionClassifier({
+		modelPath: createTempModelPath(),
+		embeddingModel: {
+			encode: async (texts) => {
+				embeddingCalls.push(texts);
+				return texts.map(() => new Array(384).fill(0.5));
+			},
+		},
+		ortModule: fakeOrt.module,
+	});
+
+	const results = await classifier.predictBatch([
+		{ type: 'function', function: { name: 'ping', arguments: {} } },
+		{ type: 'function', function: { name: 'drop_db', arguments: {} } },
+	]);
+
+	assert.deepEqual(
+		results.map(({ label }) => label),
+		['safe', 'harmful'],
+	);
+	assert.equal(embeddingCalls.length, 1);
+	assert.equal(embeddingCalls[0].length, 2);
+	assert.deepEqual(fakeOrt.state.lastTensor.dims, [2, 384]);
+});
+
+test('isActionsHarmful maps safe labels to null', async () => {
+	const results = await isActionsHarmful([{}, {}], {
+		actionClassifier: {
+			predictBatch: async () => [
+				{ label: 'safe', confidence: 0.9 },
+				{ label: 'unethical', confidence: 0.8 },
+			],
+		},
+		batchSize: 10,
+	});
+
+	assert.deepEqual(results, [
+		{ label: null, confidence: 0.9 },
+		{ label: 'unethical', confidence: 0.8 },
+	]);
 });
 
 test('predict rejects invalid embedding dimensions', async () => {

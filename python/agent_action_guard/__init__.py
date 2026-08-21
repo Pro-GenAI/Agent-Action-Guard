@@ -4,12 +4,14 @@ from .action_classifier import (
     action_guarded,
     ensure_action_safety,
     is_action_harmful,
+    is_actions_harmful,
 )
 
 __all__ = [
     "HarmfulActionException",
     "flatten_action_to_text",
     "is_action_harmful",
+    "is_actions_harmful",
     "ensure_action_safety",
     "action_guarded",
     "ActionGuardDecision",

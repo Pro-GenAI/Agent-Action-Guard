@@ -68,11 +68,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$PACKAGE_MANAGER" ]]; then
-  if [[ -f "$SCRIPT_DIR/pnpm-lock.yaml" ]] && command -v pnpm >/dev/null 2>&1; then
-    PACKAGE_MANAGER="pnpm"
-  else
-    PACKAGE_MANAGER="npm"
-  fi
+  PACKAGE_MANAGER="npm"
 fi
 
 if ! command -v "$PACKAGE_MANAGER" >/dev/null 2>&1; then

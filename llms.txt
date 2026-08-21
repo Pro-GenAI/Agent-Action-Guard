@@ -39,8 +39,8 @@ Core repository paths
 
 Operational notes
 - The classifier may use embedding infrastructure depending on integration mode.
-- For vector/embedding-backed setups, configure EMBED_MODEL_NAME, EMBEDDING_BASE_URL, and EMBEDDING_API_KEY.
-- The documented baseline embedding model is sentence-transformers/all-MiniLM-L6-v2.
+- Python and JavaScript embedding backend precedence is local ONNX via AAG_EMBED_ONNX, then OpenAI-compatible API configuration, then automatic download/cache of the default ONNX backend.
+- The default/baseline embedding model is sentence-transformers/all-MiniLM-L6-v2; both runtimes download and cache its ONNX model and tokenizer assets automatically when no embedding configuration is present.
 
 Evaluation
 - HarmActionsEval module and CLI are included for benchmark-style runs.
