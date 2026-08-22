@@ -1,85 +1,245 @@
-# Agent Action Guard
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Agent Action Guard" height="220" />
+</p>
 
-Framework to block harmful AI agent actions before they cause harm — lightweight, real-time, easy-to-use
+<h1 align="center">Agent Action Guard for JavaScript</h1>
+
+<p align="center">
+  <strong>Block harmful AI agent tool calls before they execute.</strong><br />
+  A lightweight runtime safety layer for Node.js agents, MCP tools, and tool-calling applications.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/dm/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white" alt="npm downloads" /></a>
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+" />
+  <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge" alt="CC BY 4.0 license" /></a>
+</p>
+
+---
 
 ## Install
 
 ```bash
-npm i agent-action-guard
+npm install agent-action-guard
 ```
 
-If you prefer pnpm:
+Or with pnpm:
 
 ```bash
-pnpm install agent-action-guard
+pnpm add agent-action-guard
 ```
 
-For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The package also installs `aag-classify` for direct JSON, JSON arrays, and JSONL batch classification.
+**Node.js 18+ · ESM · usable with zero embedding configuration.**
 
-## Usage
+On first use, Action Guard can automatically download and cache the default MiniLM ONNX embedding assets. You can also point it at your own local ONNX model or an OpenAI-compatible embedding API.
+
+## Why add Action Guard?
+
+An AI agent can decide to call a tool even when the resulting action is unsafe. Action Guard gives you a dedicated checkpoint between **the model deciding what to do** and **your application actually doing it**.
+
+- **Block before execution** — screen tool calls before they reach email, filesystem, API, database, or other side-effecting code.
+- **Minimal integration** — classify an action directly or wrap a function with `actionGuarded()`.
+- **Local-first option** — use cached ONNX embeddings without sending action text to an embedding API.
+- **Bring your own embeddings** — use a custom ONNX model or OpenAI-compatible endpoint when needed.
+- **Batch + CLI support** — classify multiple actions programmatically or from JSON/JSONL files.
+- **Built for agent loops** — the package contains the runtime guard; training and benchmark tooling stay outside the JavaScript runtime package.
+
+## 60-second quick start
+
+### 1. Check a tool call before it runs
 
 ```js
-import {
-	actionGuarded,
-	ensureActionSafety,
-	isActionHarmful,
-} from 'agent-action-guard';
+import { isActionHarmful } from 'agent-action-guard';
 
 const action = {
-	type: 'function',
-	function: {
-		name: 'send_email',
-		arguments: {
-			to: 'user@example.com',
-			subject: 'Status update',
-			body: 'Hello',
-		},
-	},
+  type: 'function',
+  function: {
+    name: 'send_email',
+    arguments: {
+      to: 'user@example.com',
+      subject: 'Status update',
+      body: 'Hello',
+    },
+  },
 };
 
 const { label, confidence } = await isActionHarmful(action);
+
 if (label) {
-	throw new Error(`Blocked: ${label} (${confidence.toFixed(2)})`);
+  throw new Error(`Blocked: ${label} (${confidence.toFixed(2)})`);
 }
 
-// --------- Create a guarded version of the function ---------
+// Safe path: execute the real tool here.
+```
+
+A safe action returns `label: null`. A classified harmful action returns its label plus a confidence score.
+
+### 2. Guard a function automatically
+
+```js
+import { actionGuarded } from 'agent-action-guard';
 
 const guardedSendEmail = actionGuarded(
-	async function sendEmail(params) {
-		return `sending to ${params.to}`;
-	},
-	{ confThreshold: 0.8 },
+  async function sendEmail(params) {
+    // Call your real email provider here.
+    return `sending to ${params.to}`;
+  },
+  { confThreshold: 0.8 },
 );
 
 await guardedSendEmail({
-	to: 'user@example.com',
-	subject: 'Status update',
-	body: 'Hello',
+  to: 'user@example.com',
+  subject: 'Status update',
+  body: 'Hello',
 });
 ```
 
-See [examples/basic-usage.js](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js) for a minimal runnable example.
+`actionGuarded()` derives the action from the wrapped function name and its object argument. When a harmful classification meets the configured confidence threshold, it throws `HarmfulActionError` instead of executing the wrapped function.
 
-## Compatibility testing
+### 3. Use a boolean safety gate
 
-The JavaScript package keeps runtime-version and dependency-version coverage separate:
+```js
+import { ensureActionSafety } from 'agent-action-guard';
+
+const safe = await ensureActionSafety(action);
+
+if (!safe) {
+  // Reject, escalate, log, or request approval.
+}
+```
+
+Or make harmful actions throw automatically:
+
+```js
+await ensureActionSafety(action, { raiseException: true });
+```
+
+## Batch classification
+
+Use the vectorized batch API when you already have multiple proposed actions:
+
+```js
+import { isActionsHarmful } from 'agent-action-guard';
+
+const decisions = await isActionsHarmful(actions, { batchSize: 32 });
+
+for (const decision of decisions) {
+  console.log(decision.label, decision.confidence);
+}
+```
+
+## CLI included
+
+Installing the package also installs `aag-classify`.
 
 ```bash
+aag-classify '{"type":"function","function":{"name":"send_email","arguments":{}}}'
+```
+
+Classify JSON arrays or JSONL files in batches:
+
+```bash
+aag-classify --file actions.json --batch-size 32
+aag-classify --file actions.jsonl --batch-size 32
+```
+
+The CLI reports total, safe, and unsafe action counts.
+
+## Embedding backends
+
+You do not need to configure an embedding backend to try the package.
+
+| Mode | When to use it |
+| --- | --- |
+| **Zero-config local ONNX** | Fastest path to getting started. Default MiniLM ONNX assets are downloaded and cached automatically. |
+| **Custom local ONNX** | Keep embedding inference local while controlling the model assets. Set `AAG_EMBED_ONNX`. |
+| **OpenAI-compatible API** | Use an existing embedding service or centrally managed endpoint. |
+
+Backend selection follows this precedence:
+
+1. `AAG_EMBED_ONNX` custom local model
+2. Explicit `EMBED_MODEL_NAME`
+3. API configuration via `EMBEDDING_API_KEY`, `OPENAI_API_KEY`, or `EMBEDDING_BASE_URL`
+4. Automatically downloaded/cached default `sentence-transformers/all-MiniLM-L6-v2` ONNX assets
+
+For environment variables, tokenizer files, custom endpoints, and configuration examples, see the full [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
+
+## Public runtime API
+
+```js
+import {
+  ActionClassifier,
+  HarmfulActionError,
+  actionGuarded,
+  ensureActionSafety,
+  isActionHarmful,
+  isActionsHarmful,
+} from 'agent-action-guard';
+```
+
+| API | Purpose |
+| --- | --- |
+| `isActionHarmful(action)` | Classify one proposed action and return `{ label, confidence }`. |
+| `isActionsHarmful(actions, options)` | Vectorized classification for multiple actions. |
+| `ensureActionSafety(action, options)` | Return a boolean safety decision or throw on harmful actions. |
+| `actionGuarded(fn, options)` | Wrap a function so harmful calls can be blocked before execution. |
+| `ActionClassifier` | Create/configure a classifier instance directly. |
+| `HarmfulActionError` | Error type thrown by blocking helpers. |
+
+See [`examples/basic-usage.js`](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js) for a minimal runnable example.
+
+## Where it fits
+
+```text
+User request
+    ↓
+LLM / Agent
+    ↓
+Proposed tool call
+    ↓
+┌────────────────────┐
+│ Agent Action Guard │  ← classify before execution
+└────────────────────┘
+    ↓ safe                     ↓ harmful
+Execute tool                 Block / escalate
+```
+
+Use Action Guard as a runtime safety layer alongside your existing authentication, authorization, validation, rate limits, allowlists, and human-approval policies.
+
+## Compatibility
+
+The package supports **Node.js 18+** and is tested across Node.js 18, 20, 22, and 24. Runtime dependency compatibility is tested separately across supported versions of `@huggingface/tokenizers`, `onnxruntime-node`, and the OpenAI JavaScript SDK.
+
+For contributors:
+
+```bash
+npm test
+npm run lint
 npm run test:all-versions
-npm run test:all-versions -- 18 24
-NODE_TEST_VERSIONS="20,22" npm run test:all-versions
 npm run test:dependency-matrix-bounds
+```
+
+The broader dependency matrix is available with:
+
+```bash
 npm run test:dependency-matrix
 ```
 
-`test:all-versions` uses [nvm](https://github.com/nvm-sh/nvm) to install/select each requested Node.js version, runs `npm ci` under that runtime, and then runs the JavaScript test suite. By default it tests Node.js 18, 20, 22, and 24. Pass versions after `--` or set `NODE_TEST_VERSIONS`; set `NVM_DIR` or `NVM_SH` when nvm is installed somewhere other than `~/.nvm`. The runner continues through failures by default and returns non-zero after the matrix; set `CONTINUE_ON_FAILURE=0` to stop at the first failure.
+## Important limitation
 
-The dependency matrix remains separate: it packs the local package and installs it into isolated scenario projects so the smoke test uses the selected dependency releases rather than the repository lockfile. It explicitly checks npm's current `latest` release for every runtime dependency and fails if `latest` falls outside the declared support range. The bounds command checks the oldest and newest supported dependency profiles; the full matrix additionally samples intermediate releases and varies one dependency at a time against the oldest supported companion-dependency baseline.
+Action Guard is a learned classifier, not a complete security boundary. For high-risk systems, combine its decision with deterministic policy checks, strict tool permissions, input validation, least-privilege credentials, and human approval where appropriate.
 
-## Notes
+## Learn more
 
-- This folder implements only the Action Guard runtime.
-- Benchmark, dataset, and training code remain in the Python side of the repository.
-- Local embedding inference uses `onnxruntime-node` and `@huggingface/tokenizers`.
-- The Action Guard classifier expects a 384-dimensional embedding vector.
-- The model training script is at [../python/training/](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/python/training/train_nn.py).
+- [Main repository](https://github.com/Pro-GenAI/Agent-Action-Guard)
+- [Full usage and configuration](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md)
+- [Runnable JavaScript example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js)
+- [npm package](https://www.npmjs.com/package/agent-action-guard)
+
+---
+
+<p align="center">
+  <strong>Put a safety check between your agent and its tools.</strong><br />
+  <code>npm install agent-action-guard</code>
+</p>
