@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import { mkdir, readFile, rename, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { fileURLToPath } from 'node:url';
+import { URL, fileURLToPath } from 'node:url';
 
 export const ALL_CLASSES = ['safe', 'harmful', 'unethical'];
 
@@ -19,6 +19,7 @@ export const ONNX_MODEL_PATH = path.resolve(
 
 export const DEFAULT_EMBED_MODEL_NAME =
 	'sentence-transformers/all-MiniLM-L6-v2';
+export const AAG_EMBED_GGUF_ENV = 'AAG_EMBED_GGUF';
 export const AAG_EMBED_ONNX_ENV = 'AAG_EMBED_ONNX';
 
 export function normalizeOnnxRuntimeModule(module) {
@@ -33,13 +34,136 @@ export function defaultOnnxAssetUrl(filename) {
 	return `${HF_BASE_URL}/${DEFAULT_ONNX_REPO}/resolve/main/${filename}`;
 }
 
+function isHttpUrl(value) {
+	try {
+		const parsed = new URL(value);
+		return ['http:', 'https:'].includes(parsed.protocol) && Boolean(parsed.host);
+	} catch {
+		return false;
+	}
+}
+
+function normalizeSourceComponent(value, fallback = 'source') {
+	let normalized;
+	try {
+		normalized = decodeURIComponent(value);
+	} catch {
+		normalized = value;
+	}
+	normalized = normalized
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9._-]+/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/-\./g, '.')
+		.replace(/^[ ._-]+|[ ._-]+$/g, '');
+	return normalized || fallback;
+}
+
+function normalizedUrlCacheName(url) {
+	const parsed = new URL(url);
+	const readable = normalizeSourceComponent(
+		`${parsed.protocol.replace(':', '')}-${parsed.host}-${parsed.pathname}`,
+		'remote',
+	).slice(0, 96);
+	parsed.hash = '';
+	const fingerprint = createHash('sha256')
+		.update(parsed.toString())
+		.digest('hex')
+		.slice(0, 12);
+	return `${readable}-${fingerprint}`;
+}
+
+function looksLikeHfRepoId(value) {
+	if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) {
+		return false;
+	}
+	const candidate = path.resolve(value);
+	if (fs.existsSync(candidate) || fs.existsSync(path.dirname(candidate))) {
+		return false;
+	}
+	return !value.startsWith('/') && !value.startsWith('./') && !value.startsWith('../') && !value.startsWith('~') && !value.includes('\\');
+}
+
+function hfRepoBaseUrl(repoId) {
+	return `${HF_BASE_URL}/${repoId}/resolve/main/`;
+}
+
+function normalizeHfSourceUrl(url) {
+	const parsed = new URL(url);
+	if (!['huggingface.co', 'www.huggingface.co'].includes(parsed.hostname.toLowerCase())) {
+		return { url: parsed.toString(), isBase: parsed.pathname.endsWith('/') };
+	}
+
+	const parts = parsed.pathname.split('/').filter(Boolean);
+	if (parts.length === 2) {
+		parsed.pathname = `/${parts[0]}/${parts[1]}/resolve/main/`;
+		return { url: parsed.toString(), isBase: true };
+	}
+	if (parts.length >= 4 && parts[2] === 'blob') {
+		parsed.pathname = `/${[parts[0], parts[1], 'resolve', ...parts.slice(3)].join('/')}`;
+		return { url: parsed.toString(), isBase: false };
+	}
+	if (parts.length >= 4 && parts[2] === 'tree') {
+		parsed.pathname = `/${[parts[0], parts[1], 'resolve', ...parts.slice(3)].join('/')}/`;
+		return { url: parsed.toString(), isBase: true };
+	}
+	if (parts.length === 4 && parts[2] === 'resolve') {
+		parsed.pathname = `/${parts.join('/')}/`;
+		return { url: parsed.toString(), isBase: true };
+	}
+	return { url: parsed.toString(), isBase: parsed.pathname.endsWith('/') };
+}
+
+function remoteModelUrl(source, defaultFilename) {
+	const sourceUrl = looksLikeHfRepoId(source) ? hfRepoBaseUrl(source) : source;
+	const normalized = normalizeHfSourceUrl(sourceUrl);
+	if (!normalized.isBase) {
+		return normalized.url;
+	}
+	const parsed = new URL(normalized.url);
+	parsed.pathname = `${parsed.pathname.endsWith('/') ? parsed.pathname : `${parsed.pathname}/`}${defaultFilename}`;
+	return parsed.toString();
+}
+
+function siblingUrl(url, filename) {
+	const parsed = new URL(url);
+	const parts = parsed.pathname.split('/');
+	parts[parts.length - 1] = filename;
+	parsed.pathname = parts.join('/');
+	return parsed.toString();
+}
+
+function remoteCachePath(sourceUrl, kind, defaultFilename, homeDir = os.homedir()) {
+	const parsed = new URL(sourceUrl);
+	let basename = path.posix.basename(parsed.pathname);
+	try {
+		basename = decodeURIComponent(basename);
+	} catch {
+		// Keep the encoded basename when it is not valid percent-encoding.
+	}
+	let normalizedFilename = normalizeSourceComponent(basename, defaultFilename);
+	const expectedExtension = path.extname(defaultFilename).toLowerCase();
+	if (expectedExtension && !normalizedFilename.endsWith(expectedExtension)) {
+		normalizedFilename += expectedExtension;
+	}
+	return path.join(
+		homeDir,
+		'.cache',
+		'agent-action-guard',
+		kind,
+		normalizedUrlCacheName(sourceUrl),
+		normalizedFilename,
+	);
+}
+
 async function downloadFile(url, destination, fetchImpl = globalThis.fetch) {
 	if (fs.existsSync(destination)) {
 		return;
 	}
 	if (typeof fetchImpl !== 'function') {
 		throw new Error(
-			'A fetch implementation is required to download ONNX assets.',
+			'A fetch implementation is required to download embedding assets.',
 		);
 	}
 
@@ -49,7 +173,7 @@ async function downloadFile(url, destination, fetchImpl = globalThis.fetch) {
 		const response = await fetchImpl(url);
 		if (!response.ok || !response.body) {
 			throw new Error(
-				`Failed to download ONNX embedding asset ${url}: HTTP ${response.status}`,
+				`Failed to download embedding asset ${url}: HTTP ${response.status}`,
 			);
 		}
 
@@ -63,12 +187,41 @@ async function downloadFile(url, destination, fetchImpl = globalThis.fetch) {
 	}
 }
 
+async function resolveRemoteOnnxModelFiles(
+	source,
+	{ fetchImpl = globalThis.fetch, homeDir = os.homedir() } = {},
+) {
+	const modelUrl = remoteModelUrl(source, 'model.onnx');
+	const modelPath = remoteCachePath(modelUrl, 'onnx', 'model.onnx', homeDir);
+	const directory = path.dirname(modelPath);
+	const files = {
+		modelPath,
+		tokenizerPath: path.join(directory, 'tokenizer.json'),
+		tokenizerConfigPath: path.join(directory, 'tokenizer_config.json'),
+	};
+	await downloadFile(modelUrl, files.modelPath, fetchImpl);
+	await downloadFile(
+		siblingUrl(modelUrl, 'tokenizer.json'),
+		files.tokenizerPath,
+		fetchImpl,
+	);
+	await downloadFile(
+		siblingUrl(modelUrl, 'tokenizer_config.json'),
+		files.tokenizerConfigPath,
+		fetchImpl,
+	);
+	return files;
+}
+
 export async function resolveOnnxModelFiles({
 	fetchImpl = globalThis.fetch,
 	homeDir = os.homedir(),
 } = {}) {
 	const configured = process.env[AAG_EMBED_ONNX_ENV];
 	if (configured) {
+		if (isHttpUrl(configured) || looksLikeHfRepoId(configured)) {
+			return resolveRemoteOnnxModelFiles(configured, { fetchImpl, homeDir });
+		}
 		const configuredPath = path.resolve(configured);
 		const modelPath = configuredPath.toLowerCase().endsWith('.onnx')
 			? configuredPath
@@ -111,6 +264,28 @@ export async function resolveOnnxModelFiles({
 	return files;
 }
 
+export async function resolveGgufModelFile({
+	fetchImpl = globalThis.fetch,
+	homeDir = os.homedir(),
+} = {}) {
+	const configured = process.env[AAG_EMBED_GGUF_ENV];
+	if (!configured) {
+		throw new Error(`${AAG_EMBED_GGUF_ENV} is not configured`);
+	}
+
+	if (isHttpUrl(configured) || looksLikeHfRepoId(configured)) {
+		const modelUrl = remoteModelUrl(configured, 'model.gguf');
+		const modelPath = remoteCachePath(modelUrl, 'gguf', 'model.gguf', homeDir);
+		await downloadFile(modelUrl, modelPath, fetchImpl);
+		return modelPath;
+	}
+
+	const configuredPath = path.resolve(configured);
+	return configuredPath.toLowerCase().endsWith('.gguf')
+		? configuredPath
+		: path.join(configuredPath, 'model.gguf');
+}
+
 export const ActionGuardDecision = Object.freeze({
 	ALLOW: 'ALLOW',
 	BLOCK: 'BLOCK',
@@ -121,6 +296,7 @@ export class EmbeddingModel {
 		modelName = undefined,
 		{
 			clientFactory = null,
+			ggufModule = null,
 			ortModule = null,
 			tokenizerFactory = null,
 			assetResolver = resolveOnnxModelFiles,
@@ -131,6 +307,8 @@ export class EmbeddingModel {
 		this.modelName = modelName ?? envModelName ?? DEFAULT_EMBED_MODEL_NAME;
 		this.client = null;
 		this.clientFactory = clientFactory;
+		this.ggufModule = ggufModule;
+		this.ggufRuntimePromise = null;
 		this.ortModule = ortModule;
 		this.tokenizerFactory = tokenizerFactory;
 		this.assetResolver = assetResolver;
@@ -139,6 +317,7 @@ export class EmbeddingModel {
 		this.onnxTokenizer = null;
 		this.onnxTokenizerMetadata = null;
 
+		const localGgufConfigured = Boolean(process.env[AAG_EMBED_GGUF_ENV]);
 		const localOnnxConfigured = Boolean(process.env[AAG_EMBED_ONNX_ENV]);
 		const modelConfigured = Boolean(
 			modelName !== undefined || envModelName,
@@ -149,7 +328,9 @@ export class EmbeddingModel {
 			process.env.OPENAI_API_KEY,
 		);
 
-		if (localOnnxConfigured) {
+		if (localGgufConfigured) {
+			this.backend = 'gguf';
+		} else if (localOnnxConfigured) {
 			this.backend = 'onnx';
 		} else if (modelConfigured) {
 			this.backend = 'api';
@@ -158,6 +339,66 @@ export class EmbeddingModel {
 		} else {
 			this.backend = 'onnx';
 		}
+	}
+
+	async getGgufRuntime() {
+		if (this.ggufRuntimePromise) {
+			return this.ggufRuntimePromise;
+		}
+
+		const modelPath = await resolveGgufModelFile({ fetchImpl: this.fetchImpl });
+		if (!fs.existsSync(modelPath)) {
+			throw new Error(`GGUF embedding model not found: ${modelPath}`);
+		}
+
+		this.ggufRuntimePromise = (async () => {
+			let module = this.ggufModule;
+			if (!module) {
+				try {
+					module = await import('node-llama-cpp');
+				} catch (error) {
+					const wrapped = new Error(
+						'GGUF embeddings require node-llama-cpp. Install it with `npm install node-llama-cpp`.',
+					);
+					wrapped.cause = error;
+					throw wrapped;
+				}
+			}
+
+			const llama = await module.getLlama();
+			const model = await llama.loadModel({ modelPath });
+			const context = await model.createEmbeddingContext();
+			return { llama, model, context };
+		})();
+
+		try {
+			return await this.ggufRuntimePromise;
+		} catch (error) {
+			this.ggufRuntimePromise = null;
+			throw error;
+		}
+	}
+
+	async encodeGguf(texts) {
+		const { context } = await this.getGgufRuntime();
+		return Promise.all(
+			texts.map(async (text) => {
+				const result = await context.getEmbeddingFor(String(text));
+				const vector = Array.from(result?.vector ?? []);
+				if (
+					vector.length === 0 ||
+					vector.some((value) => !Number.isFinite(value))
+				) {
+					throw new Error(
+						'GGUF embedding model returned an invalid embedding vector.',
+					);
+				}
+				const norm = Math.sqrt(
+					vector.reduce((sum, value) => sum + value * value, 0),
+				);
+				return vector.map((value) => value / Math.max(norm, 1e-12));
+			}),
+		);
 	}
 
 	async getClient() {
@@ -394,6 +635,9 @@ export class EmbeddingModel {
 	}
 
 	async encode(texts) {
+		if (this.backend === 'gguf') {
+			return this.encodeGguf(texts);
+		}
 		if (this.backend === 'onnx') {
 			return this.encodeOnnx(texts);
 		}

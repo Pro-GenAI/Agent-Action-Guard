@@ -39,7 +39,7 @@ Core repository paths
 
 Operational notes
 - The classifier may use embedding infrastructure depending on integration mode.
-- Python and JavaScript embedding backend precedence is local ONNX via AAG_EMBED_ONNX, then OpenAI-compatible API configuration, then automatic download/cache of the default ONNX backend.
+- Python and JavaScript embedding backend precedence is configured GGUF via AAG_EMBED_GGUF, then configured ONNX via AAG_EMBED_ONNX, then OpenAI-compatible API configuration, then automatic download/cache of the default ONNX backend. GGUF/ONNX sources may be local files/directories, direct HTTP(S) model URLs, base URLs ending in `/`, or Hugging Face `owner/repo` IDs. Remote cache folder/file names are normalized from source URLs into filesystem-safe components plus a short fingerprint. Hugging Face repo IDs use standard `main/model.gguf` or `main/model.onnx` filenames; direct URLs select nonstandard filenames. If both model variables are set, GGUF wins; GGUF llama.cpp bindings are loaded only when that backend is selected.
 - The default/baseline embedding model is sentence-transformers/all-MiniLM-L6-v2; both runtimes download and cache its ONNX model and tokenizer assets automatically when no embedding configuration is present.
 
 Evaluation

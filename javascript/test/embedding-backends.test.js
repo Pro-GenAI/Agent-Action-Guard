@@ -8,12 +8,14 @@ import {
 	DEFAULT_EMBED_MODEL_NAME,
 	EmbeddingModel,
 	defaultOnnxAssetUrl,
+	resolveGgufModelFile,
 	resolveOnnxModelFiles,
 } from '../src/runtime-utils.js';
 
 const EMBEDDING_KEY_ENV = 'EMBEDDING_API_KEY'
 const OPENAI_KEY_ENV = 'OPENAI_API_KEY';
 const EMBEDDING_ENV_NAMES = [
+	'AAG_EMBED_GGUF',
 	'AAG_EMBED_ONNX',
 	'EMBED_MODEL_NAME',
 	'EMBEDDING_BASE_URL',
@@ -75,6 +77,123 @@ test('AAG_EMBED_ONNX takes precedence over API configuration', () => {
 		assert.equal(new EmbeddingModel().backend, 'onnx');
 	} finally {
 		restoreEmbeddingEnv(originalEnv);
+	}
+});
+
+test('AAG_EMBED_GGUF takes precedence over ONNX and API configuration', () => {
+	const originalEnv = captureEmbeddingEnv();
+	clearEmbeddingEnv();
+	process.env.AAG_EMBED_GGUF = '/tmp/custom-embedding.gguf';
+	process.env.AAG_EMBED_ONNX = '/tmp/custom-embedding.onnx';
+	process.env.EMBED_MODEL_NAME = 'configured-api-model';
+	try {
+		assert.equal(new EmbeddingModel().backend, 'gguf');
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
+	}
+});
+
+test('resolveGgufModelFile accepts a GGUF filepath or directory', async () => {
+	const originalEnv = captureEmbeddingEnv();
+	clearEmbeddingEnv();
+	try {
+		process.env.AAG_EMBED_GGUF = '/tmp/custom.gguf';
+		assert.equal(await resolveGgufModelFile(), path.resolve('/tmp/custom.gguf'));
+		process.env.AAG_EMBED_GGUF = '/tmp/models';
+		assert.equal(
+			await resolveGgufModelFile(),
+			path.resolve('/tmp/models/model.gguf'),
+		);
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
+	}
+});
+
+test('ONNX URL downloads assets into normalized cache names', async () => {
+	const originalEnv = captureEmbeddingEnv();
+	const tempHome = await mkdtemp(path.join(os.tmpdir(), 'aag-js-url-cache-'));
+	const requested = [];
+	clearEmbeddingEnv();
+	process.env.AAG_EMBED_ONNX =
+		'https://Example.com/models/My%20Model%20(v1).onnx?download=true';
+	try {
+		const files = await resolveOnnxModelFiles({
+			homeDir: tempHome,
+			fetchImpl: async (url) => {
+				requested.push(url);
+				return new globalThis.Response('asset');
+			},
+		});
+		assert.equal(path.basename(files.modelPath), 'my-model-v1.onnx');
+		assert.equal(path.basename(files.tokenizerPath), 'tokenizer.json');
+		assert.equal(path.basename(path.dirname(files.modelPath)), path.basename(path.dirname(files.tokenizerPath)));
+		assert.match(path.basename(path.dirname(files.modelPath)), /^[a-z0-9._-]+$/);
+		assert.deepEqual(requested, [
+			'https://example.com/models/My%20Model%20(v1).onnx?download=true',
+			'https://example.com/models/tokenizer.json?download=true',
+			'https://example.com/models/tokenizer_config.json?download=true',
+		]);
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
+		await rm(tempHome, { recursive: true, force: true });
+	}
+});
+
+test('Hugging Face repo IDs resolve standard ONNX and GGUF assets', async () => {
+	const originalEnv = captureEmbeddingEnv();
+	const tempHome = await mkdtemp(path.join(os.tmpdir(), 'aag-js-hf-cache-'));
+	const requested = [];
+	const fetchImpl = async (url) => {
+		requested.push(url);
+		return new globalThis.Response('asset');
+	};
+	clearEmbeddingEnv();
+	try {
+		process.env.AAG_EMBED_ONNX = 'acme/example-onnx';
+		await resolveOnnxModelFiles({ homeDir: tempHome, fetchImpl });
+		assert.deepEqual(requested, [
+			'https://huggingface.co/acme/example-onnx/resolve/main/model.onnx',
+			'https://huggingface.co/acme/example-onnx/resolve/main/tokenizer.json',
+			'https://huggingface.co/acme/example-onnx/resolve/main/tokenizer_config.json',
+		]);
+
+		requested.length = 0;
+		delete process.env.AAG_EMBED_ONNX;
+		process.env.AAG_EMBED_GGUF = 'acme/example-gguf';
+		const modelPath = await resolveGgufModelFile({ homeDir: tempHome, fetchImpl });
+		assert.equal(path.basename(modelPath), 'model.gguf');
+		assert.deepEqual(requested, [
+			'https://huggingface.co/acme/example-gguf/resolve/main/model.gguf',
+		]);
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
+		await rm(tempHome, { recursive: true, force: true });
+	}
+});
+
+test('GGUF URL uses a normalized downloaded filename', async () => {
+	const originalEnv = captureEmbeddingEnv();
+	const tempHome = await mkdtemp(path.join(os.tmpdir(), 'aag-js-gguf-url-'));
+	const requested = [];
+	clearEmbeddingEnv();
+	process.env.AAG_EMBED_GGUF =
+		'https://models.example/Embed%20Model%20(Q8_0).GGUF?version=1';
+	try {
+		const modelPath = await resolveGgufModelFile({
+			homeDir: tempHome,
+			fetchImpl: async (url) => {
+				requested.push(url);
+				return new globalThis.Response('asset');
+			},
+		});
+		assert.equal(path.basename(modelPath), 'embed-model-q8_0.gguf');
+		assert.match(path.basename(path.dirname(modelPath)), /^[a-z0-9._-]+$/);
+		assert.deepEqual(requested, [
+			'https://models.example/Embed%20Model%20(Q8_0).GGUF?version=1',
+		]);
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
+		await rm(tempHome, { recursive: true, force: true });
 	}
 });
 
@@ -144,6 +263,27 @@ test('resolveOnnxModelFiles auto-downloads and caches default ONNX assets', asyn
 	} finally {
 		restoreEmbeddingEnv(originalEnv);
 		await rm(tempHome, { recursive: true, force: true });
+	}
+});
+
+test('EmbeddingModel generates normalized embeddings with local GGUF inference', async () => {
+	const originalEnv = captureEmbeddingEnv();
+	clearEmbeddingEnv();
+	process.env.AAG_EMBED_GGUF = '/tmp/custom.gguf';
+	try {
+		const model = new EmbeddingModel();
+		model.ggufRuntimePromise = Promise.resolve({
+			context: {
+				getEmbeddingFor: async (text) => ({
+					vector: text === 'hello' ? [3, 4] : [0, 2],
+				}),
+			},
+		});
+		const embeddings = await model.encode(['hello', 'world']);
+		assert.equal(model.backend, 'gguf');
+		assert.deepEqual(embeddings, [[0.6, 0.8], [0, 1]]);
+	} finally {
+		restoreEmbeddingEnv(originalEnv);
 	}
 });
 

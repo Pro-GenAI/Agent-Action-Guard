@@ -27,6 +27,7 @@ def _clear_embedding_env(monkeypatch):
     monkeypatch.delenv("EMBEDDING_BASE_URL", raising=False)
     monkeypatch.delenv("EMBEDDING_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AAG_EMBED_GGUF", raising=False)
     monkeypatch.delenv("AAG_EMBED_ONNX", raising=False)
 
 
@@ -96,6 +97,111 @@ def test_onnx_env_accepts_model_filepath_or_directory(monkeypatch, tmp_path):
     assert vocab_file == tmp_path / "tokenizer.json"
 
 
+def test_gguf_env_accepts_model_filepath_or_directory(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    runtime_module = _load_runtime_utils_module()
+    custom_model = tmp_path / "custom.gguf"
+
+    monkeypatch.setenv("AAG_EMBED_GGUF", str(custom_model))
+    assert runtime_module._resolve_gguf_model_file() == custom_model
+
+    monkeypatch.setenv("AAG_EMBED_GGUF", str(tmp_path))
+    assert runtime_module._resolve_gguf_model_file() == tmp_path / "model.gguf"
+
+
+def test_onnx_url_downloads_and_normalizes_cache_names(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    runtime_module = _load_runtime_utils_module()
+    source = "https://Example.com/models/My%20Model%20(v1).onnx?download=true"
+    downloads = []
+    monkeypatch.setenv("AAG_EMBED_ONNX", source)
+    monkeypatch.setattr(
+        runtime_module,
+        "_download_file",
+        lambda url, destination: downloads.append((url, destination)),
+    )
+
+    model_file, vocab_file = runtime_module._resolve_onnx_model_files(home_dir=tmp_path)
+
+    assert model_file.name == "my-model-v1.onnx"
+    assert vocab_file == model_file.with_name("tokenizer.json")
+    assert model_file.parent.parent.name == "onnx"
+    assert all(
+        character.isalnum() or character in "._-"
+        for character in model_file.parent.name
+    )
+    assert downloads == [
+        (source, model_file),
+        ("https://Example.com/models/tokenizer.json?download=true", vocab_file),
+    ]
+
+
+def test_onnx_hf_repo_id_downloads_standard_assets(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    runtime_module = _load_runtime_utils_module()
+    downloads = []
+    monkeypatch.setenv("AAG_EMBED_ONNX", "acme/example-onnx")
+    monkeypatch.setattr(
+        runtime_module,
+        "_download_file",
+        lambda url, destination: downloads.append((url, destination)),
+    )
+
+    model_file, vocab_file = runtime_module._resolve_onnx_model_files(home_dir=tmp_path)
+
+    assert downloads == [
+        (
+            "https://huggingface.co/acme/example-onnx/resolve/main/model.onnx",
+            model_file,
+        ),
+        (
+            "https://huggingface.co/acme/example-onnx/resolve/main/tokenizer.json",
+            vocab_file,
+        ),
+    ]
+
+
+def test_gguf_url_and_hf_repo_id_download_to_normalized_cache(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    runtime_module = _load_runtime_utils_module()
+    downloads = []
+    monkeypatch.setattr(
+        runtime_module,
+        "_download_file",
+        lambda url, destination: downloads.append((url, destination)),
+    )
+
+    direct_url = "https://models.example/Embed%20Model%20(Q8_0).GGUF?version=1"
+    monkeypatch.setenv("AAG_EMBED_GGUF", direct_url)
+    direct_model = runtime_module._resolve_gguf_model_file(home_dir=tmp_path)
+    assert direct_model.name == "embed-model-q8_0.gguf"
+    assert direct_model.parent.parent.name == "gguf"
+    assert all(
+        character.isalnum() or character in "._-"
+        for character in direct_model.parent.name
+    )
+    assert downloads[-1] == (direct_url, direct_model)
+
+    monkeypatch.setenv("AAG_EMBED_GGUF", "acme/example-gguf")
+    repo_model = runtime_module._resolve_gguf_model_file(home_dir=tmp_path)
+    assert downloads[-1] == (
+        "https://huggingface.co/acme/example-gguf/resolve/main/model.gguf",
+        repo_model,
+    )
+
+
+def test_gguf_environment_overrides_onnx_and_api(monkeypatch):
+    _clear_embedding_env(monkeypatch)
+    monkeypatch.setenv("AAG_EMBED_GGUF", "/tmp/custom.gguf")
+    monkeypatch.setenv("AAG_EMBED_ONNX", "/tmp/custom.onnx")
+    monkeypatch.setenv("EMBED_MODEL_NAME", "api-embedding-model")
+    monkeypatch.setenv("EMBEDDING_BASE_URL", "http://localhost:1234/v1")
+
+    runtime_module = _load_runtime_utils_module()
+
+    assert runtime_module.EmbeddingModel().backend == "gguf"
+
+
 def test_default_onnx_assets_use_trained_minilm_model(monkeypatch):
     _clear_embedding_env(monkeypatch)
     runtime_module = _load_runtime_utils_module()
@@ -114,6 +220,50 @@ def test_default_onnx_assets_use_trained_minilm_model(monkeypatch):
         (runtime_module._default_onnx_asset_url("model.onnx"), model_file),
         (runtime_module._default_onnx_asset_url("tokenizer.json"), vocab_file),
     ]
+
+
+def test_gguf_config_generates_normalized_embeddings(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    monkeypatch.setenv("AAG_EMBED_GGUF", str(tmp_path / "custom.gguf"))
+    runtime_module = _load_runtime_utils_module()
+
+    class FakeLlama:
+        def embed(self, texts, normalize=False):
+            assert texts == ["hello", "world"]
+            assert normalize is True
+            return [[3.0, 4.0], [0.0, 2.0]]
+
+    model = runtime_module.EmbeddingModel()
+    model.gguf_model = FakeLlama()
+    embeddings = model.encode(["hello", "world"])
+
+    assert model.backend == "gguf"
+    np.testing.assert_allclose(embeddings, [[0.6, 0.8], [0.0, 1.0]])
+
+
+def test_invalid_gguf_embedding_shape_is_rejected(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    monkeypatch.setenv("AAG_EMBED_GGUF", str(tmp_path / "custom.gguf"))
+    runtime_module = _load_runtime_utils_module()
+
+    class FakeLlama:
+        def embed(self, _texts, normalize=False):
+            assert normalize is True
+            return [[[1.0, 2.0]]]
+
+    model = runtime_module.EmbeddingModel()
+    model.gguf_model = FakeLlama()
+    with pytest.raises(ValueError, match="one sentence embedding per input"):
+        model.encode(["hello"])
+
+
+def test_missing_local_gguf_model_has_actionable_error(monkeypatch, tmp_path):
+    _clear_embedding_env(monkeypatch)
+    monkeypatch.setenv("AAG_EMBED_GGUF", str(tmp_path / "missing.gguf"))
+    runtime_module = _load_runtime_utils_module()
+
+    with pytest.raises(FileNotFoundError, match="GGUF embedding model not found"):
+        runtime_module.EmbeddingModel()._get_gguf_runtime()
 
 
 def test_onnx_config_takes_precedence_and_generates_embeddings(monkeypatch, tmp_path):

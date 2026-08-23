@@ -21,6 +21,7 @@ import {
 const EMBEDDING_KEY_ENV = 'EMBEDDING_API_KEY';
 const OPENAI_KEY_ENV = 'OPENAI_API_KEY';
 const EMBEDDING_ENV_NAMES = [
+	'AAG_EMBED_GGUF',
 	'AAG_EMBED_ONNX',
 	'EMBED_MODEL_NAME',
 	'EMBEDDING_BASE_URL',
@@ -290,7 +291,7 @@ test('default resolver surfaces download failure and removes temporary files', a
 				fetchImpl: async () =>
 					new globalThis.Response('failed', { status: 503 }),
 			}),
-			/Failed to download ONNX embedding asset.*HTTP 503/,
+			/Failed to download embedding asset.*HTTP 503/,
 		);
 		const cacheDir = path.join(
 			tempHome,

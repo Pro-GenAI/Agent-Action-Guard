@@ -23,19 +23,49 @@ is_harmful, confidence = is_action_harmful({
 })
 ```
 
-#### Use an existing local ONNX model
+#### Configure a GGUF model source
 
-Set `AAG_EMBED_ONNX` to either the `.onnx` filepath or a directory containing `model.onnx`. Keep the matching `tokenizer.json` beside the model.
+`AAG_EMBED_GGUF` accepts a local `.gguf` file, a local directory containing `model.gguf`, a direct HTTP(S) model URL, a base URL ending in `/`, or a Hugging Face `owner/repo` ID. GGUF inference is optional and loads `llama-cpp-python` only when this backend is selected.
 
 ```bash
-export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+pip install llama-cpp-python
+
+# Local file
+export AAG_EMBED_GGUF="/models/all-MiniLM-L6-v2/model.gguf"
+
+# Direct remote file (use this for nonstandard GGUF filenames/quantizations)
+export AAG_EMBED_GGUF="https://example.com/models/all-MiniLM-L6-v2.Q8_0.gguf"
+
+# Hugging Face repo ID; resolves main/model.gguf
+export AAG_EMBED_GGUF="org/embedding-model-gguf"
+
 python app.py
 ```
 
-Python embedding backend precedence is:
-1. `AAG_EMBED_ONNX` local ONNX configuration.
-2. OpenAI-compatible API configuration (`EMBED_MODEL_NAME`, `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, or `OPENAI_API_KEY`).
-3. Automatic download/cache of the default `sentence-transformers/all-MiniLM-L6-v2` ONNX model and tokenizer.
+#### Configure an ONNX model source
+
+`AAG_EMBED_ONNX` accepts a local `.onnx` file, a local directory containing `model.onnx`, a direct HTTP(S) model URL, a base URL ending in `/`, or a Hugging Face `owner/repo` ID. Local models keep `tokenizer.json` beside the model. A direct remote model URL derives `tokenizer.json` as a sibling URL; a base URL or repo ID resolves the standard `model.onnx` and `tokenizer.json` names.
+
+```bash
+# Local file
+export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+
+# Direct remote file
+export AAG_EMBED_ONNX="https://example.com/models/model.onnx"
+
+# Hugging Face repo ID; resolves main/model.onnx and main/tokenizer.json
+export AAG_EMBED_ONNX="org/embedding-model-onnx"
+
+python app.py
+```
+
+Remote assets are stored under `~/.cache/agent-action-guard/{gguf,onnx}/`. URL-derived folder and file names are normalized to lowercase filesystem-safe components (`a-z`, `0-9`, `.`, `_`, `-`) and cache folders include a short source fingerprint to avoid collisions.
+
+If both `AAG_EMBED_GGUF` and `AAG_EMBED_ONNX` are set, GGUF is selected. Python embedding backend precedence is:
+1. `AAG_EMBED_GGUF` GGUF configuration.
+2. `AAG_EMBED_ONNX` ONNX configuration.
+3. OpenAI-compatible API configuration (`EMBED_MODEL_NAME`, `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, or `OPENAI_API_KEY`).
+4. Automatic download/cache of the default `sentence-transformers/all-MiniLM-L6-v2` ONNX model and tokenizer.
 
 #### Use an OpenAI-compatible embedding API
 
@@ -206,19 +236,35 @@ const result = await isActionHarmful({
 console.log(result);
 ```
 
-To use an existing local ONNX model:
+To use GGUF, install the optional llama.cpp binding and set `AAG_EMBED_GGUF` to a local file/directory, direct model URL, base URL ending in `/`, or Hugging Face `owner/repo` ID:
 
 ```bash
-export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+npm install node-llama-cpp
+
+export AAG_EMBED_GGUF="/models/all-MiniLM-L6-v2/model.gguf"
+# or: export AAG_EMBED_GGUF="https://example.com/models/all-MiniLM-L6-v2.Q8_0.gguf"
+# or: export AAG_EMBED_GGUF="org/embedding-model-gguf"
+
 node app.js
 ```
 
-JavaScript embedding backend precedence matches Python:
-1. `AAG_EMBED_ONNX` uses a local ONNX embedding model first.
-2. Otherwise, `EMBED_MODEL_NAME`, `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, or `OPENAI_API_KEY` select the OpenAI-compatible embeddings API.
-3. If none are set, the runtime automatically downloads and caches the default `sentence-transformers/all-MiniLM-L6-v2` ONNX model, `tokenizer.json`, and `tokenizer_config.json`, then generates embeddings locally.
+`AAG_EMBED_ONNX` accepts the same source forms. Direct ONNX URLs derive `tokenizer.json` and `tokenizer_config.json` as sibling URLs; base URLs and Hugging Face repo IDs resolve the standard filenames.
 
-`AAG_EMBED_ONNX` may point to a `.onnx` file or a directory containing `model.onnx`; keep `tokenizer.json` and `tokenizer_config.json` beside the JavaScript embedding model.
+```bash
+export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+# or: export AAG_EMBED_ONNX="https://example.com/models/model.onnx"
+# or: export AAG_EMBED_ONNX="org/embedding-model-onnx"
+
+node app.js
+```
+
+Remote assets use the same normalized URL-derived cache naming as Python under `~/.cache/agent-action-guard/{gguf,onnx}/`. A Hugging Face repo ID resolves `main/model.gguf` or `main/model.onnx`; use a direct URL for nonstandard filenames or a specific GGUF quantization.
+
+If both `AAG_EMBED_GGUF` and `AAG_EMBED_ONNX` are set, GGUF is selected. JavaScript embedding backend precedence matches Python:
+1. `AAG_EMBED_GGUF` uses the configured GGUF source first.
+2. Otherwise, `AAG_EMBED_ONNX` uses the configured ONNX source.
+3. Otherwise, `EMBED_MODEL_NAME`, `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, or `OPENAI_API_KEY` select the OpenAI-compatible embeddings API.
+4. If none are set, the runtime automatically downloads and caches the default `sentence-transformers/all-MiniLM-L6-v2` ONNX model, `tokenizer.json`, and `tokenizer_config.json`, then generates embeddings locally.
 
 #### JavaScript OpenAI-compatible embedding API
 

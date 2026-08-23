@@ -153,15 +153,19 @@ You do not need to configure an embedding backend to try the package.
 | Mode | When to use it |
 | --- | --- |
 | **Zero-config local ONNX** | Fastest path to getting started. Default MiniLM ONNX assets are downloaded and cached automatically. |
-| **Custom local ONNX** | Keep embedding inference local while controlling the model assets. Set `AAG_EMBED_ONNX`. |
+| **Configured GGUF** | Use a local file/directory, direct model URL, base URL ending in `/`, or Hugging Face `owner/repo` ID. Install `node-llama-cpp`. |
+| **Configured ONNX** | Use a local file/directory, direct model URL, base URL ending in `/`, or Hugging Face `owner/repo` ID. |
 | **OpenAI-compatible API** | Use an existing embedding service or centrally managed endpoint. |
 
 Backend selection follows this precedence:
 
-1. `AAG_EMBED_ONNX` custom local model
-2. Explicit `EMBED_MODEL_NAME`
-3. API configuration via `EMBEDDING_API_KEY`, `OPENAI_API_KEY`, or `EMBEDDING_BASE_URL`
-4. Automatically downloaded/cached default `sentence-transformers/all-MiniLM-L6-v2` ONNX assets
+1. `AAG_EMBED_GGUF` configured GGUF source
+2. `AAG_EMBED_ONNX` configured ONNX source
+3. Explicit `EMBED_MODEL_NAME`
+4. API configuration via `EMBEDDING_API_KEY`, `OPENAI_API_KEY`, or `EMBEDDING_BASE_URL`
+5. Automatically downloaded/cached default `sentence-transformers/all-MiniLM-L6-v2` ONNX assets
+
+If both model variables are set, GGUF takes precedence. Remote assets are cached under normalized filesystem-safe names derived from their source URLs. Hugging Face repo IDs resolve standard `main/model.gguf` or `main/model.onnx` filenames; use a direct URL for nonstandard GGUF filenames/quantizations. Direct ONNX URLs derive tokenizer sidecars from sibling URLs.
 
 For environment variables, tokenizer files, custom endpoints, and configuration examples, see the full [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md).
 
