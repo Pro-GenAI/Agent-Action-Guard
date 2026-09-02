@@ -1,6 +1,6 @@
 {
 	"name": "agent-action-guard",
-	"version": "0.1.0",
+	"version": "1.2.0",
 	"description": "JavaScript runtime for screening AI agent actions as safe, harmful, or unethical.",
 	"type": "module",
 	"main": "./src/index.js",
