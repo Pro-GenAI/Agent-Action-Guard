@@ -91,6 +91,22 @@ pnpm install agent-action-guard
 
 Action Guard sits between the agent and its tools, blocking unsafe calls before they run — no human in the loop required.
 
+### Agent Action Guard vs. Laya
+
+[Laya](https://github.com/receptron/laya) is a general-purpose local model that can also be used as an action-safety classifier similar to Agent Action Guard. The comparison script evaluates both models on HarmActions using CPU execution for both systems and excludes warm-up/model-loading time from the reported per-action latency.
+
+```bash
+cd python
+python scripts/compare_laya_harmactions.py
+```
+
+| Model | HarmActions | Accuracy | Precision | Recall | F1 | ms/action |
+|---|---:|---:|---:|---:|---:|---:|
+| **Agent Action Guard** | **97.87%** | **97.87%** | **100.00%** | **97.87%** | **98.92%** | **19.66** |
+| Laya | 51.06% | 51.06% | 100.00% | 51.06% | 67.61% | 815.86 |
+
+The benchmark uses the same HarmActions rows for both classifiers and forces CPU execution to make the latency comparison more consistent.
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/iceberg.jpg" alt="Iceberg" height="400"/>
 </p>

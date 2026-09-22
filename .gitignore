@@ -17,6 +17,7 @@ dist/
 posts.*
 test.ipynb
 evaluation_results*
+.laya-node-runtime/
 
 .env
 
