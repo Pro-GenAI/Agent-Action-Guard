@@ -85,6 +85,8 @@ await ensureActionSafety(action, { raiseException: true });
 - `javascript/` — npm runtime package for Node.js action screening.
 - `USAGE.md` — detailed usage examples and environment setup.
 - `README.md` — project overview, demos, and citations.
+- `Dockerfile` — minimal Python 3.12 container image for the `aag-classify` CLI; build from the repository root with `docker build -t agent-action-guard .`.
+- `.dockerignore` — keeps local virtualenvs, caches, tests, training files, and other development-only artifacts out of the Docker build context.
 
 ## Architecture Overview
 

@@ -3,6 +3,8 @@
 
 ```bash
 pip install agent-action-guard
+# or
+uv add agent-action-guard
 ```
 
 2. Choose the embedding backend. ONNX is the default and requires no embedding server.
@@ -29,6 +31,8 @@ is_harmful, confidence = is_action_harmful({
 
 ```bash
 pip install llama-cpp-python
+# or
+uv add llama-cpp-python
 
 # Local file
 export AAG_EMBED_GGUF="/models/all-MiniLM-L6-v2/model.gguf"
@@ -73,6 +77,8 @@ To use an embedding server instead, set its model, base URL, and credentials in 
 
 ```bash
 pip install "agent-action-guard[all]"
+# or
+uv add "agent-action-guard[all]"
 
 export EMBED_MODEL_NAME="sentence-transformers/all-MiniLM-L6-v2"
 export EMBEDDING_BASE_URL="http://localhost:1234/v1"
@@ -110,7 +116,7 @@ def delete_user(user_id: str):
 ```
 
 PyPI package scope:
-- `pip install agent-action-guard` installs the runtime classifier and dependencies for local ONNX embedding inference. The default embedding model and tokenizer are downloaded and cached on first use rather than bundled in the wheel.
+- `pip install agent-action-guard` (or `uv add agent-action-guard`) installs the runtime classifier and dependencies for local ONNX embedding inference. The default embedding model and tokenizer are downloaded and cached on first use rather than bundled in the wheel.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
 
 Repository-local development commands run from `python/`:

@@ -30,6 +30,8 @@ Python package support: **Python 3.8 through Python 3.14**.
 
 ```bash
 pip install agent-action-guard
+# or
+uv add agent-action-guard
 ```
 <!-- 
 If you use pepip:
@@ -43,6 +45,9 @@ Want to run the evaluation benchmark too?
 
 ```bash
 pip install "agent-action-guard[harmactionseval]"
+# or
+uv add "agent-action-guard[harmactionseval]"
+
 python -m agent_action_guard.harmactionseval
 ```
 

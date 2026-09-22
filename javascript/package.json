@@ -5,7 +5,7 @@
 	"type": "module",
 	"main": "./src/index.js",
 	"bin": {
-		"aag-classify": "./bin/aag-classify.js"
+		"aag-classify": "bin/aag-classify.js"
 	},
 	"scripts": {
 		"format": "prettier --write .",
