@@ -99,6 +99,7 @@ all = [
 
 dev = [
     "torch",
+    "onnx>=1.14.0,<2.0.0",
     "uv",
     "ruff",
     "black",

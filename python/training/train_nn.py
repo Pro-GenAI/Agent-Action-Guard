@@ -4,6 +4,7 @@ Train a neural network on embeddings built from action metadata.
 - Saves the trained PyTorch model and the embedding model name used.
 """
 
+import argparse
 import json
 import random
 from collections import Counter
@@ -11,13 +12,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from agent_action_guard._runtime_utils import (
     ALL_CLASSES,
-    EMBED_MODEL_NAME,
     ONNX_MODEL_PATH,
     EmbeddingModel,
     flatten_action_to_text,
@@ -27,6 +28,16 @@ MODEL_PATH = (
     Path(__file__).parent.parent / "agent_action_guard" / "action_classifier_model.pt"
 )
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
+def resolve_device(device_name: str) -> torch.device:
+    """Resolve an explicit training device, with ``auto`` preferring CUDA."""
+    if device_name == "auto":
+        return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device(device_name)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise ValueError(f"CUDA device requested but CUDA is unavailable: {device_name}")
+    return device
 
 
 class ActionClassNet(nn.Module):
@@ -109,7 +120,9 @@ _BATCH_SIZE = 8
 _ROOT = Path(__file__).parent.parent
 _DATA_PATH = _ROOT / "agent_action_guard" / "harmactions_dataset.json"
 
-_embed_model = EmbeddingModel(EMBED_MODEL_NAME)
+# Match normal Agent Action Guard runtime backend selection. With no embedding
+# environment variables configured this uses the default local ONNX backend.
+_embed_model = EmbeddingModel()
 
 
 def _get_class_label(entry):
@@ -148,13 +161,25 @@ def load_texts_and_labels():
     return texts, labels, classes, weights
 
 
-def make_embeddings(texts):
-    """Generate embeddings for texts."""
-    # Sentence-transformers returns numpy arrays
-    embs = _embed_model.encode(
-        texts, normalize_embeddings=True, show_progress_bar=False
+def make_embeddings(texts, batch_size: int = 64, description: str = "Embedding"):
+    """Generate embeddings in batches with a visible progress bar."""
+    chunks = []
+    progress = Progress(
+        TextColumn("[bold cyan]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
     )
-    return np.array(embs)
+    with progress:
+        task = progress.add_task(description, total=len(texts))
+        for start in range(0, len(texts), batch_size):
+            batch = texts[start : start + batch_size]
+            embs = _embed_model.encode(
+                batch, normalize_embeddings=True, show_progress_bar=False
+            )
+            chunks.append(np.asarray(embs, dtype=np.float32))
+            progress.advance(task, len(batch))
+    return np.concatenate(chunks, axis=0)
 
 
 def train_one(
@@ -189,23 +214,38 @@ def train_one(
         weight=class_weights.to(DEVICE) if class_weights is not None else None
     )
 
-    for epoch in range(1, epochs + 1):
-        model.train()
-        total_loss = 0.0
-        total_samples = 0
-        for xb, yb in train_loader:
-            xb = xb.to(DEVICE)
-            yb = yb.to(DEVICE)
-            logits = model(xb)
-            loss = loss_fn(logits, yb)
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
-            bs = xb.size(0)
-            total_loss += loss.item() * bs
-            total_samples += bs
-        avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
-        print(f"Epoch {epoch}/{epochs} - loss: {avg_loss:.4f}")
+    progress = Progress(
+        TextColumn("[bold cyan]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+    )
+    with progress:
+        task = progress.add_task("Training regular classifier", total=epochs * len(train_loader))
+        for epoch in range(1, epochs + 1):
+            model.train()
+            total_loss = 0.0
+            total_samples = 0
+            for xb, yb in train_loader:
+                xb = xb.to(DEVICE)
+                yb = yb.to(DEVICE)
+                logits = model(xb)
+                loss = loss_fn(logits, yb)
+                opt.zero_grad()
+                loss.backward()
+                opt.step()
+                bs = xb.size(0)
+                total_loss += loss.item() * bs
+                total_samples += bs
+                avg_loss = total_loss / total_samples if total_samples > 0 else 0.0
+                progress.update(
+                    task,
+                    description=(
+                        f"Training regular classifier epoch {epoch}/{epochs} "
+                        f"loss={avg_loss:.4f}"
+                    ),
+                )
+                progress.advance(task)
 
     with torch.inference_mode():
         model.eval()
@@ -230,11 +270,12 @@ def _train_model():
         stratify=classes,
     )
 
-    print("Generating embeddings...")
+    print(f"Embedding backend: {_embed_model.backend}", flush=True)
+    print("Generating embeddings...", flush=True)
     # Embeddings should be deterministic given seed and model
     _set_seed()
-    Xtr_embs = make_embeddings(Xtr_texts)
-    Xte_embs = make_embeddings(Xte_texts)
+    Xtr_embs = make_embeddings(Xtr_texts, description="Embedding train set")
+    Xte_embs = make_embeddings(Xte_texts, description="Embedding test set")
 
     # Use best values discovered interactively
     print("Training...")
@@ -298,6 +339,7 @@ def export_model_to_onnx(
             },
             opset_version=opset_version,
             do_constant_folding=True,
+            dynamo=False,
         )
 
         print(f"Saved model in ONNX format to {onnx_path}")
@@ -305,6 +347,18 @@ def export_model_to_onnx(
         print("Failed saving ONNX model:", e)
 
 
+def _parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--device",
+        default="auto",
+        help="Training device: auto, cpu, cuda, or cuda:N (default: auto).",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    # Run grid search with top-level configuration variables
+    args = _parse_args()
+    DEVICE = resolve_device(args.device)
+    print(f"Training regular classifier on: {DEVICE}")
     _train_model()
