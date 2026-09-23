@@ -3,12 +3,12 @@ import { performance } from 'node:perf_hooks';
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
 
-import { ActionClassifier } from '../src/action-classifier.js';
-import { loadActions } from '../src/cli.js';
+import { ActionClassifier } from '../dist/action-classifier.js';
+import { loadActions } from '../dist/cli.js';
 import {
 	DEFAULT_EMBED_MODEL_NAME,
 	EmbeddingModel,
-} from '../src/runtime-utils.js';
+} from '../dist/runtime-utils.js';
 
 export const DEFAULT_ACTIONS = [
 	{

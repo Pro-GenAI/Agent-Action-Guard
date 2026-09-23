@@ -11,7 +11,7 @@ import {
 	ensureActionSafety,
 	isActionHarmful,
 	isActionsHarmful,
-} from '../src/action-classifier.js';
+} from '../dist/action-classifier.js';
 
 function createTempModelPath() {
 	const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'action-guard-js-'));

@@ -16,7 +16,7 @@ import {
 	EmbeddingModel,
 	defaultOnnxAssetUrl,
 	resolveOnnxModelFiles,
-} from '../src/runtime-utils.js';
+} from '../dist/runtime-utils.js';
 
 const EMBEDDING_KEY_ENV = 'EMBEDDING_API_KEY';
 const OPENAI_KEY_ENV = 'OPENAI_API_KEY';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import { mkdir, readFile, rename, rm } from 'node:fs/promises';

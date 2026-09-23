@@ -185,7 +185,7 @@ print(result.final_output)
 
 ### JavaScript Runtime Package
 
-The repository also includes an npm package in [javascript/package.json](javascript/package.json) that exposes the same action-screening runtime for Node.js.
+The repository also includes an npm package in [typescript/package.json](typescript/package.json) that exposes the same action-screening runtime for Node.js.
 
 Install and test it from the package directory:
 
@@ -285,7 +285,7 @@ node app.js
 
 `EMBEDDING_API_KEY` takes precedence over `OPENAI_API_KEY`. The classifier is trained against `sentence-transformers/all-MiniLM-L6-v2` embeddings, so custom API or ONNX embedding models must produce compatible 384-dimensional vectors.
 
-The JavaScript Action Guard classifier itself continues to use the packaged ONNX model in [javascript/src/action_classifier_model.onnx](javascript/src/action_classifier_model.onnx). Local embedding inference depends on `onnxruntime-node` and `@huggingface/tokenizers`; API inference depends on `openai`.
+The JavaScript Action Guard classifier itself continues to use the packaged ONNX model in [typescript/src/action_classifier_model.onnx](typescript/src/action_classifier_model.onnx). Local embedding inference depends on `onnxruntime-node` and `@huggingface/tokenizers`; API inference depends on `openai`.
 
 ### Batch classification and `aag-classify` CLI
 
@@ -359,7 +359,7 @@ make latency-backends
 python examples/scripts/compare_embedding_backend_latency.py --iterations 10 --batch-size 8
 ```
 
-Run the JavaScript benchmark from `javascript/`:
+Run the JavaScript benchmark from `typescript/`:
 
 ```bash
 make latency-backends

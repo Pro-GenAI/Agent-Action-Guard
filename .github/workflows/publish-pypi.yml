@@ -48,7 +48,7 @@ jobs:
           python -m venv /tmp/pkg-test
           /tmp/pkg-test/bin/python -m pip install --upgrade pip
           /tmp/pkg-test/bin/python -m pip install dist/*.whl
-          /tmp/pkg-test/bin/python -m pip install pytest
+          /tmp/pkg-test/bin/python -m pip install pytest rich
           cd /tmp
           /tmp/pkg-test/bin/python -m pytest "$GITHUB_WORKSPACE/python/tests"
 

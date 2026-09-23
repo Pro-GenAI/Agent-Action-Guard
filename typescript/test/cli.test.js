@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { loadActions, main, summarizeResults } from '../src/cli.js';
+import { loadActions, main, summarizeResults } from '../dist/cli.js';
 
 function tempFile(name, contents) {
 	const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'aag-cli-js-'));

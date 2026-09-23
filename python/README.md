@@ -53,7 +53,7 @@ python -m agent_action_guard.harmactionseval
 
 ### JavaScript Runtime
 
-The repository also ships an npm package in [javascript/package.json](javascript/package.json) for screening agent actions in Node.js.
+The repository also ships an npm package in [typescript/package.json](typescript/package.json) for screening agent actions in Node.js.
 
 ```bash
 npm install agent-action-guard
@@ -90,6 +90,22 @@ pnpm install agent-action-guard
 > These models often still respond *"Sorry, I can't help with that"* while executing the harmful action anyway.
 
 Action Guard sits between the agent and its tools, blocking unsafe calls before they run — no human in the loop required.
+
+### Agent Action Guard vs. Luna and Laya
+
+[Laya](https://github.com/receptron/laya) is a general-purpose local model that can also be used as an action-safety classifier similar to Agent Action Guard. The repository comparison benchmark evaluates Agent Action Guard, `gpt-5.6-luna`, and Laya on the same HarmActions rows. Local classifiers use CPU execution, and warm-up/model-loading time is excluded from the reported per-action latency.
+
+```bash
+python scripts/compare_laya_harmactions.py
+```
+
+| Model | HarmActions | Accuracy | Precision | Recall | F1 | ms/action |
+|---|---:|---:|---:|---:|---:|---:|
+| **Agent Action Guard** | **97.87%** | **97.87%** | **100.00%** | **97.87%** | **98.92%** | **19.66** |
+| gpt-5.6-luna | 90.07% | 90.07% | 100.00% | 90.07% | 94.78% | 3381.72 |
+| Laya | 51.06% | 51.06% | 100.00% | 51.06% | 67.61% | 815.86 |
+
+The benchmark uses the same HarmActions rows for all classifiers; CPU execution is forced for the local systems to make the latency comparison more consistent.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/iceberg.jpg" alt="Iceberg" height="400"/>

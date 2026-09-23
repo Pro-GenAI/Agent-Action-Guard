@@ -53,7 +53,7 @@ python -m agent_action_guard.harmactionseval
 
 ### JavaScript Runtime
 
-The repository also ships an npm package in [javascript/package.json](javascript/package.json) for screening agent actions in Node.js.
+The repository also ships an npm package in [typescript/package.json](typescript/package.json) for screening agent actions in Node.js.
 
 ```bash
 npm install agent-action-guard

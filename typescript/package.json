@@ -1,13 +1,16 @@
 {
 	"name": "agent-action-guard",
-	"version": "1.2.0",
-	"description": "JavaScript runtime for screening AI agent actions as safe, harmful, or unethical.",
+	"version": "1.2.1",
+	"description": "TypeScript runtime for screening AI agent actions as safe, harmful, or unethical.",
 	"type": "module",
-	"main": "./src/index.js",
+	"main": "./dist/index.js",
 	"bin": {
 		"aag-classify": "bin/aag-classify.js"
 	},
 	"scripts": {
+		"build": "tsc -p tsconfig.json && node scripts/copy-assets.js",
+		"pretest": "npm run build",
+		"prepack": "npm run build",
 		"format": "prettier --write .",
 		"lint": "eslint .",
 		"quality": "npm run format && npm run lint",
@@ -19,11 +22,14 @@
 		"test:runtimes": "node --test test/cross-runtime.test.js"
 	},
 	"exports": {
-		".": "./src/index.js"
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
 	},
 	"files": [
 		"bin",
-		"src",
+		"dist",
 		"README.md"
 	],
 	"engines": {
@@ -37,12 +43,15 @@
 	],
 	"license": "CC-BY-4.0",
 	"devDependencies": {
+		"@types/node": "^18.19.0",
 		"eslint": "^9.0.0",
-		"prettier": "^3.0.0"
+		"prettier": "^3.0.0",
+		"typescript": "^5.9.0"
 	},
 	"dependencies": {
 		"@huggingface/tokenizers": "^0.1.0",
 		"onnxruntime-node": "^1.14.0",
 		"openai": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0"
-	}
+	},
+	"types": "./dist/index.d.ts"
 }

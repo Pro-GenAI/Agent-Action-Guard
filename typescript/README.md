@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Agent Action Guard" height="220" />
 </p>
 
-<h1 align="center">Agent Action Guard for JavaScript</h1>
+<h1 align="center">Agent Action Guard for TypeScript / JavaScript</h1>
 
 <p align="center">
   <strong>Block harmful AI agent tool calls before they execute.</strong><br />
@@ -43,7 +43,26 @@ An AI agent can decide to call a tool even when the resulting action is unsafe. 
 - **Local-first option** — use cached ONNX embeddings without sending action text to an embedding API.
 - **Bring your own embeddings** — use a custom ONNX model or OpenAI-compatible endpoint when needed.
 - **Batch + CLI support** — classify multiple actions programmatically or from JSON/JSONL files.
-- **Built for agent loops** — the package contains the runtime guard; training and benchmark tooling stay outside the JavaScript runtime package.
+- **Built for agent loops** — the package contains the runtime guard; training and benchmark tooling stay outside the TypeScript runtime package.
+
+## Agent Action Guard vs. Luna and Laya
+
+[Laya](https://github.com/receptron/laya) is a general-purpose local model that can also be used as an action-safety classifier similar to Agent Action Guard. The repository comparison benchmark evaluates Agent Action Guard, `gpt-5.6-luna`, and Laya on the same HarmActions rows. Local classifiers use CPU execution, and warm-up/model-loading time is excluded from the reported per-action latency.
+
+Run the benchmark from the repository's Python package:
+
+```bash
+cd python
+python scripts/compare_laya_harmactions.py
+```
+
+| Model | HarmActions | Accuracy | Precision | Recall | F1 | ms/action |
+|---|---:|---:|---:|---:|---:|---:|
+| **Agent Action Guard** | **97.87%** | **97.87%** | **100.00%** | **97.87%** | **98.92%** | **19.66** |
+| gpt-5.6-luna | 90.07% | 90.07% | 100.00% | 90.07% | 94.78% | 3381.72 |
+| Laya | 51.06% | 51.06% | 100.00% | 51.06% | 67.61% | 815.86 |
+
+The benchmark uses the same HarmActions rows for all classifiers; CPU execution is forced for the local systems to make the latency comparison more consistent.
 
 ## 60-second quick start
 
@@ -191,7 +210,7 @@ import {
 | `ActionClassifier` | Create/configure a classifier instance directly. |
 | `HarmfulActionError` | Error type thrown by blocking helpers. |
 
-See [`examples/basic-usage.js`](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js) for a minimal runnable example.
+See [`examples/basic-usage.js`](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/typescript/examples/basic-usage.js) for a minimal runnable example.
 
 ## Where it fits
 
@@ -238,7 +257,7 @@ Action Guard is a learned classifier, not a complete security boundary. For high
 
 - [Main repository](https://github.com/Pro-GenAI/Agent-Action-Guard)
 - [Full usage and configuration](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md)
-- [Runnable JavaScript example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/javascript/examples/basic-usage.js)
+- [Runnable JavaScript example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/typescript/examples/basic-usage.js)
 - [npm package](https://www.npmjs.com/package/agent-action-guard)
 
 ---

@@ -12,7 +12,7 @@ import {
 	ensureActionSafety,
 	flattenActionToText,
 	isActionHarmful,
-} from '../src/index.js';
+} from '../dist/index.js';
 
 function createTempModelPath() {
 	const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'action-guard-js-'));

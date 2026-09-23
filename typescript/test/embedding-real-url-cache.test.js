@@ -6,7 +6,7 @@ import test from 'node:test';
 import {
 	resolveGgufModelFile,
 	resolveOnnxModelFiles,
-} from '../src/runtime-utils.js';
+} from '../dist/runtime-utils.js';
 
 const REAL_ONNX_BASE_URL =
 	'https://huggingface.co/llmware/bling-tiny-llama-onnx/resolve/main/';

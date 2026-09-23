@@ -1,4 +1,4 @@
-// import { isActionHarmful } from '../src/index.js';
+// import { isActionHarmful } from '../dist/index.js';
 import { isActionHarmful } from 'agent-action-guard';
 
 async function main() {

@@ -5,7 +5,7 @@ import {
 	EmbeddingModel,
 	flattenActionToText,
 	normalizeOnnxRuntimeModule,
-} from '../src/runtime-utils.js';
+} from '../dist/runtime-utils.js';
 
 test('normalizeOnnxRuntimeModule supports legacy default-only ESM wrappers', () => {
 	const runtime = { InferenceSession: { create() {} }, Tensor: class {} };
