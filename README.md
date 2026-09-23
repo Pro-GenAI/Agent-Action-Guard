@@ -103,6 +103,7 @@ python scripts/compare_laya_harmactions.py
 | Model | HarmActions | Accuracy | Precision | Recall | F1 | ms/action |
 |---|---:|---:|---:|---:|---:|---:|
 | **Agent Action Guard** | **97.87%** | **97.87%** | **100.00%** | **97.87%** | **98.92%** | **19.66** |
+| gpt-5.6-luna | 90.07% | 90.07% | 100.00% | 90.07% | 94.78% | 3381.72 |
 | Laya | 51.06% | 51.06% | 100.00% | 51.06% | 67.61% | 815.86 |
 
 The benchmark uses the same HarmActions rows for both classifiers and forces CPU execution to make the latency comparison more consistent.
