@@ -91,9 +91,9 @@ pnpm install agent-action-guard
 
 Action Guard sits between the agent and its tools, blocking unsafe calls before they run — no human in the loop required.
 
-### Agent Action Guard vs. Laya
+### Agent Action Guard vs. Laya and LLM
 
-[Laya](https://github.com/receptron/laya) is a general-purpose local model that can also be used as an action-safety classifier similar to Agent Action Guard. The comparison script evaluates both models on HarmActions using CPU execution for both systems and excludes warm-up/model-loading time from the reported per-action latency.
+[Laya](https://github.com/receptron/laya) is a general-purpose local model that can also be used as an action-safety classifier similar to Agent Action Guard. The comparison script evaluates Agent Action Guard, Laya, and an OpenAI LLM classifier on the same HarmActions rows. The two local systems are forced to CPU execution, and warm-up/model-loading time is excluded from the reported per-action latency.
 
 ```bash
 cd python
@@ -106,7 +106,15 @@ python scripts/compare_laya_harmactions.py
 | gpt-5.6-luna | 90.07% | 90.07% | 100.00% | 90.07% | 94.78% | 3381.72 |
 | Laya | 51.06% | 51.06% | 100.00% | 51.06% | 67.61% | 815.86 |
 
-The benchmark uses the same HarmActions rows for both classifiers and forces CPU execution to make the latency comparison more consistent.
+<p align="center">
+  <img src="assets/benchmark_quality.svg" alt="Bar chart comparing Agent Action Guard, gpt-5.6-luna, and Laya accuracy and F1 score on HarmActions" width="900"/>
+</p>
+
+<p align="center">
+  <img src="assets/benchmark_latency.svg" alt="Bar chart comparing Agent Action Guard, gpt-5.6-luna, and Laya per-action latency" width="900"/>
+</p>
+
+The charts use the same values as the table above: higher is better for classification quality, while lower is better for latency.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/iceberg.jpg" alt="Iceberg" height="400"/>

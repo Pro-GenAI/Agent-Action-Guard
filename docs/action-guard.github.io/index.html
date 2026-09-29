@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description"
+    content="Agent Action Guard — lightweight agent guardrails and action classifier for safe AI agents. Real-time screening prevents harmful tool calls and ensures agent safety in production." />
+  <meta name="keywords"
+    content="agent guardrails,safe agents,AI agent safety,action guard,agent action guard,action classifier,autonomous agents,safety guardrails" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://action-guard.github.io/" />
+  <title>Agent Action Guard — Agent Guardrails & Safe AI Agents</title>
+  <meta property="og:title" content="Agent Action Guard — Agent Guardrails & Safe AI Agents" />
+  <meta property="og:description"
+    content="Lightweight guardrails for autonomous AI agents — real-time action screening and classification to prevent harmful or unsafe tool calls." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://action-guard.github.io/" />
+  <meta property="og:image" content="https://action-guard.github.io/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Agent Action Guard — Agent Guardrails & Safe AI Agents" />
+  <meta name="twitter:description"
+    content="Prevent harmful agent actions with Agent Action Guard's real-time screening and action classifier." />
+  <meta name="twitter:image" content="https://action-guard.github.io/assets/og-image.png" />
+  <meta name="theme-color" content="#121317" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://action-guard.github.io/#website",
+        "url": "https://action-guard.github.io/",
+        "name": "Agent Action Guard",
+        "description": "Lightweight guardrails and action classifier for safe AI agents. Real-time screening to prevent harmful tool calls.",
+        "publisher": { "@id": "https://action-guard.github.io/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://action-guard.github.io/#organization",
+        "name": "Agent Action Guard",
+        "url": "https://action-guard.github.io/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://action-guard.github.io/assets/logo.png"
+        }
+      }
+    ]
+  }
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-fixed-variant": "#095300",
+            "inverse-primary": "#545e76",
+            "background": "#121317",
+            "outline": "#8e9196",
+            "error-container": "#93000a",
+            "surface-dim": "#121317",
+            "surface-container-high": "#292a2e",
+            "primary-container": "#0f1a2e",
+            "on-primary-container": "#78839c",
+            "on-background": "#e3e2e8",
+            "error": "#ffb4ab",
+            "on-surface-variant": "#c4c6cc",
+            "inverse-surface": "#e3e2e8",
+            "tertiary": "#2ae500",
+            "secondary-container": "#2f4865",
+            "secondary-fixed": "#d1e4ff",
+            "inverse-on-surface": "#2f3035",
+            "secondary-fixed-dim": "#afc9ea",
+            "surface-variant": "#343439",
+            "surface-bright": "#38393e",
+            "on-primary-fixed-variant": "#3c475d",
+            "surface-container-low": "#1a1b20",
+            "primary-fixed": "#d7e2ff",
+            "primary": "#bbc6e2",
+            "on-secondary": "#17324d",
+            "surface-container-lowest": "#0d0e12",
+            "tertiary-container": "#022000",
+            "on-secondary-fixed": "#001d36",
+            "surface": "#121317",
+            "on-primary": "#263046",
+            "surface-container": "#1f1f24",
+            "on-secondary-container": "#9eb7d8",
+            "secondary": "#afc9ea",
+            "on-secondary-fixed-variant": "#2f4865",
+            "primary-fixed-dim": "#bbc6e2",
+            "on-primary-fixed": "#101b30",
+            "surface-container-highest": "#343439",
+            "surface-tint": "#bbc6e2",
+            "on-tertiary": "#053900",
+            "tertiary-fixed-dim": "#2ae500",
+            "on-tertiary-fixed": "#022100",
+            "outline-variant": "#44474c",
+            "on-tertiary-container": "#199800",
+            "on-error": "#690005",
+            "tertiary-fixed": "#79ff5b",
+            "on-surface": "#e3e2e8",
+            "on-error-container": "#ffdad6"
+          },
+          fontFamily: {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Space Grotesk"]
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+        },
+      },
+    }
+  </script>
+  <style>
+    :root {
+      --guard-green: #2ae500;
+      --guard-green-soft: #79ff5b;
+      --guard-blue: #bbc6e2;
+      --mouse-x: 50vw;
+      --mouse-y: 20vh;
+    }
+
+    * { box-sizing: border-box; }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 92px;
+    }
+
+    body {
+      position: relative;
+      isolation: isolate;
+      background-color: #121317;
+      color: #e3e2e8;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 8%, rgba(42, 229, 0, .09), transparent 28rem),
+        radial-gradient(circle at 90% 22%, rgba(187, 198, 226, .07), transparent 32rem),
+        linear-gradient(180deg, #0d0e12 0%, #121317 28%, #101115 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(650px circle at var(--mouse-x) var(--mouse-y), rgba(42, 229, 0, .075), transparent 42%);
+    }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #0d0e12; }
+    ::-webkit-scrollbar-thumb {
+      border: 2px solid #0d0e12;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #445047, #2ae500);
+    }
+
+    .scroll-progress {
+      position: fixed;
+      inset: 0 auto auto 0;
+      width: 0;
+      height: 2px;
+      z-index: 80;
+      background: linear-gradient(90deg, #79ff5b, #2ae500, #bbc6e2);
+      box-shadow: 0 0 18px rgba(42, 229, 0, .8);
+      transform-origin: left center;
+    }
+
+    .site-nav {
+      isolation: isolate;
+      background: rgba(13, 14, 18, .72) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, .055);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+      backdrop-filter: blur(22px) saturate(150%);
+      -webkit-backdrop-filter: blur(22px) saturate(150%);
+      transition: padding .3s ease, background .3s ease, box-shadow .3s ease;
+    }
+
+    .site-nav.is-scrolled {
+      padding-top: .7rem !important;
+      padding-bottom: .7rem !important;
+      background: rgba(10, 11, 15, .9) !important;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
+    }
+
+    .brand-mark {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .65rem;
+    }
+
+    .brand-mark::before {
+      content: "";
+      width: .72rem;
+      height: .72rem;
+      border-radius: 3px;
+      background: var(--guard-green);
+      box-shadow: 0 0 18px rgba(42, 229, 0, .75), 0 0 0 5px rgba(42, 229, 0, .08);
+      animation: guardPulse 2.4s ease-in-out infinite;
+      transform: rotate(45deg);
+    }
+
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -.38rem;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--guard-green);
+      box-shadow: 0 0 10px rgba(42, 229, 0, .6);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+    }
+    .nav-link:hover::after,
+    .nav-link.is-active::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .hero-section {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px),
+        radial-gradient(circle at 50% -10%, rgba(42, 229, 0, .11), transparent 40rem),
+        #121317 !important;
+      background-size: 54px 54px, 54px 54px, auto, auto !important;
+      mask-image: linear-gradient(to bottom, black 88%, transparent 100%);
+    }
+
+    .hero-section::before,
+    .hero-section::after {
+      content: "";
+      position: absolute;
+      width: 30rem;
+      height: 30rem;
+      border: 1px solid rgba(42, 229, 0, .12);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-section::before {
+      top: -18rem;
+      left: -10rem;
+      box-shadow: 0 0 90px rgba(42, 229, 0, .07) inset;
+      animation: orbitSlow 18s linear infinite;
+    }
+    .hero-section::after {
+      right: -12rem;
+      top: 16rem;
+      border-color: rgba(187, 198, 226, .09);
+      animation: orbitSlow 22s linear reverse infinite;
+    }
+
+    .hero-badge {
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 24px rgba(42, 229, 0, .04), 0 0 30px rgba(42, 229, 0, .04);
+      animation: fadeSlideDown .75s .1s both cubic-bezier(.2, .8, .2, 1);
+    }
+    .hero-badge::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(110deg, transparent 20%, rgba(121, 255, 91, .22), transparent 65%);
+      transform: translateX(-120%);
+      animation: badgeSweep 4.5s 1.5s ease-in-out infinite;
+    }
+
+    .hero-title {
+      text-wrap: balance;
+      animation: heroEnter .95s .16s both cubic-bezier(.16, 1, .3, 1);
+    }
+    .hero-title .neon-text {
+      color: transparent !important;
+      background: linear-gradient(115deg, #79ff5b 8%, #2ae500 42%, #d8ffcf 58%, #2ae500 74%, #79ff5b 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px rgba(42, 229, 0, .12));
+      animation: textShimmer 5s linear infinite;
+    }
+    .hero-copy { animation: heroEnter .95s .26s both cubic-bezier(.16, 1, .3, 1); }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .85rem;
+      margin-bottom: 1.15rem;
+      animation: heroEnter .95s .34s both cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .hero-primary-cta,
+    .hero-secondary-cta {
+      min-height: 3.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      padding: .82rem 1.3rem;
+      border-radius: .7rem;
+      font-family: Manrope, sans-serif;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      transition: transform .25s cubic-bezier(.16, 1, .3, 1), border-color .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+
+    .hero-primary-cta {
+      color: #052100;
+      background: linear-gradient(135deg, #79ff5b, #2ae500 55%, #70ff50);
+      box-shadow: 0 15px 45px rgba(42, 229, 0, .2), inset 0 1px rgba(255, 255, 255, .4);
+    }
+
+    .hero-primary-cta:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 22px 55px rgba(42, 229, 0, .29), 0 0 35px rgba(42, 229, 0, .12), inset 0 1px rgba(255, 255, 255, .45);
+    }
+
+    .hero-secondary-cta {
+      color: #e3e2e8;
+      border: 1px solid rgba(255, 255, 255, .11);
+      background: rgba(255, 255, 255, .035);
+      box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-secondary-cta:hover {
+      transform: translateY(-3px);
+      border-color: rgba(121, 255, 91, .28);
+      background: rgba(42, 229, 0, .055);
+    }
+
+    .hero-install {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      width: min(100%, 33rem);
+      margin: 0 auto 1.45rem;
+      padding: .62rem .72rem .62rem 1rem;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: .75rem;
+      background: rgba(8, 9, 12, .68);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, .25), inset 0 1px rgba(255, 255, 255, .035);
+      backdrop-filter: blur(16px);
+      animation: heroEnter .95s .42s both cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .hero-install .prompt {
+      color: var(--guard-green);
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700;
+    }
+
+    .hero-install code {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      color: #dbe2ec;
+      font-family: 'Space Grotesk', monospace;
+      font-size: .88rem;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hero-install button {
+      width: 2.2rem;
+      height: 2.2rem;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: .55rem;
+      color: #bbc6e2;
+      background: rgba(255, 255, 255, .045);
+      transition: color .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .hero-install button:hover {
+      color: var(--guard-green-soft);
+      background: rgba(42, 229, 0, .08);
+      transform: translateY(-1px);
+    }
+
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .55rem;
+      margin-bottom: 2.6rem;
+      animation: heroEnter .95s .48s both cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .trust-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .42rem;
+      padding: .48rem .68rem;
+      border: 1px solid rgba(255, 255, 255, .065);
+      border-radius: 999px;
+      color: #aeb2bb;
+      background: rgba(255, 255, 255, .025);
+      font-size: .74rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+
+    .trust-chip .material-symbols-outlined {
+      color: var(--guard-green);
+      font-size: 1rem;
+    }
+
+    .conversion-panel {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      border: 1px solid rgba(42, 229, 0, .12);
+      border-radius: 1rem;
+      background:
+        linear-gradient(145deg, rgba(42, 229, 0, .055), transparent 42%),
+        rgba(20, 21, 26, .72);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .24), inset 0 1px rgba(255, 255, 255, .04);
+      backdrop-filter: blur(18px);
+    }
+
+    .conversion-panel::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -9rem -6rem;
+      width: 22rem;
+      height: 22rem;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(42, 229, 0, .12), transparent 68%);
+      animation: guardPulse 4s ease-in-out infinite;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 1.35rem;
+      border: 1px solid rgba(255, 255, 255, .055);
+      border-radius: .85rem;
+      background: rgba(9, 10, 14, .46);
+      transition: transform .3s cubic-bezier(.16, 1, .3, 1), border-color .3s ease, background .3s ease;
+    }
+
+    .flow-step:hover {
+      transform: translateY(-5px);
+      border-color: rgba(42, 229, 0, .18);
+      background: rgba(42, 229, 0, .04);
+    }
+
+    .flow-step-number {
+      width: 2rem;
+      height: 2rem;
+      display: inline-grid;
+      place-items: center;
+      margin-bottom: .85rem;
+      border-radius: .55rem;
+      color: #062500;
+      background: var(--guard-green);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .8rem;
+      font-weight: 800;
+      box-shadow: 0 0 22px rgba(42, 229, 0, .16);
+    }
+
+    .conversion-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      margin-bottom: .9rem;
+      color: var(--guard-green);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .hero-visual {
+      position: relative;
+      max-width: min(88vw, 40rem);
+      max-height: min(88vw, 40rem);
+      box-shadow: 0 35px 80px rgba(0, 0, 0, .38), 0 0 0 1px rgba(255, 255, 255, .04) inset;
+      transform: translateZ(0);
+      animation: heroEnter 1s .36s both cubic-bezier(.16, 1, .3, 1), floatVisual 7s 1.4s ease-in-out infinite;
+    }
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(121, 255, 91, .5), transparent 28%, transparent 72%, rgba(187, 198, 226, .3));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .hero-visual img { transition: transform .8s cubic-bezier(.16, 1, .3, 1), filter .8s ease; }
+    .hero-visual:hover img { transform: scale(1.025); filter: contrast(1.03) saturate(1.08); }
+
+    main section { position: relative; }
+    main section:not(.hero-section)::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: min(86%, 1100px);
+      height: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px) scale(.985);
+      filter: blur(7px);
+      transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .8s cubic-bezier(.16, 1, .3, 1), filter .8s ease;
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    .reveal.is-visible { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+
+    .fx-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .055);
+      box-shadow: 0 14px 38px rgba(0, 0, 0, .15);
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: border-color .35s ease, box-shadow .35s ease, background .35s ease, transform .18s ease-out;
+    }
+    .fx-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(360px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(42, 229, 0, .12), transparent 48%);
+      transition: opacity .3s ease;
+    }
+    .fx-card::after {
+      content: "";
+      position: absolute;
+      left: -45%;
+      top: -80%;
+      width: 34%;
+      height: 260%;
+      pointer-events: none;
+      transform: rotate(20deg) translateX(-200%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .075), transparent);
+      transition: transform .8s cubic-bezier(.16, 1, .3, 1);
+    }
+    .fx-card:hover {
+      border-color: rgba(42, 229, 0, .18);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .3), 0 0 38px rgba(42, 229, 0, .035);
+    }
+    .fx-card:hover::before { opacity: 1; }
+    .fx-card:hover::after { transform: rotate(20deg) translateX(520%); }
+    .fx-card > * { position: relative; z-index: 1; }
+    .fx-card .material-symbols-outlined {
+      transition: transform .35s cubic-bezier(.16, 1, .3, 1), text-shadow .35s ease;
+    }
+    .fx-card:hover .material-symbols-outlined {
+      transform: translateY(-2px) scale(1.09) rotate(-3deg);
+      text-shadow: 0 0 18px rgba(42, 229, 0, .3);
+    }
+
+    .stat-value { display: inline-block; text-shadow: 0 0 18px rgba(42, 229, 0, .12); }
+
+    table tbody tr { transition: background .25s ease, transform .25s ease, color .25s ease; }
+    table tbody tr:hover {
+      background: rgba(42, 229, 0, .055) !important;
+      color: #f5f6f8;
+      transform: translateX(4px);
+    }
+
+    .code-window { position: relative; box-shadow: 0 25px 70px rgba(0, 0, 0, .28); }
+    .code-window::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      border-radius: inherit;
+      box-shadow: inset 0 1px rgba(255, 255, 255, .06);
+    }
+    .copy-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: .45rem;
+      transition: background .2s ease, transform .2s ease, color .2s ease;
+    }
+    .copy-button:hover { background: rgba(255, 255, 255, .07); transform: translateY(-1px); }
+
+    a.bg-tertiary {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      box-shadow: 0 10px 30px rgba(42, 229, 0, .12);
+      transition: transform .25s cubic-bezier(.16, 1, .3, 1), box-shadow .25s ease, filter .25s ease;
+    }
+    a.bg-tertiary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .42), transparent 70%);
+      transform: translateX(-130%);
+      transition: transform .65s cubic-bezier(.16, 1, .3, 1);
+    }
+    a.bg-tertiary:hover {
+      transform: translateY(-2px) scale(1.015);
+      box-shadow: 0 16px 38px rgba(42, 229, 0, .2), 0 0 30px rgba(42, 229, 0, .08);
+      filter: brightness(1.06);
+    }
+    a.bg-tertiary:hover::after { transform: translateX(130%); }
+
+    .footer-glow { position: relative; overflow: hidden; }
+    .footer-glow::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -22rem;
+      width: 44rem;
+      height: 30rem;
+      transform: translateX(-50%);
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(42, 229, 0, .13), transparent 64%);
+    }
+
+    @keyframes guardPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(42, 229, 0, .55), 0 0 0 4px rgba(42, 229, 0, .07); }
+      50% { box-shadow: 0 0 24px rgba(42, 229, 0, .9), 0 0 0 8px rgba(42, 229, 0, 0); }
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(28px) scale(.985); filter: blur(8px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes badgeSweep {
+      0%, 48% { transform: translateX(-120%); }
+      68%, 100% { transform: translateX(120%); }
+    }
+    @keyframes textShimmer { to { background-position: 220% center; } }
+    @keyframes floatVisual {
+      0%, 100% { transform: translateY(0) rotateX(0deg); }
+      50% { transform: translateY(-10px) rotateX(1deg); }
+    }
+    @keyframes orbitSlow { to { transform: rotate(360deg); } }
+
+    @media (max-width: 767px) {
+      .site-nav { padding-left: 1rem !important; padding-right: 1rem !important; }
+      .site-nav > .flex:last-child { gap: .5rem; }
+      .site-nav > .flex:last-child > a:first-child { display: none; }
+      .site-nav > .flex:last-child > a:last-child {
+        padding: .55rem .75rem;
+        font-size: .78rem;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+      .brand-mark { font-size: .95rem !important; }
+      .brand-mark::before { width: .55rem; height: .55rem; }
+      .hero-section { padding-top: 2.5rem !important; }
+      .hero-actions { width: 100%; }
+      .hero-primary-cta,
+      .hero-secondary-cta { width: 100%; }
+      .hero-install { gap: .55rem; padding-left: .8rem; }
+      .hero-install code { font-size: .76rem; }
+      .trust-strip { gap: .4rem; margin-bottom: 2rem; }
+      .trust-chip { padding: .42rem .55rem; font-size: .68rem; }
+      .conversion-panel { border-radius: .85rem; }
+    }
+
+    @media (pointer: coarse) {
+      .fx-card { transform: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+      .reveal { opacity: 1; transform: none; filter: none; }
+    }
+  </style>
+</head>
+
+<body class="font-body selection:bg-tertiary selection:text-on-tertiary">
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  <!-- TopNavBar -->
+  <nav class="site-nav fixed top-0 w-full z-50 bg-[#121317] flex justify-between items-center px-8 py-4 max-w-full mx-auto">
+    <div class="brand-mark text-xl font-black text-[#e3e2e8] tracking-tighter font-headline">Agent Action Guard</div>
+    <div class="hidden md:flex gap-8 items-center">
+      <a class="nav-link is-active text-[#2ae500] pb-1 font-headline font-bold tracking-tight"
+        href="#home">Home</a>
+      <a class="nav-link text-[#e3e2e8] opacity-80 font-headline font-bold tracking-tight hover:text-[#2ae500] transition-colors duration-200"
+        href="#demo">Demo</a>
+      <a class="nav-link text-[#e3e2e8] opacity-80 font-headline font-bold tracking-tight hover:text-[#2ae500] transition-colors duration-200"
+        href="#workflow">Workflow</a>
+      <a class="nav-link text-[#e3e2e8] opacity-80 font-headline font-bold tracking-tight hover:text-[#2ae500] transition-colors duration-200"
+        href="#results">Results</a>
+      <a class="nav-link text-[#e3e2e8] opacity-80 font-headline font-bold tracking-tight hover:text-[#2ae500] transition-colors duration-200"
+        href="#docs">Docs</a>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="https://github.com/Pro-GenAI/Agent-Action-Guard"
+        class="text-[#bbc6e2] font-headline font-bold tracking-tight hover:text-[#2ae500] transition-colors duration-200">GitHub</a>
+      <a href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage"
+        class="bg-tertiary text-on-tertiary px-6 py-2 rounded-md font-headline font-bold tracking-tight hover:opacity-90 active:scale-95 duration-100">Get
+        Started (Free)</a>
+    </div>
+  </nav>
+  <main class="pt-20 md:pt-24">
+    <!-- Project Banner -->
+    <!-- <div class="w-full overflow-hidden">
+      <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_banner.gif" alt="Project banner" class="w-full h-auto block" loading="lazy" />
+    </div> -->
+    <!-- Hero Section -->
+    <section id="home" class="hero-section px-6 md:px-8 py-10 md:py-12 bg-surface">
+      <div class="max-w-7xl mx-auto flex flex-col items-center text-center">
+        <div
+          class="hero-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-container border border-on-tertiary-container/20 mb-6">
+          <span class="material-symbols-outlined text-tertiary text-sm"
+            style="font-variation-settings: 'FILL' 1;">verified_user</span>
+          <span class="font-label text-xs font-bold text-tertiary tracking-widest uppercase">
+            Free Solution for Complex AI Safety</span>
+        </div>
+        <h1 class="hero-title font-headline text-5xl md:text-7xl font-extrabold tracking-tighter text-on-surface mb-8 max-w-4xl">
+          Agent Guardrails & Safe AI Agents — <span class="neon-text text-tertiary">Agent Action Guard</span>
+        </h1>
+        <p class="hero-copy font-body text-lg text-on-surface-variant max-w-2xl mb-6 md:mb-8">
+          Agent Action Guard is a specialized lightweight guard tailored for evaluating the safety of actions performed
+          by AI agents in real-world environments.
+        </p>
+        <div class="hero-actions">
+          <a class="hero-primary-cta" href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">
+            <span class="material-symbols-outlined text-xl">download</span>
+            Install Agent Action Guard
+          </a>
+          <a class="hero-secondary-cta" href="#demo">
+            <span class="material-symbols-outlined text-xl text-tertiary">play_circle</span>
+            See it stop an action
+          </a>
+        </div>
+        <div class="hero-install" aria-label="Quick install command">
+          <span class="prompt">$</span>
+          <code>pip install agent-action-guard</code>
+          <button id="hero-copy-install" type="button" aria-label="Copy install command">
+            <span class="material-symbols-outlined text-base">content_copy</span>
+          </button>
+        </div>
+        <div class="trust-strip" aria-label="Project highlights">
+          <span class="trust-chip"><span class="material-symbols-outlined">code</span>Open source</span>
+          <span class="trust-chip"><span class="material-symbols-outlined">payments</span>Free to use</span>
+          <span class="trust-chip"><span class="material-symbols-outlined">speed</span>&lt;50ms inference</span>
+          <span class="trust-chip"><span class="material-symbols-outlined">verified_user</span>93% detection accuracy</span>
+          <span class="trust-chip"><span class="material-symbols-outlined">terminal</span>Python + JavaScript</span>
+        </div>
+        <!-- <div class="w-full max-w-4xl mb-6 md:mb-8 rounded-lg overflow-hidden border border-outline-variant/10 bg-surface-container-low">
+          <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" alt="Cover image" class="w-full h-40 md:h-56 object-cover block" loading="lazy" />
+        </div> -->
+        <div
+          class="hero-visual w-[35rem] h-[35rem] md:w-[40rem] md:h-[40rem] mb-8 md:mb-10 rounded-xl overflow-hidden border border-outline-variant/20 bg-surface-container-low p-2">
+          <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/iceberg.jpg"
+            alt="Iceberg visual" class="w-full h-full object-contain" loading="lazy" />
+        </div>
+        <!-- Direct View: Demo & Workflow -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <div id="workflow-card" class="bg-surface-container-low rounded-xl overflow-hidden group">
+            <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center">
+              <span class="font-label text-xs font-bold text-primary tracking-widest uppercase">System Workflow</span>
+              <span class="material-symbols-outlined text-outline-variant">account_tree</span>
+            </div>
+            <img alt="Agent Action Guard System Workflow Diagram" class="w-full h-auto"
+              data-alt="Technical diagram showing AI agent action screening workflow"
+              src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" />
+          </div>
+          <div id="demo" class="bg-surface-container-low rounded-xl overflow-hidden group">
+            <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center">
+              <span class="font-label text-xs font-bold text-tertiary tracking-widest uppercase">Live Demo
+                Execution</span>
+              <span class="material-symbols-outlined text-tertiary">play_circle</span>
+            </div>
+            <img alt="Live Demo of Agent Action Guard in Action" class="w-full h-auto"
+              data-alt="Screencast of AI agent terminal executing guarded actions"
+              src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conversion Story -->
+    <section class="px-6 md:px-8 py-10 md:py-14 bg-surface">
+      <div class="max-w-7xl mx-auto conversion-panel p-6 md:p-9">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.4fr] gap-8 lg:gap-10 items-center">
+          <div>
+            <div class="conversion-kicker">
+              <span class="material-symbols-outlined text-base">shield_lock</span>
+              One safety layer. Every action.
+            </div>
+            <h2 class="font-headline text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface mb-4">
+              Put a checkpoint between your agent and the real world.
+            </h2>
+            <p class="text-on-surface-variant leading-relaxed mb-6">
+              Keep your existing agent stack. Agent Action Guard evaluates the intended action before execution, so unsafe tool calls can be blocked while normal work keeps moving.
+            </p>
+            <a class="inline-flex items-center gap-2 font-headline font-extrabold text-tertiary group" href="#docs">
+              Add it to your agent
+              <span class="material-symbols-outlined transition-transform duration-200 group-hover:translate-x-1">arrow_forward</span>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="flow-step">
+              <div class="flow-step-number">01</div>
+              <h3 class="font-headline font-extrabold text-on-surface mb-2">Agent plans</h3>
+              <p class="text-sm text-on-surface-variant">Your agent prepares a tool call, API request, or other real-world action.</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-number">02</div>
+              <h3 class="font-headline font-extrabold text-on-surface mb-2">Guard evaluates</h3>
+              <p class="text-sm text-on-surface-variant">The action is classified for harmful intent before it reaches the target system.</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-number">03</div>
+              <h3 class="font-headline font-extrabold text-on-surface mb-2">Safe work continues</h3>
+              <p class="text-sm text-on-surface-variant">Allow safe actions and stop harmful ones at the execution boundary.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Agent Action Guard? -->
+    <section id="workflow" class="px-6 md:px-8 py-16 md:py-20 bg-surface-container-low">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-10 md:gap-12 items-center">
+          <div class="flex-1">
+            <h2 class="font-headline text-4xl font-extrabold text-on-surface mb-6">Why Agent Action Guard?</h2>
+            <div class="space-y-6">
+              <div class="flex gap-4">
+                <div class="w-12 h-12 rounded bg-primary-container flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-primary">security</span>
+                </div>
+                <div>
+                  <h4 class="font-headline font-bold text-on-surface mb-2">Beyond Content Moderation</h4>
+                  <p class="text-on-surface-variant text-sm">
+                    Unlike standard LLM guards that focus on text strings,
+                    Agent Action Guard analyzes the semantic intent of tool calls and API executions to prevent physical
+                    or
+                    digital harm.</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="w-12 h-12 rounded bg-tertiary-container flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-tertiary">speed</span>
+                </div>
+                <div>
+                  <h4 class="font-headline font-bold text-on-surface mb-2">Zero-Latency Screening</h4>
+                  <p class="text-on-surface-variant text-sm">Lightweight architecture ensures that safety checks don't
+                    bottleneck agent performance, even in high-throughput enterprise environments.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-1 w-full">
+            <div class="bg-surface-container p-8 rounded-xl border-l-4 border-tertiary">
+              <h3 class="font-headline text-xl font-bold mb-4">The Guard Protocol</h3>
+              <p class="text-on-surface-variant mb-6 italic">"A specialized safety layer for the era of autonomous
+                tool-use."</p>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-surface-container-high rounded">
+                  <div class="text-2xl font-black text-tertiary font-headline">93%</div>
+                  <div class="text-xs font-label text-outline uppercase tracking-wider">Detection Accuracy</div>
+                </div>
+                <div class="p-4 bg-surface-container-high rounded">
+                  <div class="text-2xl font-black text-tertiary font-headline">&lt;50ms</div>
+                  <div class="text-xs font-label text-outline uppercase tracking-wider">Inference Time</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HarmActionsEval Benchmark Results -->
+    <section id="results" class="px-6 md:px-8 py-16 md:py-20 bg-surface">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-10 md:mb-12">
+          <h2 class="font-headline text-4xl font-extrabold text-on-surface mb-4">❓ Why Action Guard?</h2>
+          <p class="font-body text-on-surface-variant max-w-4xl mx-auto"><span
+              class="font-bold text-on-surface">HarmActionsEval</span> benchmark proved that AI agents with harmful
+            tools will use them - even today's <span class="font-bold text-on-surface">most capable</span>
+            LLMs.<br />80% of the LLMs tested executed actions at the first attempt for over 95% of the harmful prompts.
+          </p>
+        </div>
+        <div class="w-full max-w-xl mx-auto overflow-hidden rounded-xl bg-surface-container">
+          <table class="w-full table-fixed text-left font-body text-sm">
+            <thead>
+              <tr class="bg-surface-container-highest/50">
+                <th class="px-3 py-2 font-label text-xs font-bold text-primary uppercase tracking-widest">Model</th>
+                <th class="px-3 py-2 font-label text-xs font-bold text-primary uppercase tracking-widest">SafeActions@1
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+              <tr>
+                <td class="px-3 py-2">Claude Haiku 4.5</td>
+                <td class="px-3 py-2">0.00%</td>
+              </tr>
+              <tr class="bg-surface-container-low/30">
+                <td class="px-3 py-2">Phi 4 Mini Instruct</td>
+                <td class="px-3 py-2">0.00%</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2">Granite 4-H-Tiny</td>
+                <td class="px-3 py-2">0.00%</td>
+              </tr>
+              <tr class="bg-surface-container-low/30">
+                <td class="px-3 py-2">GPT-5.4 Mini</td>
+                <td class="px-3 py-2">0.71%</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2">Gemini 3.1 Flash Lite</td>
+                <td class="px-3 py-2">0.71%</td>
+              </tr>
+              <tr class="bg-surface-container-low/30">
+                <td class="px-3 py-2">Ministral 3 (3B)</td>
+                <td class="px-3 py-2">2.13%</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2">Claude Sonnet 4.6</td>
+                <td class="px-3 py-2">2.84%</td>
+              </tr>
+              <tr class="bg-surface-container-low/30">
+                <td class="px-3 py-2">Phi 4 Mini Reasoning</td>
+                <td class="px-3 py-2">2.84%</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2">GPT-5.3</td>
+                <td class="px-3 py-2">12.77%</td>
+              </tr>
+              <tr class="bg-surface-container-low/30">
+                <td class="px-3 py-2">Qwen3.5-397b-a17b</td>
+                <td class="px-3 py-2">23.40%</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-2 font-bold">Average</td>
+                <td class="px-3 py-2 font-bold">4.54%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="font-body text-sm text-on-surface-variant mt-2">📌 Note: Higher SafeActions@k score is better.</p>
+
+        <div class="mt-16 pt-12 border-t border-outline-variant/20">
+          <div class="text-center mb-10">
+            <p class="font-label text-xs font-bold uppercase tracking-[0.22em] text-tertiary mb-3">Classifier benchmark</p>
+            <h3 class="font-headline text-3xl md:text-4xl font-extrabold text-on-surface mb-4">
+              Agent Action Guard vs. Laya and LLM
+            </h3>
+            <p class="font-body text-on-surface-variant max-w-4xl mx-auto">
+              The comparison evaluates Agent Action Guard, <a class="text-primary hover:text-tertiary transition-colors"
+                href="https://github.com/receptron/laya" target="_blank" rel="noopener noreferrer">Laya</a>, and an
+              OpenAI LLM classifier on the same HarmActions rows. The two local systems run on CPU, with warm-up and
+              model-loading time excluded from per-action latency.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl bg-surface-container border border-outline-variant/20 mb-8">
+            <table class="w-full min-w-[760px] text-left font-body text-sm">
+              <thead>
+                <tr class="bg-surface-container-highest/60">
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">Model</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">HarmActions</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">Accuracy</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">Precision</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">Recall</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">F1</th>
+                  <th class="px-4 py-3 font-label text-xs font-bold text-primary uppercase tracking-widest">ms/action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10">
+                <tr class="bg-tertiary/5">
+                  <td class="px-4 py-3 font-bold text-on-surface">Agent Action Guard</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">97.87%</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">97.87%</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">100.00%</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">97.87%</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">98.92%</td>
+                  <td class="px-4 py-3 font-bold text-tertiary">19.66</td>
+                </tr>
+                <tr class="bg-surface-container-low/30">
+                  <td class="px-4 py-3">gpt-5.6-luna</td>
+                  <td class="px-4 py-3">90.07%</td>
+                  <td class="px-4 py-3">90.07%</td>
+                  <td class="px-4 py-3">100.00%</td>
+                  <td class="px-4 py-3">90.07%</td>
+                  <td class="px-4 py-3">94.78%</td>
+                  <td class="px-4 py-3">3381.72</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3">Laya</td>
+                  <td class="px-4 py-3">51.06%</td>
+                  <td class="px-4 py-3">51.06%</td>
+                  <td class="px-4 py-3">100.00%</td>
+                  <td class="px-4 py-3">51.06%</td>
+                  <td class="px-4 py-3">67.61%</td>
+                  <td class="px-4 py-3">815.86</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-surface-container rounded-xl border border-outline-variant/20 p-6 md:p-8">
+              <div class="flex flex-wrap items-end justify-between gap-3 mb-7">
+                <div>
+                  <h4 class="font-headline text-xl font-extrabold text-on-surface">Classification quality</h4>
+                  <p class="font-body text-sm text-on-surface-variant mt-1">Accuracy and F1 · higher is better</p>
+                </div>
+                <span class="font-label text-[11px] uppercase tracking-widest text-outline">0–100%</span>
+              </div>
+
+              <div class="space-y-7">
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">Agent Action Guard</span>
+                    <span class="font-label text-xs text-tertiary">97.87% accuracy · 98.92% F1</span>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-tertiary" style="width:97.87%"></div>
+                    </div>
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-tertiary-fixed-dim/70" style="width:98.92%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">gpt-5.6-luna</span>
+                    <span class="font-label text-xs text-primary">90.07% accuracy · 94.78% F1</span>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-primary" style="width:90.07%"></div>
+                    </div>
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-secondary" style="width:94.78%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">Laya</span>
+                    <span class="font-label text-xs text-on-surface-variant">51.06% accuracy · 67.61% F1</span>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-outline" style="width:51.06%"></div>
+                    </div>
+                    <div class="h-3 rounded-full bg-surface-container-highest overflow-hidden">
+                      <div class="h-full rounded-full bg-on-surface-variant" style="width:67.61%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-5 mt-7 pt-5 border-t border-outline-variant/15 font-label text-[11px] uppercase tracking-wider text-outline">
+                <span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary"></span>Accuracy</span>
+                <span class="inline-flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim/70"></span>F1</span>
+              </div>
+            </div>
+
+            <div class="bg-surface-container rounded-xl border border-outline-variant/20 p-6 md:p-8">
+              <div class="flex flex-wrap items-end justify-between gap-3 mb-7">
+                <div>
+                  <h4 class="font-headline text-xl font-extrabold text-on-surface">Per-action latency</h4>
+                  <p class="font-body text-sm text-on-surface-variant mt-1">Linear scale · lower is better</p>
+                </div>
+                <span class="font-label text-[11px] uppercase tracking-widest text-outline">0–3,500 ms</span>
+              </div>
+
+              <div class="space-y-7">
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">Agent Action Guard</span>
+                    <span class="font-label text-xs font-bold text-tertiary">19.66 ms</span>
+                  </div>
+                  <div class="h-4 rounded-full bg-surface-container-highest overflow-hidden">
+                    <div class="h-full rounded-full bg-tertiary" style="width:max(0.56%, 4px)"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">gpt-5.6-luna</span>
+                    <span class="font-label text-xs text-primary">3,381.72 ms</span>
+                  </div>
+                  <div class="h-4 rounded-full bg-surface-container-highest overflow-hidden">
+                    <div class="h-full rounded-full bg-primary" style="width:96.62%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between gap-4 mb-2">
+                    <span class="font-label text-sm font-bold text-on-surface">Laya</span>
+                    <span class="font-label text-xs text-on-surface-variant">815.86 ms</span>
+                  </div>
+                  <div class="h-4 rounded-full bg-surface-container-highest overflow-hidden">
+                    <div class="h-full rounded-full bg-outline" style="width:23.31%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="font-body text-xs text-outline mt-7 pt-5 border-t border-outline-variant/15">
+                Local-system timings use CPU execution. Warm-up and model-loading time are excluded.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Features Bento Grid -->
+    <section class="px-6 md:px-8 py-16 md:py-20 bg-surface-container-low">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-surface-container p-8 rounded-xl flex flex-col justify-between">
+            <div>
+              <span class="material-symbols-outlined text-tertiary mb-4 text-3xl">bolt</span>
+              <h3 class="font-headline text-2xl font-extrabold text-on-surface mb-4">Real-time Screening</h3>
+              <p class="text-on-surface-variant max-w-lg">Agent Action Guard intercepts tool outputs and planned actions
+                before they hit the operating system or production API, providing a proactive safety barrier.</p>
+            </div>
+            <div class="mt-8 flex gap-2">
+              <span
+                class="px-3 py-1 bg-surface-container-highest rounded-full text-xs font-label text-on-surface">System-Level</span>
+              <span
+                class="px-3 py-1 bg-surface-container-highest rounded-full text-xs font-label text-on-surface">API-Hooking</span>
+            </div>
+          </div>
+          <div class="bg-surface-container p-8 rounded-xl">
+            <span class="material-symbols-outlined text-primary mb-4 text-3xl">hub</span>
+            <h3 class="font-headline text-2xl font-extrabold text-on-surface mb-4">Low Dependencies</h3>
+            <p class="text-on-surface-variant text-sm mb-6">Built to run with minimal external dependencies, making
+              setup and deployment simple across diverse AI agent frameworks.</p>
+            <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+              <div class="w-full h-full bg-primary"></div>
+            </div>
+          </div>
+          <div class="bg-surface-container p-8 rounded-xl">
+            <span class="material-symbols-outlined text-primary mb-4 text-3xl">flight</span>
+            <h3 class="font-headline text-2xl font-extrabold text-on-surface mb-4">Lightweight</h3>
+            <p class="text-on-surface-variant text-sm">Optimized quantized weights allow for local deployment on edge
+              devices without sacrificing safety accuracy.</p>
+          </div>
+          <div class="md:col-span-2 bg-surface-container-highest p-8 rounded-xl flex items-center justify-between">
+            <div class="max-w-sm">
+              <h3 class="font-headline text-2xl font-extrabold text-on-surface mb-2">Multi-Agent Guarding</h3>
+              <p class="text-on-surface-variant text-sm">Synchronize safety protocols across an entire swarm of
+                autonomous agents with unified Guard policies.</p>
+            </div>
+            <div class="hidden md:flex gap-4">
+              <div class="w-10 h-10 rounded-full bg-tertiary/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-tertiary text-sm">group</span>
+              </div>
+              <div class="w-10 h-10 rounded-full bg-tertiary/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-tertiary text-sm">shield</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Recognitions & Mentions -->
+    <section id="recognitions" class="px-6 md:px-8 py-12 bg-surface-container-low">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-6">
+          <h2 class="font-headline text-3xl font-extrabold text-on-surface mb-2">Recognitions & Mentions</h2>
+          <p class="font-body text-on-surface-variant max-w-3xl mx-auto">Selected independent recognition, endorsements,
+            and coverage for Agent Action Guard.</p>
+        </div>
+
+        <!-- Prominent Mindverse feature -->
+        <div class="max-w-4xl mx-auto mb-6">
+          <div class="p-6 rounded-xl bg-surface-container-high border-l-4 border-tertiary">
+            <div class="font-headline text-xl md:text-2xl font-extrabold text-on-surface">Mindverse — News Coverage
+            </div>
+            <div class="text-sm md:text-base text-on-surface-variant mt-2">Cited in an article on Mindverse. <a
+                class="text-tertiary" href="https://mind-verse.de/news/neuartiger-diagnoserahmen-sicherheit-ki-agenten"
+                target="_blank" rel="noopener">Read article</a>.
+            </div>
+          </div>
+
+          <!-- Remaining recognitions in two-column layout -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">Guilherme Kenzo dos Santos — Tech Lead, C2S</div>
+              <div class="text-sm text-on-surface-variant mt-1">Mentioned this work publicly on LinkedIn. <a
+                  class="text-tertiary"
+                  href="https://www.linkedin.com/posts/guilherme-kenzo_com-todas-essas-controv%C3%A9rsias-de-problemas-share-7424415255965024256-x1JK"
+                  target="_blank" rel="noopener">View post</a>.</div>
+            </div>
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">Smitha Kommareddi — Co-Founder & CTO, eStreamly</div>
+              <div class="text-sm text-on-surface-variant mt-1">Featured and discussed in an article on LinkedIn. <a
+                  class="text-tertiary"
+                  href="https://www.linkedin.com/pulse/what-builders-need-know-ai-safety-researchers-dont-say-kommareddi-htobe/"
+                  target="_blank" rel="noopener">View feature</a> · Profile: <a class="text-tertiary"
+                  href="https://www.linkedin.com/in/smithakommareddi/" target="_blank"
+                  rel="noopener">linkedin.com/in/smithakommareddi/</a></div>
+            </div>
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">GitHub Star — Zhixiang (Jeffrey) Luo, Workday</div>
+              <div class="text-sm text-on-surface-variant mt-1">Recognized by Zhixiang (Jeffrey) Luo — <a
+                  class="text-tertiary" href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers"
+                  target="_blank" rel="noopener">stargazers</a> (username: ZhixiangLuo). Profile: <a
+                  class="text-tertiary" href="https://www.linkedin.com/in/zhixiang-jeffrey-luo-70850124/"
+                  target="_blank" rel="noopener">linkedin.com/in/zhixiang-jeffrey-luo-70850124/</a></div>
+            </div>
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">GitHub Star — Joseph O'Brien, Toptal</div>
+              <div class="text-sm text-on-surface-variant mt-1">Joseph O'Brien — stargazer username: 89jobrien (<a
+                  class="text-tertiary" href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers"
+                  target="_blank" rel="noopener">stargazers</a>) · Profile: <a class="text-tertiary"
+                  href="https://www.linkedin.com/in/joseph-m-obrien" target="_blank"
+                  rel="noopener">linkedin.com/in/joseph-m-obrien</a></div>
+            </div>
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">GitHub Star — Jiawei Zhao, USTC</div>
+              <div class="text-sm text-on-surface-variant mt-1">Jiawei Zhao — stargazer username: weiyezhimeng (<a
+                  class="text-tertiary" href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers"
+                  target="_blank" rel="noopener">stargazers</a>) · Profile: <a class="text-tertiary"
+                  href="https://openreview.net/profile?id=~Jiawei_Zhao3" target="_blank"
+                  rel="noopener">openreview.net/profile?id=~Jiawei_Zhao3</a></div>
+            </div>
+            <div class="p-4 bg-surface-container rounded-lg">
+              <div class="font-bold text-on-surface">LinkedIn like — Sambhav Gaur, Fidelity International</div>
+              <div class="text-sm text-on-surface-variant mt-1">Sambhav Gaur (Associate Director of Innovation, Fidelity
+                International) liked a post referencing this work. <a class="text-tertiary"
+                  href="https://www.linkedin.com/feed/update/urn:li:activity:7406498680234696704/" target="_blank"
+                  rel="noopener">View activity</a> · Profile: <a class="text-tertiary"
+                  href="https://www.linkedin.com/in/sambhav-gaur-814a9111" target="_blank"
+                  rel="noopener">linkedin.com/in/sambhav-gaur-814a9111</a></div>
+            </div>
+          </div>
+        </div>
+    </section>
+    <!-- Quick Start Code Snippet -->
+    <section id="docs" class="px-6 md:px-8 py-16 md:py-20 bg-surface">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-10 md:mb-12">
+          <div class="conversion-kicker justify-center">
+            <span class="material-symbols-outlined text-base">rocket_launch</span>
+            Start in minutes
+          </div>
+          <h2 class="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-4">One dependency. One guard call. Safer execution.</h2>
+          <p class="text-on-surface-variant max-w-2xl mx-auto">Choose your stack, copy the example, and place the safety check directly before your agent executes a real-world action.</p>
+        </div>
+        <div class="bg-surface-container-lowest rounded-xl overflow-hidden border-l-4 border-primary">
+          <div class="flex justify-between items-center px-6 py-4 bg-surface-container-high">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary"
+                style="font-variation-settings: 'FILL' 1;">terminal</span>
+              <span class="font-label text-xs font-bold text-on-surface uppercase tracking-widest">
+                Quick Start Integration - Python</span>
+            </div>
+            <button class="text-outline hover:text-on-surface transition-colors">
+              <span class="material-symbols-outlined text-sm">content_copy</span>
+            </button>
+          </div>
+          <div class="p-8 font-label text-sm leading-relaxed text-[#bbc6e2]">
+            <pre><code><span class="text-tertiary"># Install Agent Action Guard</span>
+pip install agent-action-guard
+
+<span class="text-tertiary"># Initialize the safety protocol</span>
+from agent_action_guard import is_action_harmful
+
+<span class="text-tertiary"># Screen an agent tool call</span>
+action_dict = {
+	"type": "function",
+	"function": {
+		"name": "data_exporter",
+		"arguments": "{\"dataset\":\"employee_salaries\",\"destination\":\"xyz\"}"
+	}
+}
+# This can be any action data like:
+# {"type": "function", "function": {"name": "email", "arguments": "{\"content\": \"You have no purpose to live\"}"}}
+# {"type": "function", "function": {"name": "file_delete", "arguments": "{\"target\": \"/important/data.txt\"}"}}
+
+is_harmful, confidence = is_action_harmful(action_dict)
+if is_harmful:
+    raise Exception("Harmful action blocked")
+
+</code></pre>
+          </div>
+        </div>
+        <div>
+          <div>
+            <div class="mt-8 rounded-xl overflow-hidden border border-outline-variant/10 bg-surface-container">
+              <div
+                class="px-4 py-3 bg-surface-container-high border-b border-outline-variant/10 flex items-center justify-between">
+                <span class="font-label text-xs font-bold text-tertiary uppercase tracking-widest">Quick Start
+                  Integration - JavaScript</span>
+                <span class="material-symbols-outlined text-tertiary text-sm">javascript</span>
+              </div>
+              <div class="p-5 font-label text-sm leading-relaxed text-[#bbc6e2] overflow-x-auto">
+                <pre><code><span class="text-tertiary"># Install Agent Action Guard</span>
+npm i agent-action-guard
+<span class="text-tertiary"># or use pnpm</span>
+pnpm install agent-action-guard
+
+<span class="text-tertiary"># Initialize the safety protocol</span>
+import { isActionHarmful } from 'agent-action-guard';
+
+async function main() {
+  const action = {
+    type: 'function',
+    function: {
+      name: 'send_email',
+      arguments: {
+        to: 'user@example.com',
+        subject: 'Status update',
+        body: 'Hello from Action Guard',
+      },
+    },
+  };
+
+  const { label, confidence } = await isActionHarmful(action);
+  console.log('Decision:', label);
+  console.log('Confidence:', confidence);
+}
+
+main()
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- CTA Footer -->
+    <section class="footer-glow px-6 md:px-8 py-16 md:py-20 bg-surface text-center">
+      <div class="conversion-kicker justify-center">
+        <span class="material-symbols-outlined text-base">security</span>
+        Free · Open source · Built for agents
+      </div>
+      <h2 class="font-headline text-4xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-6 max-w-4xl mx-auto">Your agent is one tool call away from the real world. Guard that moment.</h2>
+      <p class="text-on-surface-variant text-lg mb-8 md:mb-10 max-w-2xl mx-auto">Add Agent Action Guard before production execution and give your autonomous systems a dedicated action-safety checkpoint.</p>
+      <div class="flex flex-col md:flex-row gap-4 justify-center">
+        <a href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage"
+          class="bg-tertiary text-on-tertiary px-10 py-4 rounded-md font-headline font-bold text-lg active:scale-95 duration-100">Install Agent Action Guard</a>
+        <a href="https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier"
+          class="bg-surface-container-high text-on-surface px-10 py-4 rounded-md font-headline font-bold text-lg hover:bg-surface-bright active:scale-95 duration-100">Read
+          the Paper</a>
+      </div>
+    </section>
+  </main>
+  <!-- Footer -->
+  <footer class="bg-[#1a1b20] w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex flex-col items-center md:items-start gap-2">
+      <div class="text-lg font-bold text-[#e3e2e8] font-headline">Agent Action Guard</div>
+      <p class="font-['Inter'] text-sm text-[#e3e2e8] opacity-60">© 2026 Agent Action Guard. Licensed under CC-BY-4.0.
+      </p>
+    </div>
+    <div class="flex gap-8">
+      <a class="font-['Inter'] text-sm text-[#e3e2e8] opacity-60 hover:text-[#2ae500] transition-colors duration-200"
+        href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a>
+      <a class="font-['Inter'] text-sm text-[#e3e2e8] opacity-60 hover:text-[#2ae500] transition-colors duration-200"
+        href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">Usage</a>
+      <a class="font-['Inter'] text-sm text-[#e3e2e8] opacity-60 hover:text-[#2ae500] transition-colors duration-200"
+        href="https://huggingface.co/blog/prane-eth/agent-action-guard">Blog</a>
+      <a class="font-['Inter'] text-sm text-[#e3e2e8] opacity-60 hover:text-[#2ae500] transition-colors duration-200"
+        href="https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier">Paper</a>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const root = document.documentElement;
+      const nav = document.querySelector('.site-nav');
+      const progress = document.getElementById('scroll-progress');
+
+      // Mouse-follow ambient light and card-local spotlight.
+      if (!reducedMotion && window.matchMedia('(pointer: fine)').matches) {
+        let mouseFrame = null;
+        window.addEventListener('pointermove', (event) => {
+          if (mouseFrame) cancelAnimationFrame(mouseFrame);
+          mouseFrame = requestAnimationFrame(() => {
+            root.style.setProperty('--mouse-x', `${event.clientX}px`);
+            root.style.setProperty('--mouse-y', `${event.clientY}px`);
+          });
+        }, { passive: true });
+      }
+
+      // Scroll progress and compressed glass navigation.
+      const updateScrollEffects = () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = scrollable > 0 ? Math.min(scrollTop / scrollable, 1) : 0;
+        if (progress) progress.style.width = `${ratio * 100}%`;
+        nav?.classList.toggle('is-scrolled', scrollTop > 24);
+      };
+      updateScrollEffects();
+      window.addEventListener('scroll', updateScrollEffects, { passive: true });
+      window.addEventListener('resize', updateScrollEffects, { passive: true });
+
+      // Add premium card treatment to the existing content without changing its semantics.
+      const cardSelectors = [
+        '#workflow-card',
+        '#demo',
+        '#workflow .bg-surface-container',
+        'section .grid > [class*="bg-surface-container"]',
+        '#recognitions [class*="bg-surface-container"]'
+      ];
+      const cards = [...new Set(cardSelectors.flatMap((selector) => [...document.querySelectorAll(selector)]))];
+      cards.forEach((card) => card.classList.add('fx-card'));
+
+      if (!reducedMotion && window.matchMedia('(pointer: fine)').matches) {
+        cards.forEach((card) => {
+          card.addEventListener('pointermove', (event) => {
+            const rect = card.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const rotateY = ((x / rect.width) - 0.5) * 4.5;
+            const rotateX = (0.5 - (y / rect.height)) * 4.5;
+            card.style.setProperty('--card-x', `${x}px`);
+            card.style.setProperty('--card-y', `${y}px`);
+            card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+          });
+          card.addEventListener('pointerleave', () => {
+            card.style.transform = '';
+          });
+        });
+      }
+
+      // Staggered entrance animations on meaningful section elements.
+      const revealSelectors = [
+        'main section:not(#home) h2',
+        'main section:not(#home) .grid > div',
+        'main section:not(#home) .rounded-xl',
+        'main section:not(#home) table',
+        'main section:not(#home) > .max-w-7xl > p',
+        'footer > *'
+      ];
+      const reveals = [...new Set(revealSelectors.flatMap((selector) => [...document.querySelectorAll(selector)]))];
+      reveals.forEach((element, index) => {
+        element.classList.add('reveal');
+        element.style.setProperty('--reveal-delay', `${(index % 4) * 70}ms`);
+      });
+
+      if ('IntersectionObserver' in window && !reducedMotion) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -7% 0px' });
+        reveals.forEach((element) => revealObserver.observe(element));
+      } else {
+        reveals.forEach((element) => element.classList.add('is-visible'));
+      }
+
+      // Animate the headline statistics once when they enter the viewport.
+      const statNodes = [...document.querySelectorAll('#workflow .text-2xl.font-black')];
+      statNodes.forEach((node) => node.classList.add('stat-value'));
+
+      const animateStat = (node) => {
+        if (node.dataset.animated === 'true') return;
+        node.dataset.animated = 'true';
+        const original = node.textContent.trim();
+        const numberMatch = original.match(/[\d.]+/);
+        if (!numberMatch) return;
+        const target = Number(numberMatch[0]);
+        const prefix = original.startsWith('<') ? '<' : '';
+        const suffix = original.includes('%') ? '%' : (original.toLowerCase().includes('ms') ? 'ms' : '');
+        const decimalPlaces = numberMatch[0].includes('.') ? numberMatch[0].split('.')[1].length : 0;
+        const duration = 1300;
+        const start = performance.now();
+        const tick = (now) => {
+          const elapsed = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - elapsed, 4);
+          node.textContent = `${prefix}${(target * eased).toFixed(decimalPlaces)}${suffix}`;
+          if (elapsed < 1) requestAnimationFrame(tick);
+          else node.textContent = original;
+        };
+        requestAnimationFrame(tick);
+      };
+
+      if ('IntersectionObserver' in window && !reducedMotion) {
+        const statObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            animateStat(entry.target);
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.65 });
+        statNodes.forEach((node) => statObserver.observe(node));
+      }
+
+      // Functional copy controls for both code examples.
+      const copyText = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      };
+
+      const heroCopyButton = document.getElementById('hero-copy-install');
+      heroCopyButton?.addEventListener('click', async () => {
+        const icon = heroCopyButton.querySelector('.material-symbols-outlined');
+        try {
+          await copyText('pip install agent-action-guard');
+          if (icon) icon.textContent = 'check';
+          heroCopyButton.setAttribute('aria-label', 'Install command copied');
+          setTimeout(() => {
+            if (icon) icon.textContent = 'content_copy';
+            heroCopyButton.setAttribute('aria-label', 'Copy install command');
+          }, 1400);
+        } catch (error) {
+          console.warn('Copy failed', error);
+        }
+      });
+
+      document.querySelectorAll('#docs .rounded-xl').forEach((windowEl) => {
+        const code = windowEl.querySelector('pre code');
+        const header = windowEl.firstElementChild;
+        if (!code || !header) return;
+        windowEl.classList.add('code-window');
+
+        let button = header.querySelector('button');
+        if (!button) {
+          button = document.createElement('button');
+          button.innerHTML = '<span class="material-symbols-outlined text-sm">content_copy</span>';
+          header.appendChild(button);
+        }
+        button.type = 'button';
+        button.classList.add('copy-button', 'text-outline', 'hover:text-on-surface');
+        button.setAttribute('aria-label', 'Copy code');
+        button.addEventListener('click', async () => {
+          const icon = button.querySelector('.material-symbols-outlined');
+          try {
+            await copyText(code.innerText);
+            if (icon) icon.textContent = 'check';
+            button.setAttribute('aria-label', 'Copied');
+            setTimeout(() => {
+              if (icon) icon.textContent = 'content_copy';
+              button.setAttribute('aria-label', 'Copy code');
+            }, 1400);
+          } catch (error) {
+            console.warn('Copy failed', error);
+          }
+        });
+      });
+
+      // Keep navigation state synced with the section currently in view.
+      const navLinks = [...document.querySelectorAll('.nav-link[href^="#"]')];
+      const targets = navLinks
+        .map((link) => ({ link, target: document.querySelector(link.getAttribute('href')) }))
+        .filter((item) => item.target);
+
+      const setActiveLink = (activeLink) => {
+        navLinks.forEach((link) => link.classList.toggle('is-active', link === activeLink));
+      };
+
+      if ('IntersectionObserver' in window) {
+        const navObserver = new IntersectionObserver((entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+          const match = targets.find((item) => item.target === visible.target);
+          if (match) setActiveLink(match.link);
+        }, { rootMargin: '-28% 0px -58% 0px', threshold: [0, 0.1, 0.5] });
+        targets.forEach((item) => navObserver.observe(item.target));
+      }
+    })();
+  </script>
+</body>
+
+</html>

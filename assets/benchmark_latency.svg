@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="330" viewBox="0 0 920 330" role="img" aria-labelledby="title desc">
+  <title id="title">Per-action latency comparison</title>
+  <desc id="desc">Bar chart comparing per-action latency. Agent Action Guard takes 19.66 milliseconds, gpt-5.6-luna takes 3381.72 milliseconds, and Laya takes 815.86 milliseconds per action.</desc>
+  <rect width="920" height="330" fill="#ffffff"/>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #24292f; }
+    .title { font-size: 22px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #57606a; }
+    .label { font-size: 14px; font-weight: 600; }
+    .value { font-size: 12px; font-weight: 600; }
+    .inverse { fill: #ffffff; }
+    .tick { font-size: 11px; fill: #6e7781; }
+    .grid { stroke: #d8dee4; stroke-width: 1; }
+  </style>
+  <text x="32" y="38" class="title">Per-action latency</text>
+  <text x="32" y="61" class="subtitle">Lower is better · linear scale · warm-up/model loading excluded</text>
+
+  <line x1="220" y1="84" x2="220" y2="270" class="grid"/>
+  <line x1="408" y1="84" x2="408" y2="270" class="grid"/>
+  <line x1="596" y1="84" x2="596" y2="270" class="grid"/>
+  <line x1="784" y1="84" x2="784" y2="270" class="grid"/>
+  <line x1="878" y1="84" x2="878" y2="270" class="grid"/>
+  <text x="220" y="294" text-anchor="middle" class="tick">0 ms</text>
+  <text x="408" y="294" text-anchor="middle" class="tick">1,000</text>
+  <text x="596" y="294" text-anchor="middle" class="tick">2,000</text>
+  <text x="784" y="294" text-anchor="middle" class="tick">3,000</text>
+  <text x="878" y="294" text-anchor="middle" class="tick">3,500</text>
+
+  <text x="205" y="118" text-anchor="end" class="label">Agent Action Guard</text>
+  <rect x="220" y="101" width="4" height="26" rx="2" fill="#0969da"/>
+  <text x="234" y="119" class="value">19.66 ms</text>
+
+  <text x="205" y="184" text-anchor="end" class="label">gpt-5.6-luna</text>
+  <rect x="220" y="167" width="636" height="26" rx="4" fill="#bf8700"/>
+  <text x="848" y="185" text-anchor="end" class="value inverse">3,381.72 ms</text>
+
+  <text x="205" y="250" text-anchor="end" class="label">Laya</text>
+  <rect x="220" y="233" width="153" height="26" rx="4" fill="#57606a"/>
+  <text x="365" y="251" text-anchor="end" class="value inverse">815.86 ms</text>
+
+  <text x="32" y="318" class="subtitle">Local systems were forced to CPU execution for the comparison.</text>
+</svg>

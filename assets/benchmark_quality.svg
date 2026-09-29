@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="430" viewBox="0 0 920 430" role="img" aria-labelledby="title desc">
+  <title id="title">HarmActions classification quality comparison</title>
+  <desc id="desc">Bar chart comparing Agent Action Guard, gpt-5.6-luna, and Laya on accuracy and F1 score. Agent Action Guard scores 97.87 percent accuracy and 98.92 percent F1; gpt-5.6-luna scores 90.07 percent accuracy and 94.78 percent F1; Laya scores 51.06 percent accuracy and 67.61 percent F1.</desc>
+  <rect width="920" height="430" fill="#ffffff"/>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #24292f; }
+    .title { font-size: 22px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #57606a; }
+    .label { font-size: 14px; font-weight: 600; }
+    .metric { font-size: 12px; fill: #57606a; }
+    .value { font-size: 12px; font-weight: 600; }
+    .inverse { fill: #ffffff; }
+    .tick { font-size: 11px; fill: #6e7781; }
+    .grid { stroke: #d8dee4; stroke-width: 1; }
+  </style>
+  <text x="32" y="38" class="title">HarmActions classification quality</text>
+  <text x="32" y="61" class="subtitle">Higher is better · values match the benchmark table in README</text>
+
+  <line x1="220" y1="86" x2="220" y2="382" class="grid"/>
+  <line x1="385" y1="86" x2="385" y2="382" class="grid"/>
+  <line x1="550" y1="86" x2="550" y2="382" class="grid"/>
+  <line x1="715" y1="86" x2="715" y2="382" class="grid"/>
+  <line x1="880" y1="86" x2="880" y2="382" class="grid"/>
+  <text x="220" y="405" text-anchor="middle" class="tick">0%</text>
+  <text x="385" y="405" text-anchor="middle" class="tick">25%</text>
+  <text x="550" y="405" text-anchor="middle" class="tick">50%</text>
+  <text x="715" y="405" text-anchor="middle" class="tick">75%</text>
+  <text x="880" y="405" text-anchor="middle" class="tick">100%</text>
+
+  <text x="32" y="118" class="label">Agent Action Guard</text>
+  <text x="205" y="143" text-anchor="end" class="metric">Accuracy</text>
+  <rect x="220" y="127" width="646" height="22" rx="4" fill="#0969da"/>
+  <text x="858" y="143" text-anchor="end" class="value inverse">97.87%</text>
+  <text x="205" y="175" text-anchor="end" class="metric">F1</text>
+  <rect x="220" y="159" width="653" height="22" rx="4" fill="#54aeff"/>
+  <text x="865" y="175" text-anchor="end" class="value">98.92%</text>
+
+  <text x="32" y="226" class="label">gpt-5.6-luna</text>
+  <text x="205" y="251" text-anchor="end" class="metric">Accuracy</text>
+  <rect x="220" y="235" width="594" height="22" rx="4" fill="#bf8700"/>
+  <text x="806" y="251" text-anchor="end" class="value inverse">90.07%</text>
+  <text x="205" y="283" text-anchor="end" class="metric">F1</text>
+  <rect x="220" y="267" width="626" height="22" rx="4" fill="#d4a72c"/>
+  <text x="838" y="283" text-anchor="end" class="value">94.78%</text>
+
+  <text x="32" y="334" class="label">Laya</text>
+  <text x="205" y="359" text-anchor="end" class="metric">Accuracy</text>
+  <rect x="220" y="343" width="337" height="22" rx="4" fill="#57606a"/>
+  <text x="549" y="359" text-anchor="end" class="value inverse">51.06%</text>
+  <text x="205" y="391" text-anchor="end" class="metric">F1</text>
+  <rect x="220" y="375" width="446" height="22" rx="4" fill="#8c959f"/>
+  <text x="658" y="391" text-anchor="end" class="value">67.61%</text>
+</svg>
