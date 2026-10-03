@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const DEFAULT_NODE_VERSIONS = ['18', '20', '22', '24'];
+export const DEFAULT_NODE_VERSIONS = ['18', '20', '22', '24', '26'];
 
 export function normalizeNodeVersions(values) {
 	const versions = [];

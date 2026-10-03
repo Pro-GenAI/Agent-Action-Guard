@@ -1,0 +1,99 @@
+name: Release Validation
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    python:
+        name: Python test and security
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Install Python package and validation tools
+              working-directory: python
+              run: |
+                  python -m venv .venv
+                  .venv/bin/python -m pip install --upgrade pip
+                  .venv/bin/python -m pip install -e ".[harmactionseval]" pytest bandit detect-secrets pip-audit ruff semgrep uv
+                  echo "$GITHUB_WORKSPACE/python/.venv/bin" >> "$GITHUB_PATH"
+
+            - name: Test
+              working-directory: python
+              run: make test
+
+            - name: Security
+              working-directory: python
+              run: make security
+
+            - name: Upload security reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: python-security-reports
+                  path: python/security-reports/
+                  if-no-files-found: ignore
+
+    typescript:
+        name: TypeScript test and security
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: npm
+                  cache-dependency-path: typescript/package-lock.json
+
+            - name: Install TypeScript dependencies
+              working-directory: typescript
+              run: npm ci
+
+            - name: Install pnpm for pnpm lockfile auditing
+              run: npm install --global pnpm@10.33.2
+
+            - name: Set up Python for security scanners
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Install security scanners
+              run: |
+                  python -m venv .security-venv
+                  .security-venv/bin/python -m pip install --upgrade pip
+                  .security-venv/bin/python -m pip install detect-secrets semgrep
+                  echo "$GITHUB_WORKSPACE/.security-venv/bin" >> "$GITHUB_PATH"
+
+            - name: Test
+              working-directory: typescript
+              run: make test
+
+            - name: Security
+              working-directory: typescript
+              run: make security
+
+            - name: Upload security reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: typescript-security-reports
+                  path: typescript/security-reports/
+                  if-no-files-found: ignore

@@ -26,6 +26,33 @@ DEFAULT_EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", DEFAULT_EMBED_MODEL_NAME)
 AAG_EMBED_GGUF_ENV = "AAG_EMBED_GGUF"
 AAG_EMBED_ONNX_ENV = "AAG_EMBED_ONNX"
+
+
+def create_onnx_session(model_path: str | Path):
+    """Create an ONNX session, falling back to ONNX's reference evaluator.
+
+    ONNX Runtime does not publish a CPython 3.14 Intel-macOS wheel. The ONNX
+    package does publish a universal2 wheel, and ReferenceEvaluator implements
+    the same ``run(None, feeds)`` contract used by this package.
+    """
+    try:
+        import onnxruntime as ort
+    except ImportError:
+        try:
+            from onnx.reference import ReferenceEvaluator
+        except ImportError as exc:
+            raise ImportError(
+                "ONNX inference requires either onnxruntime or onnx. "
+                "Install agent-action-guard with its platform dependencies."
+            ) from exc
+        return ReferenceEvaluator(str(model_path))
+
+    return ort.InferenceSession(
+        str(model_path),
+        providers=["CPUExecutionProvider"],
+    )
+
+
 _HF_BASE_URL = "https://huggingface.co/"
 _DEFAULT_ONNX_REPO = "onnx-models/all-MiniLM-L6-v2-onnx"
 _HF_REPO_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -37,13 +64,15 @@ def _default_onnx_asset_url(filename: str) -> str:
 
 def _download_file(url: str, destination: Path) -> None:
     """Download a runtime asset atomically if it is not already cached."""
+    if not _is_http_url(url):
+        raise ValueError("Embedding asset downloads require an HTTP(S) URL.")
     if destination.exists():
         return
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     temp_path = None
     try:
-        with urllib.request.urlopen(
+        with urllib.request.urlopen(  # nosec B310  # noqa: S310, RUF100
             url, timeout=120
         ) as response, tempfile.NamedTemporaryFile(
             mode="wb", delete=False, dir=str(destination.parent)
@@ -308,7 +337,6 @@ class EmbeddingModel:
         if self.onnx_session is not None and self.onnx_tokenizer is not None:
             return self.onnx_session, self.onnx_tokenizer
 
-        import onnxruntime as ort
         from tokenizers import Tokenizer
 
         files = _resolve_onnx_model_files()
@@ -329,9 +357,7 @@ class EmbeddingModel:
             raise ValueError("ONNX embedding tokenizer does not define a [PAD] token.")
         tokenizer.enable_padding(pad_id=pad_id, pad_token="[PAD]")
 
-        self.onnx_session = ort.InferenceSession(
-            str(model_file), providers=["CPUExecutionProvider"]
-        )
+        self.onnx_session = create_onnx_session(model_file)
         self.onnx_tokenizer = tokenizer
         return self.onnx_session, self.onnx_tokenizer
 

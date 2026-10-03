@@ -8,7 +8,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from torch import nn
 
 from agent_action_guard._runtime_utils import (
@@ -17,7 +23,6 @@ from agent_action_guard._runtime_utils import (
     flatten_action_to_text,
 )
 from experiments.moc import MixtureOfClassifiers
-
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "agent_action_guard" / "harmactions_dataset.json"
@@ -49,10 +54,14 @@ class RegularActionNet(nn.Module):
 def resolve_device(device_name: str) -> torch.device:
     """Resolve auto/cpu/cuda/cuda:N consistently for both classifiers."""
     if device_name == "auto":
-        return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        return (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
-        raise ValueError(f"CUDA device requested but CUDA is unavailable: {device_name}")
+        raise ValueError(
+            f"CUDA device requested but CUDA is unavailable: {device_name}"
+        )
     return device
 
 
@@ -91,7 +100,8 @@ def embed_rows(rows, batch_size: int) -> np.ndarray:
 
 
 def load_regular(path: Path, device: torch.device) -> RegularActionNet:
-    checkpoint = torch.load(path, map_location=device)
+    # nosemgrep: trailofbits.python.pickles-in-pytorch.pickles-in-pytorch
+    checkpoint = torch.load(path, map_location=device, weights_only=True)
     hidden = int(checkpoint.get("config", {}).get("hidden", 64))
     model = RegularActionNet(int(checkpoint["in_dim"]), hidden).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
@@ -100,7 +110,8 @@ def load_regular(path: Path, device: torch.device) -> RegularActionNet:
 
 
 def load_moc(path: Path, device: torch.device) -> MixtureOfClassifiers:
-    checkpoint = torch.load(path, map_location=device)
+    # nosemgrep: trailofbits.python.pickles-in-pytorch.pickles-in-pytorch
+    checkpoint = torch.load(path, map_location=device, weights_only=True)
     config = checkpoint["config"]
     model = MixtureOfClassifiers(
         in_dim=int(checkpoint["in_dim"]),

@@ -30,7 +30,7 @@ Or with pnpm:
 pnpm add agent-action-guard
 ```
 
-**Node.js 18+ · ESM · usable with zero embedding configuration.**
+**Node.js 18+ · ESM · usable with zero embedding configuration.** The runtime compatibility matrix covers Node.js 18, 20, 22, 24, and 26.
 
 On first use, Action Guard can automatically download and cache the default MiniLM ONNX embedding assets. You can also point it at your own local ONNX model or an OpenAI-compatible embedding API.
 

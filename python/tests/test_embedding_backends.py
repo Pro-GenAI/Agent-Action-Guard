@@ -517,6 +517,21 @@ def test_download_file_writes_atomically_and_cleans_temporary_file(
     assert list(destination.parent.iterdir()) == [destination]
 
 
+def test_download_file_rejects_non_http_urls_without_network(monkeypatch, tmp_path):
+    runtime_module = _load_runtime_utils_module()
+    destination = tmp_path / "model.onnx"
+
+    def fail_urlopen(*_args, **_kwargs):
+        raise AssertionError("network should not be used for a rejected URL scheme")
+
+    monkeypatch.setattr(runtime_module.urllib.request, "urlopen", fail_urlopen)
+
+    with pytest.raises(ValueError, match=r"HTTP\(S\) URL"):
+        runtime_module._download_file("file:///tmp/model.onnx", destination)
+
+    assert not destination.exists()
+
+
 def test_missing_local_onnx_model_has_actionable_error(monkeypatch, tmp_path):
     _clear_embedding_env(monkeypatch)
     monkeypatch.setenv("AAG_EMBED_ONNX", str(tmp_path / "missing.onnx"))

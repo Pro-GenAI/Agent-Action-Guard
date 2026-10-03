@@ -1,28 +1,40 @@
-PYTHON ?= python3
+UV ?= uv
 SOURCE_DIRS := agent_action_guard examples scripts tests training
-PY_FILES := $(shell rg --files $(SOURCE_DIRS) -g '*.py') sitecustomize.py
+PY_FILES := $(shell find $(SOURCE_DIRS) -type f -name '*.py') sitecustomize.py
 
-.PHONY: format lint quality dependency-matrix dependency-matrix-bounds latency-backends
+.PHONY: install install-dev format lint quality test security dependency-matrix dependency-matrix-bounds latency-backends
+
+install:
+	$(UV) sync
+
+install-dev:
+	$(UV) sync --extra dev
 
 format:
-	$(PYTHON) -m isort $(SOURCE_DIRS) sitecustomize.py
-	$(PYTHON) -m black $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with isort isort $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with black black $(SOURCE_DIRS) sitecustomize.py
 
 lint:
-	$(PYTHON) -m ruff check $(SOURCE_DIRS) sitecustomize.py
-	$(PYTHON) -m black --check $(SOURCE_DIRS) sitecustomize.py
-	$(PYTHON) -m isort --check-only $(SOURCE_DIRS) sitecustomize.py
-	$(PYTHON) -m mypy $(SOURCE_DIRS) sitecustomize.py
-	$(PYTHON) -m flake8 --jobs=1 $(SOURCE_DIRS) sitecustomize.py
-	PYLINTHOME=/tmp/pylint-cache $(PYTHON) -m pylint $(PY_FILES)
+	$(UV) run --with ruff ruff check $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with black black --check $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with isort isort --check-only $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with mypy mypy $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --with flake8 flake8 --jobs=1 $(SOURCE_DIRS) sitecustomize.py
+	PYLINTHOME=/tmp/pylint-cache $(UV) run --with pylint pylint $(PY_FILES)
 
 quality: format lint
 
+test:
+	$(UV) run --with pytest --with rich pytest
+
+security:
+	$(UV) run python scripts/security_audit.py
+
 dependency-matrix:
-	$(PYTHON) scripts/test_dependency_matrix.py
+	$(UV) run python scripts/test_dependency_matrix.py
 
 dependency-matrix-bounds:
-	$(PYTHON) scripts/test_dependency_matrix.py --bounds-only --no-optional
+	$(UV) run python scripts/test_dependency_matrix.py --bounds-only --no-optional
 
 latency-backends:
-	$(PYTHON) examples/scripts/compare_embedding_backend_latency.py
+	$(UV) run --with rich python examples/scripts/compare_embedding_backend_latency.py

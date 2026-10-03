@@ -12,7 +12,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -33,10 +39,14 @@ DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 def resolve_device(device_name: str) -> torch.device:
     """Resolve an explicit training device, with ``auto`` preferring CUDA."""
     if device_name == "auto":
-        return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        return (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
-        raise ValueError(f"CUDA device requested but CUDA is unavailable: {device_name}")
+        raise ValueError(
+            f"CUDA device requested but CUDA is unavailable: {device_name}"
+        )
     return device
 
 
@@ -221,7 +231,9 @@ def train_one(
         TimeElapsedColumn(),
     )
     with progress:
-        task = progress.add_task("Training regular classifier", total=epochs * len(train_loader))
+        task = progress.add_task(
+            "Training regular classifier", total=epochs * len(train_loader)
+        )
         for epoch in range(1, epochs + 1):
             model.train()
             total_loss = 0.0
@@ -294,7 +306,7 @@ def _train_model():
     print(f"-> acc: {acc:.4f}")
 
     # Save best model and embedding info
-    torch.save(
+    torch.save(  # nosemgrep: trailofbits.python.pickles-in-pytorch.pickles-in-pytorch
         {
             "model_state_dict": model.state_dict(),
             "in_dim": Xtr_embs.shape[1],

@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import argparse
 import os
+import platform
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 try:
@@ -37,6 +39,7 @@ CORE_RANGES = {
     "onnxruntime": ("1.14.0", "2.0.0"),
     "openai": ("1.0.0", "4.0.0"),
 }
+ONNX_REFERENCE_RANGE = ("1.21.0", "2.0.0")
 
 OPTIONAL_RANGES = {
     "python-dotenv": ("0.21.0", "2.0.0"),
@@ -84,8 +87,21 @@ def _python_version_tuple(version):
     return int(major), int(minor)
 
 
-def _dependency_ranges_for_python(python_version):
+def _dependency_ranges_for_python(
+    python_version, sys_platform=None, platform_machine=None
+):
     ranges = dict(CORE_RANGES)
+    active_platform = sys.platform if sys_platform is None else sys_platform
+    active_machine = (
+        platform.machine() if platform_machine is None else platform_machine
+    )
+    if (
+        _python_version_tuple(python_version) >= (3, 14)
+        and active_platform == "darwin"
+        and active_machine == "x86_64"
+    ):
+        ranges.pop("onnxruntime")
+        ranges["onnx"] = ONNX_REFERENCE_RANGE
     tokenizers_min = (
         "0.21.0" if _python_version_tuple(python_version) >= (3, 13) else "0.13.3"
     )

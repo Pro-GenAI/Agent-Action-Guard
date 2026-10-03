@@ -1,5 +1,5 @@
 """
-Action Classifier Module (ONNX Runtime)
+Action Classifier Module (ONNX inference)
 Lightweight inference without PyTorch dependency.
 """
 
@@ -8,11 +8,11 @@ from __future__ import annotations
 import functools
 
 import numpy as np
-import onnxruntime as ort
 
 from ._runtime_utils import (
     ALL_CLASSES,
     ONNX_MODEL_PATH,
+    create_onnx_session,
     embed_model,
     flatten_action_to_text,
 )
@@ -25,7 +25,7 @@ class ActionClassifier:
         self.embedding_model = (
             embed_model if embedding_model is None else embedding_model
         )
-        self.session: ort.InferenceSession | None = None
+        self.session = None
         self.load_model()
 
     def load_model(self):
@@ -33,11 +33,7 @@ class ActionClassifier:
         if not ONNX_MODEL_PATH.exists():
             raise FileNotFoundError(f"ONNX model not found: {ONNX_MODEL_PATH}")
 
-        # Create inference session
-        self.session = ort.InferenceSession(
-            str(ONNX_MODEL_PATH),
-            providers=["CPUExecutionProvider"],
-        )
+        self.session = create_onnx_session(ONNX_MODEL_PATH)
 
     def predict(self, action_dict: dict) -> tuple[str, float]:
         """Predict the class and confidence of one action."""

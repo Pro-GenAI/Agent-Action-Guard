@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+PYPROJECT_PATH = Path(__file__).resolve().parents[1] / "pyproject.toml"
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "test_dependency_matrix.py"
 )
@@ -10,6 +11,12 @@ SPEC = importlib.util.spec_from_file_location("dependency_matrix_script", SCRIPT
 dependency_matrix = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(dependency_matrix)
+
+
+def test_dev_extra_includes_security_scanners():
+    pyproject_text = PYPROJECT_PATH.read_text(encoding="utf-8")
+    for requirement in ("bandit", "pip-audit", "detect-secrets", "semgrep", "ruff"):
+        assert f'"{requirement}"' in pyproject_text
 
 
 def test_default_python_versions_cover_all_declared_supported_minors():
@@ -50,8 +57,26 @@ def test_dependency_ranges_follow_python_compatibility(
     ranges = dependency_matrix._dependency_ranges_for_python(python_version)
 
     assert ranges["tokenizers"] == (expected_tokenizers_min, "1.0.0")
-    assert ranges["onnxruntime"] == ("1.14.0", "2.0.0")
+    if (
+        python_version == "3.14"
+        and dependency_matrix.sys.platform == "darwin"
+        and dependency_matrix.platform.machine() == "x86_64"
+    ):
+        assert "onnxruntime" not in ranges
+        assert ranges["onnx"] == ("1.21.0", "2.0.0")
+    else:
+        assert ranges["onnxruntime"] == ("1.14.0", "2.0.0")
     assert ranges["openai"] == ("1.0.0", "4.0.0")
+
+
+def test_python_314_intel_macos_matrix_uses_onnx_reference_backend():
+    ranges = dependency_matrix._dependency_ranges_for_python(
+        "3.14", sys_platform="darwin", platform_machine="x86_64"
+    )
+
+    assert "onnxruntime" not in ranges
+    assert ranges["onnx"] == ("1.21.0", "2.0.0")
+    assert ranges["tokenizers"] == ("0.21.0", "1.0.0")
 
 
 def test_bounds_only_matrix_uses_distinct_oldest_and_newest_profiles():

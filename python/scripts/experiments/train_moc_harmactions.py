@@ -9,7 +9,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -21,7 +27,6 @@ from agent_action_guard._runtime_utils import (
 )
 from experiments.moc import MixtureOfClassifiers, set_seed
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "agent_action_guard" / "harmactions_dataset.json"
 DEFAULT_MODEL_PATH = Path(__file__).with_name("moc_harmactions.pt")
@@ -30,10 +35,14 @@ DEFAULT_MODEL_PATH = Path(__file__).with_name("moc_harmactions.pt")
 def resolve_device(device_name: str) -> torch.device:
     """Resolve auto/cpu/cuda/cuda:N consistently."""
     if device_name == "auto":
-        return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        return (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
     device = torch.device(device_name)
     if device.type == "cuda" and not torch.cuda.is_available():
-        raise ValueError(f"CUDA device requested but CUDA is unavailable: {device_name}")
+        raise ValueError(
+            f"CUDA device requested but CUDA is unavailable: {device_name}"
+        )
     return device
 
 
@@ -195,6 +204,7 @@ def train(args: argparse.Namespace) -> None:
         "embedding_backend": embed_model.backend,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    # nosemgrep: trailofbits.python.pickles-in-pytorch.pickles-in-pytorch
     torch.save(checkpoint, args.output)
 
     print(f"Validation 3-way accuracy:  {three_way:.4f}")

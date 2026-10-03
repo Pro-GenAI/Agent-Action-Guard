@@ -99,6 +99,11 @@ def _build_fake_runtime_utils_module():
     )
     runtime_module.ALL_CLASSES = ["safe", "harmful", "unethical"]  # type: ignore
     runtime_module.ONNX_MODEL_PATH = _FakeModelPath(exists=True)  # type: ignore
+    runtime_module.create_onnx_session = mock.Mock(  # type: ignore
+        return_value=_FakeInferenceSession(
+            "test-model", providers=["CPUExecutionProvider"]
+        )
+    )
 
     class ActionGuardDecision:
         """Placeholder class for compatibility with runtime expectations."""
@@ -182,6 +187,38 @@ def _load_runtime_utils_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def test_create_onnx_session_prefers_onnxruntime(runtime_module, monkeypatch):
+    fake_runtime = _build_fake_onnxruntime_module()
+    monkeypatch.setitem(sys.modules, "onnxruntime", fake_runtime)
+
+    session = runtime_module.create_onnx_session("model.onnx")
+
+    assert isinstance(session, _FakeInferenceSession)
+    assert session.providers == ["CPUExecutionProvider"]
+
+
+def test_create_onnx_session_falls_back_to_reference_evaluator(
+    runtime_module, monkeypatch
+):
+    class FakeReferenceEvaluator:
+        def __init__(self, model_path):
+            self.model_path = model_path
+
+    fake_onnx = types.ModuleType("onnx")
+    fake_reference = types.ModuleType("onnx.reference")
+    fake_reference.ReferenceEvaluator = FakeReferenceEvaluator
+    fake_onnx.reference = fake_reference
+
+    monkeypatch.setitem(sys.modules, "onnxruntime", None)
+    monkeypatch.setitem(sys.modules, "onnx", fake_onnx)
+    monkeypatch.setitem(sys.modules, "onnx.reference", fake_reference)
+
+    session = runtime_module.create_onnx_session("model.onnx")
+
+    assert isinstance(session, FakeReferenceEvaluator)
+    assert session.model_path == "model.onnx"
 
 
 # ================== Tests for ActionClassifier (ONNX) ==================

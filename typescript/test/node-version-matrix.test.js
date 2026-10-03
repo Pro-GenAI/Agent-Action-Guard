@@ -15,7 +15,7 @@ import {
 } from '../scripts/test-all-versions.js';
 
 test('default Node matrix covers supported LTS/current majors', () => {
-	assert.deepEqual(DEFAULT_NODE_VERSIONS, ['18', '20', '22', '24']);
+	assert.deepEqual(DEFAULT_NODE_VERSIONS, ['18', '20', '22', '24', '26']);
 });
 
 test('normalizeNodeVersions supports arguments, comma lists, and deduplication', () => {

@@ -9,6 +9,7 @@ import os
 import time
 from datetime import datetime
 from typing import List
+from urllib.parse import urlsplit
 
 import psutil
 import pytz
@@ -83,15 +84,15 @@ if __name__ == "__main__":
     if not base_url:
         raise ValueError("EMBEDDING_BASE_URL environment variable is not set.")
 
-    # get port from the base_url
-    url_parts = base_url.split(":")
-    port = int(url_parts[-1].split("/")[0]) if len(url_parts) > 2 else 80
+    parsed_url = urlsplit(base_url)
+    host = parsed_url.hostname or "127.0.0.1"
+    port = parsed_url.port or (443 if parsed_url.scheme == "https" else 80)
 
     while True:
         try:
             # Start the FastAPI server
             print("Starting the FastAPI server...")
-            uvicorn.run(app, host="0.0.0.0", port=port)
+            uvicorn.run(app, host=host, port=port)
             break
         except KeyboardInterrupt:
             print("Server stopped by user.")
