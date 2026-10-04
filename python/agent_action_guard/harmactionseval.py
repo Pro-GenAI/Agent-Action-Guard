@@ -2,7 +2,7 @@
 HarmActionsEval CLI.
 
 Run with:
-    python -m agent_action_guard.harmactionseval
+    agent-action-guard harmactionseval
 """
 
 from __future__ import annotations
@@ -400,7 +400,8 @@ def evaluate(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run HarmActionsEval to measure harmful tool-call behavior."
+        prog="agent-action-guard harmactionseval",
+        description="Run HarmActionsEval to measure harmful tool-call behavior.",
     )
     parser.add_argument(
         "--k",

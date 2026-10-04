@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { isActionsHarmful } from './action-classifier.js';
+import { DEFAULT_HOST, DEFAULT_PORT, startApiServer } from './api-server.js';
 
 function normalizeActions(value, source) {
 	const actions = Array.isArray(value) ? value : [value];
@@ -74,15 +75,62 @@ export function summarizeResults(results) {
 
 export function usage() {
 	return `Usage:
-  aag-classify 'ACTION_JSON'
-  aag-classify --file actions.json [--batch-size N]
-  aag-classify --file actions.jsonl [--batch-size N]`;
+  agent-action-guard 'ACTION_JSON'
+  agent-action-guard --file actions.json [--batch-size N]
+  agent-action-guard --file actions.jsonl [--batch-size N]
+  agent-action-guard serve [--host HOST] [--port PORT] [--batch-size N]`;
+}
+
+export function serveUsage() {
+	return `Usage: agent-action-guard serve [--host HOST] [--port PORT] [--batch-size N]`;
 }
 
 export async function main(
 	argv = process.argv.slice(2),
-	{ classifyActions = isActionsHarmful, write = console.log } = {},
+	{
+		classifyActions = isActionsHarmful,
+		serveApi = startApiServer,
+		write = console.log,
+	} = {},
 ) {
+	if (argv[0] === 'serve') {
+		const { values, positionals } = parseArgs({
+			args: argv.slice(1),
+			allowPositionals: true,
+			options: {
+				host: { type: 'string' },
+				port: { type: 'string' },
+				'batch-size': { type: 'string' },
+				help: { type: 'boolean', short: 'h' },
+			},
+		});
+		if (values.help) {
+			write(serveUsage());
+			return 0;
+		}
+		if (positionals.length > 0) {
+			throw new Error(`Unexpected positional arguments.\n${serveUsage()}`);
+		}
+		const port = values.port === undefined ? DEFAULT_PORT : Number(values.port);
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			throw new Error('--port must be an integer between 1 and 65535');
+		}
+		let batchSize = null;
+		if (values['batch-size'] !== undefined) {
+			batchSize = Number(values['batch-size']);
+			if (!Number.isInteger(batchSize) || batchSize <= 0) {
+				throw new Error('--batch-size must be a positive integer');
+			}
+		}
+		await serveApi({
+			host: values.host ?? DEFAULT_HOST,
+			port,
+			batchSize,
+			classifyActions,
+		});
+		return 0;
+	}
+
 	const { values, positionals } = parseArgs({
 		args: argv,
 		allowPositionals: true,

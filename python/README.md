@@ -41,7 +41,11 @@ If you use pepip:
 pepip install agent-action-guard
 ``` -->
 
-> For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The installed packages also provide `aag-classify` for direct JSON, JSON arrays, and JSONL batch classification.
+> For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The installed packages also provide `agent-action-guard` for direct JSON, JSON arrays, JSONL batch classification, and `agent-action-guard serve` for a local HTTP classification API.
+
+Framework integrations ship in this package as `agent_action_guard.langchain`, `agent_action_guard.llamaindex`, `agent_action_guard.openai_agents`, `agent_action_guard.autogen`, and `agent_action_guard.crewai`. Framework dependencies remain optional and are only needed by applications using those frameworks.
+
+The same distribution also provides project-level pre-tool-use hook installers for Codex, Claude Code, Cursor, and Kiro via `agent-action-guard hooks install --target <target>`.
 
 Want to run the evaluation benchmark too?
 
@@ -50,7 +54,7 @@ pip install "agent-action-guard[harmactionseval]"
 # or
 uv add "agent-action-guard[harmactionseval]"
 
-python -m agent_action_guard.harmactionseval
+agent-action-guard harmactionseval
 ```
 
 ### JavaScript Runtime

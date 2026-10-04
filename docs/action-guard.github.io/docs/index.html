@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Action Guard Documentation — Python, JavaScript & Agent Safety Integrations</title>
+  <meta name="description" content="Official Agent Action Guard documentation: install the Python or JavaScript package, screen AI agent tool calls, configure embedding backends, integrations, hooks, CLI, and HTTP API." />
+  <meta name="keywords" content="Agent Action Guard documentation, AI agent safety, agent guardrails, Python agent safety, JavaScript agent safety, tool call guardrails, harmful action classifier" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="author" content="Agent Action Guard" />
+  <link rel="canonical" href="https://action-guard.github.io/docs/" />
+  <meta name="theme-color" content="#0d0e12" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Agent Action Guard" />
+  <meta property="og:title" content="Agent Action Guard Documentation" />
+  <meta property="og:description" content="Install and integrate Agent Action Guard for runtime AI-agent action screening in Python and JavaScript." />
+  <meta property="og:url" content="https://action-guard.github.io/docs/" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
+  <meta property="og:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Agent Action Guard Documentation" />
+  <meta name="twitter:description" content="Python, JavaScript, integrations, hooks, CLI, HTTP API, and embedding configuration for Agent Action Guard." />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
+  <meta name="twitter:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "@id": "https://action-guard.github.io/docs/#article",
+        "headline": "Agent Action Guard Documentation",
+        "description": "Official documentation for installing, configuring, and integrating Agent Action Guard in Python and JavaScript AI agent runtimes.",
+        "url": "https://action-guard.github.io/docs/",
+        "mainEntityOfPage": "https://action-guard.github.io/docs/",
+        "author": {
+          "@type": "Organization",
+          "name": "Agent Action Guard",
+          "url": "https://action-guard.github.io/"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Agent Action Guard",
+          "url": "https://action-guard.github.io/"
+        },
+        "about": [
+          "AI agent safety",
+          "runtime action screening",
+          "agent guardrails",
+          "tool call classification"
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://action-guard.github.io/docs/#software",
+        "name": "Agent Action Guard",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "url": "https://action-guard.github.io/",
+        "downloadUrl": "https://pypi.org/project/agent-action-guard/",
+        "softwareRequirements": "Python 3.8-3.14 or supported Node.js runtime"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Agent Action Guard",
+            "item": "https://action-guard.github.io/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Documentation",
+            "item": "https://action-guard.github.io/docs/"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0e12;
+      --surface: #15171c;
+      --surface-2: #1f2228;
+      --line: #30343c;
+      --text: #e7e9ee;
+      --muted: #aeb4c0;
+      --accent: #2ae500;
+      --accent-soft: #79ff5b;
+      --code: #bbc6e2;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(42, 229, 0, .08), transparent 28rem),
+        radial-gradient(circle at 100% 20%, rgba(187, 198, 226, .06), transparent 30rem),
+        var(--bg);
+      line-height: 1.68;
+    }
+
+    a { color: var(--accent-soft); }
+    a:hover { color: var(--accent); }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    code:not(pre code) {
+      padding: .1rem .35rem;
+      border: 1px solid var(--line);
+      border-radius: .35rem;
+      background: var(--surface-2);
+      color: var(--code);
+    }
+    pre {
+      margin: 1rem 0 1.5rem;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: .7rem;
+      background: #090a0d;
+      color: var(--code);
+      line-height: 1.55;
+    }
+    pre code.hljs { display: block; overflow-x: visible; padding: 0; background: transparent; color: var(--code); }
+    .hljs-comment, .hljs-quote { color: #7f8aa3; font-style: italic; }
+    .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-name { color: #ff7ab2; }
+    .hljs-string, .hljs-doctag, .hljs-regexp, .hljs-template-tag, .hljs-template-variable { color: #f7c76f; }
+    .hljs-number, .hljs-built_in, .hljs-builtin-name, .hljs-symbol, .hljs-bullet { color: #d6a6ff; }
+    .hljs-title, .hljs-title.function_, .hljs-title.class_, .hljs-function .hljs-title { color: #7ee787; }
+    .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-property, .hljs-params { color: #79c0ff; }
+    .hljs-meta, .hljs-meta .hljs-keyword { color: #ffa657; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(13, 14, 18, .9);
+      backdrop-filter: blur(16px);
+    }
+    .topbar-inner {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .topnav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .topnav a { text-decoration: none; font-weight: 650; }
+    .topnav .active { color: var(--accent); }
+
+    .hero {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 4.5rem 0 3rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+    }
+    h1, h2, h3 { line-height: 1.17; letter-spacing: -.025em; }
+    h1 { margin: .65rem 0 1rem; max-width: 900px; font-size: clamp(2.45rem, 6vw, 4.75rem); }
+    h2 { margin: 0 0 1rem; font-size: clamp(1.75rem, 3vw, 2.45rem); }
+    h3 { margin: 2rem 0 .65rem; font-size: 1.3rem; }
+    .hero p { max-width: 830px; color: var(--muted); font-size: 1.08rem; }
+    .hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 1.4rem; }
+    .button {
+      display: inline-block;
+      padding: .7rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: .55rem;
+      text-decoration: none;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--surface);
+    }
+    .button.primary { color: #062000; background: var(--accent); border-color: var(--accent); }
+
+    .layout {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 3rem;
+      padding: 2.5rem 0 5rem;
+    }
+    aside { align-self: start; position: sticky; top: 92px; }
+    aside strong { display: block; margin-bottom: .7rem; }
+    aside a {
+      display: block;
+      padding: .35rem 0;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    aside a:hover { color: var(--accent); }
+
+    article section {
+      padding: 0 0 3rem;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--line);
+    }
+    article p, article li { color: var(--muted); }
+    article strong { color: var(--text); }
+    .callout {
+      padding: 1rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-left: 3px solid var(--accent);
+      background: var(--surface);
+      border-radius: 0 .6rem .6rem 0;
+    }
+    .callout p { margin: 0; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: .7rem; background: var(--surface); }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; }
+    th, td { padding: .75rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--text); }
+    td { color: var(--muted); }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2rem 1rem 3rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 820px) {
+      .layout { grid-template-columns: 1fr; gap: 1.5rem; }
+      aside { position: static; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+      .cards { grid-template-columns: 1fr; }
+      .topbar-inner { align-items: flex-start; padding: .8rem 0; }
+      .topnav { justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">Agent Action Guard</a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="/">Home</a>
+        <a class="active" href="/docs/" aria-current="page">Docs</a>
+        <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="docs-title">
+      <div class="eyebrow">Official documentation</div>
+      <h1 id="docs-title">Agent Action Guard documentation</h1>
+      <p>Install and integrate runtime action screening for AI agents. Agent Action Guard classifies proposed tool calls immediately before execution so your application can block harmful actions or require additional policy checks.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#quick-start">Quick start</a>
+        <a class="button" href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md">Full repository usage guide</a>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside aria-label="Documentation sections">
+        <strong>On this page</strong>
+        <a href="#quick-start">Quick start</a>
+        <a href="#python">Python API</a>
+        <a href="#javascript">JavaScript API</a>
+        <a href="#embedding">Embedding backends</a>
+        <a href="#integrations">Framework integrations</a>
+        <a href="#hooks">Coding-agent hooks</a>
+        <a href="#cli">CLI and HTTP API</a>
+        <a href="#evaluation">HarmActionsEval</a>
+        <a href="#production">Production guidance</a>
+      </aside>
+
+      <article>
+        <section id="quick-start">
+          <h2>Quick start</h2>
+          <p>Use the runtime package in the same process as your agent and call the guard immediately before a tool executes.</p>
+
+          <div class="cards">
+            <div class="card">
+              <h3>Python</h3>
+              <pre><code class="language-bash">pip install agent-action-guard
+# or
+uv add agent-action-guard</code></pre>
+              <p>Supported package range: Python 3.8 through 3.14.</p>
+            </div>
+            <div class="card">
+              <h3>JavaScript / Node.js</h3>
+              <pre><code class="language-bash">npm install agent-action-guard
+# or
+pnpm install agent-action-guard</code></pre>
+              <p>The package exposes asynchronous action-screening helpers for Node.js agent loops.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <p><strong>Default embedding behavior:</strong> if no embedding environment variables are set, the runtime automatically downloads and caches the default MiniLM ONNX embedding assets on first use, then reuses the cached files.</p>
+          </div>
+        </section>
+
+        <section id="python">
+          <h2>Python API</h2>
+          <h3>Screen an action directly</h3>
+          <pre><code class="language-python">from agent_action_guard import is_action_harmful
+
+action = {
+    "type": "function",
+    "function": {
+        "name": "send_email",
+        "arguments": {
+            "to": "user@example.com",
+            "subject": "Status update",
+            "body": "Hello",
+        },
+    },
+}
+
+is_harmful, confidence = is_action_harmful(action)
+if is_harmful:
+    raise RuntimeError(f"Action blocked ({confidence:.2f})")</code></pre>
+
+          <h3>Guard a Python function</h3>
+          <pre><code class="language-python">from agent_action_guard import action_guarded
+
+@action_guarded(conf_threshold=0.8)
+def delete_user(user_id: str):
+    return f"deleted:{user_id}"</code></pre>
+          <p>The decorator derives an action from the function call and screens it before the wrapped function executes.</p>
+        </section>
+
+        <section id="javascript">
+          <h2>JavaScript API</h2>
+          <p>The Node.js runtime exposes <code>isActionHarmful()</code>, <code>ensureActionSafety()</code>, and <code>actionGuarded()</code>.</p>
+          <pre><code class="language-javascript">import {
+  ensureActionSafety,
+  isActionHarmful,
+} from "agent-action-guard";
+
+const action = {
+  type: "function",
+  function: {
+    name: "send_email",
+    arguments: {
+      to: "user@example.com",
+      subject: "Status update",
+      body: "Hello",
+    },
+  },
+};
+
+const decision = await isActionHarmful(action);
+if (decision.label) {
+  throw new Error("Harmful action blocked");
+}
+
+await ensureActionSafety(action, { raiseException: true });</code></pre>
+        </section>
+
+        <section id="embedding">
+          <h2>Embedding backends</h2>
+          <p>Agent Action Guard supports local GGUF, local or remote ONNX assets, OpenAI-compatible embedding APIs, and a zero-configuration ONNX default.</p>
+
+          <table>
+            <thead>
+              <tr><th>Priority</th><th>Configuration</th><th>Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><code>AAG_EMBED_GGUF</code></td><td>Uses an explicit GGUF source. Python loads llama.cpp bindings only when this backend is selected.</td></tr>
+              <tr><td>2</td><td><code>AAG_EMBED_ONNX</code></td><td>Uses an explicit ONNX source and tokenizer assets.</td></tr>
+              <tr><td>3</td><td>Embedding API variables</td><td>Uses an OpenAI-compatible embedding endpoint.</td></tr>
+              <tr><td>4</td><td>No embedding variables</td><td>Downloads and caches the default <code>sentence-transformers/all-MiniLM-L6-v2</code> ONNX assets.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Explicit ONNX source</h3>
+          <pre><code class="language-bash">export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
+python app.py</code></pre>
+
+          <h3>Explicit GGUF source</h3>
+          <pre><code class="language-bash">pip install llama-cpp-python
+export AAG_EMBED_GGUF="/models/all-MiniLM-L6-v2/model.gguf"
+python app.py</code></pre>
+
+          <h3>OpenAI-compatible embedding API</h3>
+          <pre><code class="language-bash">export EMBED_MODEL_NAME="sentence-transformers/all-MiniLM-L6-v2"
+export EMBEDDING_BASE_URL="http://localhost:1234/v1"
+export EMBEDDING_API_KEY="..."
+python app.py</code></pre>
+
+          <p>For exact remote URL, Hugging Face repository-ID, cache-path, and precedence semantics, use the <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md">repository usage guide</a>.</p>
+        </section>
+
+        <section id="integrations">
+          <h2>Framework integrations</h2>
+          <p>Framework adapters ship in the Python package and keep the underlying framework dependency optional.</p>
+          <ul>
+            <li>LangChain: <code>agent_action_guard.langchain</code></li>
+            <li>LlamaIndex: <code>agent_action_guard.llamaindex</code></li>
+            <li>OpenAI Agents SDK: <code>agent_action_guard.openai_agents</code></li>
+            <li>AutoGen: <code>agent_action_guard.autogen</code></li>
+            <li>CrewAI: <code>agent_action_guard.crewai</code></li>
+          </ul>
+
+          <h3>OpenAI Agents SDK tool</h3>
+          <pre><code class="language-python">from agent_action_guard.openai_agents import guard_function
+from agents import function_tool
+
+@function_tool
+@guard_function
+def send_email(to: str, subject: str, body: str) -> str:
+    return "sent"</code></pre>
+          <p>Use <code>guard_tool(...)</code> for existing tool objects where supported. LangChain also provides an <code>ActionGuardCallbackHandler</code>.</p>
+        </section>
+
+        <section id="hooks">
+          <h2>Coding-agent pre-tool-use hooks</h2>
+          <p>Install project-level hooks so supported coding-agent harnesses screen a proposed tool call before execution.</p>
+          <pre><code class="language-bash">agent-action-guard hooks install --target codex
+agent-action-guard hooks install --target claude-code
+agent-action-guard hooks install --target cursor
+agent-action-guard hooks install --target kiro</code></pre>
+          <p>The hook normalizes the harness's tool name and tool input into the Action Guard action schema. Harmful calls at or above the configured threshold are blocked. Set <code>AAG_HOOK_CONF_THRESHOLD</code> or pass <code>--conf-threshold</code> to tune that threshold.</p>
+        </section>
+
+        <section id="cli">
+          <h2>CLI and HTTP API</h2>
+          <h3>Classify from the command line</h3>
+          <p>The installed <code>agent-action-guard</code> command accepts a direct JSON action or a file containing JSON-array or JSONL actions.</p>
+          <pre><code class="language-bash">agent-action-guard '{"type":"function","function":{"name":"send_email","arguments":{"to":"user@example.com"}}}'</code></pre>
+
+          <h3>Run the local HTTP service</h3>
+          <pre><code class="language-bash">agent-action-guard serve</code></pre>
+          <p>The service exposes <code>GET /health</code> and <code>POST /v1/classify</code>. The default bind address is <code>127.0.0.1:8000</code>, with host, port, and default batch-size configuration available through the CLI.</p>
+        </section>
+
+        <section id="evaluation">
+          <h2>HarmActionsEval</h2>
+          <p>Install the optional evaluation dependencies when you want to run the benchmark workflow rather than only the runtime classifier.</p>
+          <pre><code class="language-bash">pip install "agent-action-guard[harmactionseval]"
+agent-action-guard harmactionseval --k 3</code></pre>
+          <p>The evaluation CLI supports controls such as <code>--k</code>, <code>--offset</code>, <code>--limit</code>, <code>--cache-path</code>, <code>--output</code>, and <code>--log-level</code>. Provider credentials and <code>OPENAI_MODEL</code> are required for the LLM-backed evaluation path.</p>
+        </section>
+
+        <section id="production">
+          <h2>Production guidance</h2>
+          <ul>
+            <li><strong>Screen at the execution boundary.</strong> Guard the normalized action immediately before a side-effecting tool runs.</li>
+            <li><strong>Keep policy layered.</strong> Treat the classifier as one control; combine it with authorization, allowlists, rate limits, sandboxing, and human approval for high-impact actions.</li>
+            <li><strong>Fail closed for malformed hook payloads.</strong> A safety gate should not silently bypass classification when the action cannot be normalized.</li>
+            <li><strong>Measure threshold changes.</strong> Validate false-positive and false-negative tradeoffs against the actions your application actually executes.</li>
+          </ul>
+
+          <div class="callout">
+            <p><strong>Next:</strong> see the <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub repository</a> for source code and examples, or the <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md">full usage reference</a> for advanced configuration details.</p>
+          </div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <p>Agent Action Guard documentation · <a href="/">Website</a> · <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a></p>
+  </footer>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      if (window.hljs) window.hljs.highlightAll();
+    });
+  </script>
+</body>
+</html>

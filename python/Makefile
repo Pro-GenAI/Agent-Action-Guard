@@ -1,4 +1,6 @@
 UV ?= uv
+TEST_WORKERS ?= logical
+TEST_DIST ?= worksteal
 SOURCE_DIRS := agent_action_guard examples scripts tests training
 PY_FILES := $(shell find $(SOURCE_DIRS) -type f -name '*.py') sitecustomize.py
 
@@ -25,7 +27,7 @@ lint:
 quality: format lint
 
 test:
-	$(UV) run --with pytest --with rich pytest
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(UV) run --with pytest --with pytest-xdist --with rich pytest -p xdist.plugin -n $(TEST_WORKERS) --dist=$(TEST_DIST)
 
 security:
 	$(UV) run python scripts/security_audit.py

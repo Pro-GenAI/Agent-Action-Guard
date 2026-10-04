@@ -150,20 +150,20 @@ for (const decision of decisions) {
 
 ## CLI included
 
-Installing the package also installs `aag-classify`.
+Installing the package also installs `agent-action-guard`.
 
 ```bash
-aag-classify '{"type":"function","function":{"name":"send_email","arguments":{}}}'
+agent-action-guard '{"type":"function","function":{"name":"send_email","arguments":{}}}'
 ```
 
 Classify JSON arrays or JSONL files in batches:
 
 ```bash
-aag-classify --file actions.json --batch-size 32
-aag-classify --file actions.jsonl --batch-size 32
+agent-action-guard --file actions.json --batch-size 32
+agent-action-guard --file actions.jsonl --batch-size 32
 ```
 
-The CLI reports total, safe, and unsafe action counts.
+The CLI reports total, safe, and unsafe action counts. Start the local HTTP API with `agent-action-guard serve`; it binds to `127.0.0.1:8000` by default and exposes `GET /health` plus `POST /v1/classify`. Use `--host`, `--port`, and `--batch-size` to configure the server. See the repository `USAGE.md` for request and response examples.
 
 ## Embedding backends
 

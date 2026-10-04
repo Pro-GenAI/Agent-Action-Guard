@@ -1,0 +1,60 @@
+# Agent Action Guard (llms.txt)
+
+This file provides a machine-readable overview of the repository for AI tools and crawlers.
+
+Project
+- Name: Agent Action Guard
+- Repository: https://github.com/Pro-GenAI/Agent-Action-Guard
+- Package: https://pypi.org/project/agent-action-guard/
+- Purpose: Classify proposed AI agent actions as safe or harmful before tool execution.
+
+What this project does
+- Screens agent/tool actions at runtime.
+- Returns a harmful/safe decision with confidence.
+- Supports integration in agent loops and MCP-compatible tooling.
+- Provides benchmark and dataset artifacts for reproducible evaluation.
+
+Primary API
+- Python import: from agent_action_guard import is_action_harmful
+- Typical use:
+  1) is_harmful, confidence = is_action_harmful(action_dict)
+  2) Block or require approval when is_harmful is True.
+
+Quick install
+- Runtime only:
+  pip install agent-action-guard
+- Runtime + HarmActionsEval CLI:
+  pip install "agent-action-guard[harmactionseval]"
+- Full optional extras (embedding/demo scripts):
+  pip install "agent-action-guard[all]"
+
+Core repository paths
+- agent_action_guard/: Runtime classifier package, model assets, benchmark module.
+- tests/: Unit tests for classifier behavior.
+- examples/: Integration examples and embedding host scripts.
+- training/: Model training scripts and related artifacts.
+- USAGE.md: Integration and environment setup details.
+- README.md: Project overview, motivation, benchmark snapshot, links.
+
+Operational notes
+- The classifier may use embedding infrastructure depending on integration mode.
+- For vector/embedding-backed setups, configure EMBED_MODEL_NAME, EMBEDDING_BASE_URL, and EMBEDDING_API_KEY.
+- The documented baseline embedding model is sentence-transformers/all-MiniLM-L6-v2.
+
+Evaluation
+- HarmActionsEval module and CLI are included for benchmark-style runs.
+- Example invocation:
+  python -m agent_action_guard.harmactionseval --k 3
+
+Policy and safety intent
+- Goal: prevent harmful, unethical, or risky autonomous actions.
+- Recommended: combine model decisions with deterministic rule checks for high-risk systems.
+
+License
+- CC BY 4.0
+- See LICENSE.md for full terms.
+
+Canonical docs for agents
+- AGENTS.md
+- README.md
+- USAGE.md

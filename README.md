@@ -7,6 +7,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/agent-action-guard?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/agent-action-guard/)
 [![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
+[![Docs](https://img.shields.io/badge/Docs-2AE500?style=for-the-badge&logo=readthedocs&logoColor=111111)](https://action-guard.github.io/docs/)
 [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449)
 [![npm](https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/agent-action-guard)
 <!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E) -->
@@ -39,7 +40,16 @@ If you use pepip:
 pepip install agent-action-guard
 ``` -->
 
-> For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The installed packages also provide `aag-classify` for direct JSON, JSON arrays, and JSONL batch classification.
+> For embedding backend options and configuration details—including zero-config ONNX embeddings, custom local ONNX models, OpenAI-compatible embedding APIs, environment variables, and backend precedence—read [USAGE.md](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md). The installed packages also provide `agent-action-guard` for direct JSON, JSON arrays, JSONL batch classification, and `agent-action-guard serve` for a local HTTP classification API.
+
+Python framework integrations are included in the same package: `agent_action_guard.langchain`, `agent_action_guard.llamaindex`, `agent_action_guard.openai_agents`, `agent_action_guard.autogen`, and `agent_action_guard.crewai`. No separate integration package is required.
+
+Pre-tool-use harness hooks are also built in for Codex, Claude Code, Cursor, and Kiro:
+
+```bash
+agent-action-guard hooks install --target codex
+# or: claude-code, cursor, kiro
+```
 
 Want to run the evaluation benchmark too?
 
@@ -48,7 +58,7 @@ pip install "agent-action-guard[harmactionseval]"
 # or
 uv add "agent-action-guard[harmactionseval]"
 
-python -m agent_action_guard.harmactionseval
+agent-action-guard harmactionseval
 ```
 
 ### JavaScript Runtime

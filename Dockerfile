@@ -8,5 +8,5 @@ WORKDIR /app
 COPY python/ /app/python/
 RUN python -m pip install --no-cache-dir /app/python
 
-ENTRYPOINT ["aag-classify"]
+ENTRYPOINT ["agent-action-guard"]
 CMD ["--help"]

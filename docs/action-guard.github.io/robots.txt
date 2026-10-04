@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://action-guard.github.io/sitemap.xml

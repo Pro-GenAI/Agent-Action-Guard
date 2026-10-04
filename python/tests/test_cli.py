@@ -3,6 +3,34 @@ import json
 from agent_action_guard import cli
 
 
+def test_parser_uses_agent_action_guard_command_name():
+    assert cli.build_parser().prog == "agent-action-guard"
+
+
+def test_harmactionseval_help_does_not_load_optional_dependencies(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "_run_harmactionseval",
+        lambda argv: (_ for _ in ()).throw(AssertionError("should not run")),
+    )
+
+    assert cli.main(["harmactionseval", "--help"]) == 0
+    assert "agent-action-guard harmactionseval" in capsys.readouterr().out
+
+
+def test_harmactionseval_subcommand_delegates_arguments(monkeypatch):
+    calls = []
+
+    def fake_harmactionseval(argv):
+        calls.append(argv)
+        return 7
+
+    monkeypatch.setattr(cli, "_run_harmactionseval", fake_harmactionseval)
+
+    assert cli.main(["harmactionseval", "--k", "3", "--limit", "10"]) == 7
+    assert calls == [["--k", "3", "--limit", "10"]]
+
+
 def test_load_actions_accepts_direct_json():
     actions = cli.load_actions(
         json.dumps(

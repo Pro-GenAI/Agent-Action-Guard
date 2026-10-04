@@ -115,6 +115,56 @@ def delete_user(user_id: str):
     print(f"Deleting user {user_id}...")
 ```
 
+#### Framework integrations
+
+Framework adapters ship inside the same `agent-action-guard` package; no separate integration packages are required. The framework libraries themselves remain optional dependencies.
+
+- LangChain: `agent_action_guard.langchain`
+- LlamaIndex: `agent_action_guard.llamaindex`
+- OpenAI Agents SDK: `agent_action_guard.openai_agents`
+- AutoGen: `agent_action_guard.autogen`
+- CrewAI: `agent_action_guard.crewai`
+
+For tool factories/decorators, guard the Python function before registering it:
+
+```python
+from agent_action_guard.openai_agents import guard_function
+from agents import function_tool
+
+@function_tool
+@guard_function
+def send_email(to: str, subject: str, body: str) -> str:
+    return "sent"
+```
+
+The same `guard_function(..., conf_threshold=...)` pattern is available for LangChain, LlamaIndex, AutoGen, and CrewAI. Existing tool objects can be wrapped with `guard_tool(...)`; LangChain also provides `ActionGuardCallbackHandler` for callback-based execution.
+
+#### Harness integrations (pre-tool-use hooks)
+
+Install Agent Action Guard directly into supported coding-agent harnesses:
+
+```bash
+agent-action-guard hooks install --target codex
+agent-action-guard hooks install --target claude-code
+agent-action-guard hooks install --target cursor
+agent-action-guard hooks install --target kiro
+```
+
+The installer writes or merges project-level hook configuration without creating separate packages:
+
+- Codex: `.codex/hooks.json`
+- Claude Code: `.claude/settings.json`
+- Cursor: `.cursor/hooks.json`
+- Kiro: `.kiro/hooks/agent-action-guard.json`
+
+Each hook receives the proposed tool call before execution and runs:
+
+```bash
+agent-action-guard hooks run --target <target>
+```
+
+The hook reads the harness JSON payload from stdin and classifies the proposed `tool_name` / `tool_input`. Harmful calls at or above the threshold are blocked. Configure the threshold with `AAG_HOOK_CONF_THRESHOLD` or `--conf-threshold`.
+
 PyPI package scope:
 - `pip install agent-action-guard` (or `uv add agent-action-guard`) installs the runtime classifier and dependencies for local ONNX embedding inference. The default embedding model and tokenizer are downloaded and cached on first use rather than bundled in the wheel.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
@@ -133,7 +183,7 @@ pytest
 After installing `agent-action-guard[harmactionseval]`, run:
 
 ```bash
-python -m agent_action_guard.harmactionseval --k 3
+agent-action-guard harmactionseval --k 3
 ```
 
 Common arguments:
@@ -287,30 +337,30 @@ node app.js
 
 The JavaScript Action Guard classifier itself continues to use the packaged ONNX model in [typescript/src/action_classifier_model.onnx](typescript/src/action_classifier_model.onnx). Local embedding inference depends on `onnxruntime-node` and `@huggingface/tokenizers`; API inference depends on `openai`.
 
-### Batch classification and `aag-classify` CLI
+### Batch classification and `agent-action-guard` CLI
 
-Both the Python and npm packages install an `aag-classify` command. Pass one action directly as JSON:
+Both the Python and npm packages install an `agent-action-guard` command. Pass one action directly as JSON:
 
 ```bash
-aag-classify '{"type":"function","function":{"name":"send_email","arguments":{"to":"user@example.com"}}}'
+agent-action-guard '{"type":"function","function":{"name":"send_email","arguments":{"to":"user@example.com"}}}'
 ```
 
 For multiple actions, pass a JSON file containing an array:
 
 ```bash
-aag-classify --file actions.json
+agent-action-guard --file actions.json
 ```
 
 Or pass a JSONL file containing one JSON action per non-empty line:
 
 ```bash
-aag-classify --file actions.jsonl
+agent-action-guard --file actions.jsonl
 ```
 
 Large inputs can be processed in bounded vectorized chunks:
 
 ```bash
-aag-classify --file actions.jsonl --batch-size 64
+agent-action-guard --file actions.jsonl --batch-size 64
 ```
 
 The command prints totals such as:
@@ -322,6 +372,61 @@ Unsafe actions: 18
 ```
 
 `Unsafe actions` includes every non-`safe` label (`harmful` and `unethical`). Batch classification uses one embedding request/inference and one Action Guard ONNX classifier inference per batch chunk rather than classifying actions one by one.
+
+### HTTP API with `agent-action-guard serve`
+
+Start a local API from either the Python or npm package:
+
+```bash
+agent-action-guard serve
+# defaults to http://127.0.0.1:8000
+```
+
+Bind a different interface or port, and optionally set a default inference batch size:
+
+```bash
+agent-action-guard serve --host 0.0.0.0 --port 8080 --batch-size 64
+```
+
+Health check:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Classify one action with `POST /v1/classify`:
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/classify \
+  -H 'content-type: application/json' \
+  -d '{"action":{"type":"function","function":{"name":"send_email","arguments":{"to":"user@example.com"}}}}'
+```
+
+For batch classification, send `actions` and optionally override the server batch size per request:
+
+```json
+{
+  "actions": [
+    {"type": "function", "function": {"name": "read_file", "arguments": {"path": "notes.txt"}}},
+    {"type": "function", "function": {"name": "send_email", "arguments": {"to": "user@example.com"}}}
+  ],
+  "batch_size": 32
+}
+```
+
+Successful responses contain one result per action and aggregate counts:
+
+```json
+{
+  "results": [
+    {"label": null, "confidence": 0.97, "safe": true},
+    {"label": "harmful", "confidence": 0.91, "safe": false}
+  ],
+  "summary": {"total": 2, "safe": 1, "unsafe": 1}
+}
+```
+
+The server is dependency-free in both runtimes, limits request bodies to 1 MiB by default, returns JSON errors for invalid input, and uses the same vectorized batch classifier as the CLI.
 
 Python exposes the same batch path programmatically:
 

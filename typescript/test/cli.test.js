@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { loadActions, main, summarizeResults } from '../dist/cli.js';
+import { loadActions, main, summarizeResults, usage } from '../dist/cli.js';
 
 function tempFile(name, contents) {
 	const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'aag-cli-js-'));
@@ -12,6 +12,12 @@ function tempFile(name, contents) {
 	fs.writeFileSync(filename, contents);
 	return filename;
 }
+
+test('usage exposes the agent-action-guard command name', () => {
+	assert.match(usage(), /agent-action-guard/);
+	assert.doesNotMatch(usage(), /aag-classify/);
+});
+
 
 test('loadActions accepts direct JSON action data', () => {
 	const actions = loadActions({

@@ -6,13 +6,17 @@ from .action_classifier import (
     is_action_harmful,
     is_actions_harmful,
 )
+from .server import classify_payload, create_api_server, run_server
 
 __all__ = [
+    "ActionGuardDecision",
     "HarmfulActionException",
+    "action_guarded",
+    "classify_payload",
+    "create_api_server",
+    "ensure_action_safety",
     "flatten_action_to_text",
     "is_action_harmful",
     "is_actions_harmful",
-    "ensure_action_safety",
-    "action_guarded",
-    "ActionGuardDecision",
+    "run_server",
 ]
