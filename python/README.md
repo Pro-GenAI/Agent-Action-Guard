@@ -45,7 +45,9 @@ pepip install agent-action-guard
 
 Framework integrations ship in this package as `agent_action_guard.langchain`, `agent_action_guard.llamaindex`, `agent_action_guard.openai_agents`, `agent_action_guard.autogen`, and `agent_action_guard.crewai`. Framework dependencies remain optional and are only needed by applications using those frameworks.
 
-The same distribution also provides project-level pre-tool-use hook installers for Codex, Claude Code, Cursor, and Kiro via `agent-action-guard hooks install --target <target>`.
+The same distribution also provides project-level pre-tool-use hook installers for Codex, Claude Code, Cursor, Kiro, OpenCode, Antigravity CLI (`agy`), GitHub Copilot CLI, OpenClaw, and Hermes Agent via `agent-action-guard hooks install --target <target>`. Supported target names are `codex`, `claude-code`, `cursor`, `kiro`, `opencode`, `agy`, `copilot`, `openclaw`, and `hermes`.
+
+OpenClaw and Hermes retain their native repository-code trust gates: run `openclaw plugins enable agent-action-guard` after installing the OpenClaw workspace plugin, and set `HERMES_ENABLE_PROJECT_PLUGINS=1` only for trusted repositories when using the Hermes project plugin.
 
 Want to run the evaluation benchmark too?
 

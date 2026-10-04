@@ -13,6 +13,7 @@ What this project does
 - Returns a harmful/safe decision with confidence.
 - Supports integration in agent loops and MCP-compatible tooling.
 - Provides benchmark and dataset artifacts for reproducible evaluation.
+- Ships pre-tool-use hook installers for Codex, Claude Code, Cursor, Kiro, OpenCode, Antigravity CLI (`agy`), GitHub Copilot CLI, OpenClaw, and Hermes Agent.
 
 Primary API
 - Python import: from agent_action_guard import is_action_harmful
@@ -37,6 +38,9 @@ Core repository paths
 - README.md: Project overview, motivation, benchmark snapshot, links.
 
 Operational notes
+- Coding-agent hook install syntax: `agent-action-guard hooks install --target <target>` where `<target>` is one of `codex`, `claude-code`, `cursor`, `kiro`, `opencode`, `agy`, `copilot`, `openclaw`, or `hermes`.
+- OpenClaw workspace plugins require explicit `openclaw plugins enable agent-action-guard` after installation.
+- Hermes project plugins require `HERMES_ENABLE_PROJECT_PLUGINS=1` for trusted repositories.
 - The classifier may use embedding infrastructure depending on integration mode.
 - For vector/embedding-backed setups, configure EMBED_MODEL_NAME, EMBEDDING_BASE_URL, and EMBEDDING_API_KEY.
 - The documented baseline embedding model is sentence-transformers/all-MiniLM-L6-v2.

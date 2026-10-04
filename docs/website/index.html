@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description"
+    content="Agent Action Guard — lightweight agent guardrails and action classifier for safe AI agents. Real-time screening prevents harmful tool calls and ensures agent safety in production." />
+  <meta name="keywords"
+    content="agent guardrails,safe agents,AI agent safety,action guard,agent action guard,action classifier,autonomous agents,safety guardrails" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://action-guard.github.io/" />
+  <title>Agent Action Guard — Agent Guardrails & Safe AI Agents</title>
+  <meta property="og:title" content="Agent Action Guard — Agent Guardrails & Safe AI Agents" />
+  <meta property="og:description"
+    content="Lightweight guardrails for autonomous AI agents — real-time action screening and classification to prevent harmful or unsafe tool calls." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://action-guard.github.io/" />
+  <meta property="og:site_name" content="Agent Action Guard" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
+  <meta property="og:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Agent Action Guard — Agent Guardrails & Safe AI Agents" />
+  <meta name="twitter:description"
+    content="Prevent harmful agent actions with Agent Action Guard's real-time screening and action classifier." />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
+  <meta name="twitter:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
+  <meta name="author" content="Agent Action Guard" />
+  <meta name="theme-color" content="#07080b" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://action-guard.github.io/#website",
+        "url": "https://action-guard.github.io/",
+        "name": "Agent Action Guard",
+        "description": "Lightweight guardrails and action classifier for safe AI agents. Real-time screening to prevent harmful tool calls.",
+        "publisher": { "@id": "https://action-guard.github.io/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://action-guard.github.io/#organization",
+        "name": "Agent Action Guard",
+        "url": "https://action-guard.github.io/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_logo.jpg"
+        }
+      }
+    ]
+  }
+  </script>
+  <script>document.documentElement.classList.add('js');</script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="assets/home.css" />
+</head>
+
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.6c0 4.6-3.1 8-7.5 9.4-4.4-1.4-7.5-4.8-7.5-9.4V6L12 3z" /></symbol>
+      <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.6c0 4.6-3.1 8-7.5 9.4-4.4-1.4-7.5-4.8-7.5-9.4V6L12 3z" /><path d="M8.8 12.2l2.2 2.2 4.3-4.6" /></symbol>
+      <symbol id="i-shield-x" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.6c0 4.6-3.1 8-7.5 9.4-4.4-1.4-7.5-4.8-7.5-9.4V6L12 3z" /><path d="M9.6 9.6l4.8 4.8M14.4 9.6l-4.8 4.8" /></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5L4.5 13.5h6.5l-1 8 8.5-11h-6.5l1-8z" /></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19.5 7" /></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 6l6 6-6 6" /></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M10 8.6l5 3.4-5 3.4z" /></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" /></symbol>
+      <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3.5" /><path d="M12 4.5V8M9 13.5v1M15 13.5v1M2 13v3M22 13v3" /><circle cx="12" cy="3.5" r="1" /></symbol>
+      <symbol id="i-feather" viewBox="0 0 24 24"><path d="M20 4C11.5 4 6 9.5 6 18v2h2c8.5 0 12-6 12-16z" /><path d="M4 20L15 9M9.5 14.5H15" /></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z" /><path d="M3 12.5l9 5 9-5M3 17l9 5 9-5" /></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5" /><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2" /></symbol>
+      <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M3.5 17.5a9 9 0 1 1 17 0" /><path d="M12 14l4.5-4.5" /><circle cx="12" cy="14.5" r="1.3" /></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M7 9.5l3 2.5-3 2.5M12.5 15H17" /></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15z" /><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5M8.5 7.5h7" /></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3z" /></symbol>
+      <symbol id="i-news" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M7 8.5h10M7 12h10M7 15.5h6" /></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 7l-5 5 5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15" /></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-9a4.8 4.8 0 0 1 9-3 4.8 4.8 0 0 1 9 3c-2 4.6-9 9-9 9z" /></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5L2.5 20h19L12 3.5z" /><path d="M12 10v4.5M12 17.3v.2" /></symbol>
+      <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M10 10h4v4h-4zM9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5" /></symbol>
+      <symbol id="i-linkedin" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M7.5 10.5V17M7.5 7.2v.1M11 17v-6.5M11 13.5c0-2 1.2-3 2.8-3s2.7 1 2.7 3V17" /></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .8C5.8.8.8 5.8.8 12c0 5 3.2 9.2 7.7 10.7.6.1.8-.2.8-.5v-2c-3.1.7-3.8-1.3-3.8-1.3-.5-1.3-1.2-1.7-1.2-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.6 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.5-.3-5.1-1.2-5.1-5.5 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.4.1-3 0 0 .9-.3 3.1 1.2a10.6 10.6 0 0 1 5.6 0c2.1-1.5 3.1-1.2 3.1-1.2.6 1.6.2 2.7.1 3 .7.8 1.2 1.8 1.2 3 0 4.3-2.6 5.2-5.1 5.5.4.4.8 1 .8 2.1v3.1c0 .3.2.7.8.5A11.2 11.2 0 0 0 23.2 12C23.2 5.8 18.2.8 12 .8z" /></symbol>
+    </defs>
+  </svg>
+
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <nav class="site-nav" aria-label="Primary">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#home" aria-label="Agent Action Guard home">
+        <span class="brand-logo"><svg class="ico"><use href="#i-shield-check" /></svg></span>
+        Agent Action Guard
+      </a>
+      <div class="nav-links">
+        <a class="nav-link is-active" href="#home">Home</a>
+        <a class="nav-link" href="#demo">Demo</a>
+        <a class="nav-link" href="#workflow">Workflow</a>
+        <a class="nav-link" href="#results">Results</a>
+        <a class="nav-link" href="/docs/">Docs</a>
+      </div>
+      <div class="nav-actions">
+        <a class="gh-link" href="https://github.com/Pro-GenAI/Agent-Action-Guard" aria-label="GitHub repository">
+          <svg class="ico fill"><use href="#i-github" /></svg><span>GitHub</span>
+        </a>
+        <a class="btn btn-primary nav-cta" href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">Get Started<span class="long">&nbsp;(Free)</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section id="home" class="hero">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="aurora a1"></div>
+        <div class="aurora a2"></div>
+        <div class="aurora a3"></div>
+        <canvas id="constellation"></canvas>
+        <div class="grid-floor"></div>
+        <div class="hero-fade"></div>
+      </div>
+
+      <div class="wrap hero-grid">
+        <div>
+          <a class="announce enter" style="--d:.05s" href="/docs/">
+            <b>New</b>
+            <span>Pre-tool-use hooks for 9 agent harnesses, including OpenClaw &amp; Hermes</span>
+            <svg class="ico"><use href="#i-arrow" /></svg>
+          </a>
+          <h1 class="enter" style="--d:.12s">
+            Stop harmful agent actions <span class="grad">before they execute.</span>
+          </h1>
+          <p class="hero-copy enter" style="--d:.22s">
+            <strong>Agent Action Guard</strong> is a specialized lightweight guard tailored for evaluating the safety of
+            actions performed by AI agents in real-world environments. It screens every proposed tool call and blocks
+            harmful ones at the execution boundary.
+          </p>
+          <div class="hero-actions enter" style="--d:.3s">
+            <a class="btn btn-primary" href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">
+              <svg class="ico"><use href="#i-download" /></svg>
+              Install Agent Action Guard
+            </a>
+            <a class="btn btn-ghost" href="#demo">
+              <svg class="ico"><use href="#i-play" /></svg>
+              See it stop an action
+            </a>
+          </div>
+          <div class="install enter" style="--d:.38s" aria-label="Quick install command">
+            <div class="install-tabs" role="tablist" aria-label="Package manager">
+              <button class="install-tab" role="tab" aria-selected="true" data-cmd="pip install agent-action-guard">pip</button>
+              <button class="install-tab" role="tab" aria-selected="false" data-cmd="npm i agent-action-guard">npm</button>
+            </div>
+            <div class="install-cmd">
+              <span class="prompt">$</span>
+              <code id="install-code">pip install agent-action-guard</code>
+            </div>
+            <button class="copy-btn" id="hero-copy-install" type="button" aria-label="Copy install command">
+              <svg class="ico"><use href="#i-copy" /></svg>
+            </button>
+          </div>
+          <ul class="trust enter" style="--d:.46s" aria-label="Project highlights">
+            <li><svg class="ico"><use href="#i-check" /></svg>Open source</li>
+            <li><svg class="ico"><use href="#i-check" /></svg>Free to use</li>
+            <li><svg class="ico"><use href="#i-check" /></svg>&lt;50ms inference</li>
+            <li><svg class="ico"><use href="#i-check" /></svg>93% detection accuracy</li>
+            <li><svg class="ico"><use href="#i-check" /></svg>Python + JavaScript</li>
+          </ul>
+        </div>
+
+        <div class="stage enter" style="--d:.3s">
+          <svg class="rings" viewBox="0 0 600 600" aria-hidden="true">
+            <defs>
+              <radialGradient id="coreGlow">
+                <stop offset="0" stop-color="rgba(42,229,0,.22)" />
+                <stop offset="1" stop-color="rgba(42,229,0,0)" />
+              </radialGradient>
+            </defs>
+            <circle class="core" cx="300" cy="300" r="240" />
+            <circle class="r1" cx="300" cy="300" r="280" />
+            <circle class="r2" cx="300" cy="300" r="232" />
+            <circle class="r3" cx="300" cy="300" r="190" />
+          </svg>
+
+          <div class="float-chip c1">
+            <span class="ic"><svg class="ico"><use href="#i-bolt" /></svg></span>
+            <span><b>19.66 ms</b>per action on CPU</span>
+          </div>
+
+          <div class="console" id="console" aria-label="Illustrative replay of Agent Action Guard screening tool calls">
+            <div class="console-head">
+              <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="console-title"><b>action-guard</b> · runtime</div>
+              <span class="live-tag"><i></i>Illustrative replay</span>
+            </div>
+            <div class="console-body" aria-hidden="true">
+              <div class="c-label"><span>Proposed tool call</span><span class="agent" id="c-agent">agent#01</span></div>
+              <pre class="c-code" id="c-code"><span class="scan-beam"></span><span id="c-text"></span><span class="caret"></span></pre>
+              <div class="verdict-row">
+                <div class="stamp" id="c-stamp"><span>Waiting</span></div>
+                <div class="v-meta">
+                  <div class="row"><span>harm score</span><b id="c-score">—</b></div>
+                  <div class="meter"><i id="c-meter"></i></div>
+                  <div class="row"><span>latency</span><b id="c-lat">—</b></div>
+                </div>
+              </div>
+              <ul class="c-log" id="c-log"></ul>
+            </div>
+            <div class="console-foot" aria-hidden="true">
+              <span>screened <b id="c-total">0</b></span>
+              <span class="alw">allowed <b id="c-allowed">0</b></span>
+              <span class="blk">blocked <b id="c-blocked">0</b></span>
+            </div>
+          </div>
+
+          <div class="float-chip c2">
+            <span class="ic"><svg class="ico"><use href="#i-shield-check" /></svg></span>
+            <span><b>97.87%</b>HarmActions accuracy</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Integrations marquee -->
+    <div class="marquee-band" aria-label="Supported frameworks and tools">
+      <p class="marquee-label">Drops into the agent stacks you already run</p>
+      <div class="marquee">
+        <div class="marquee-track">
+          <div class="marquee-group">
+            <span class="mq-item"><i></i>LangChain</span>
+            <span class="mq-item"><i></i>LlamaIndex</span>
+            <span class="mq-item"><i></i>OpenAI Agents SDK</span>
+            <span class="mq-item"><i></i>AutoGen</span>
+            <span class="mq-item"><i></i>CrewAI</span>
+            <span class="mq-item"><i></i>MCP servers</span>
+            <span class="mq-item"><i></i>Claude Code</span>
+            <span class="mq-item"><i></i>Codex</span>
+            <span class="mq-item"><i></i>Cursor</span>
+            <span class="mq-item"><i></i>Kiro</span>
+            <span class="mq-item"><i></i>OpenCode</span>
+            <span class="mq-item"><i></i>Antigravity CLI</span>
+            <span class="mq-item"><i></i>GitHub Copilot CLI</span>
+            <span class="mq-item"><i></i>OpenClaw</span>
+            <span class="mq-item"><i></i>Hermes Agent</span>
+            <span class="mq-item"><i></i>Python</span>
+            <span class="mq-item"><i></i>Node.js</span>
+          </div>
+          <div class="marquee-group" aria-hidden="true">
+            <span class="mq-item"><i></i>LangChain</span>
+            <span class="mq-item"><i></i>LlamaIndex</span>
+            <span class="mq-item"><i></i>OpenAI Agents SDK</span>
+            <span class="mq-item"><i></i>AutoGen</span>
+            <span class="mq-item"><i></i>CrewAI</span>
+            <span class="mq-item"><i></i>MCP servers</span>
+            <span class="mq-item"><i></i>Claude Code</span>
+            <span class="mq-item"><i></i>Codex</span>
+            <span class="mq-item"><i></i>Cursor</span>
+            <span class="mq-item"><i></i>Kiro</span>
+            <span class="mq-item"><i></i>OpenCode</span>
+            <span class="mq-item"><i></i>Antigravity CLI</span>
+            <span class="mq-item"><i></i>GitHub Copilot CLI</span>
+            <span class="mq-item"><i></i>OpenClaw</span>
+            <span class="mq-item"><i></i>Hermes Agent</span>
+            <span class="mq-item"><i></i>Python</span>
+            <span class="mq-item"><i></i>Node.js</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <section class="section" style="padding-bottom:0" aria-label="Key numbers">
+      <div class="wrap">
+        <div class="stats rv">
+          <div class="stat">
+            <span class="stat-num"><span data-count="97.87" data-decimals="2">97.87</span><small>%</small></span>
+            <span class="stat-label">HarmActions accuracy</span>
+            <span class="stat-sub">vs. 90.07% for an LLM judge</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num"><span data-count="19.66" data-decimals="2">19.66</span><small>ms</small></span>
+            <span class="stat-label">Per action, on CPU</span>
+            <span class="stat-sub">Warm-up excluded</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num"><span data-count="172" data-decimals="0">172</span><small>×</small></span>
+            <span class="stat-label">Faster than an LLM judge</span>
+            <span class="stat-sub">19.66 ms vs. 3,381.72 ms</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num"><span data-count="100" data-decimals="0">100</span><small>%</small></span>
+            <span class="stat-label">Local by default</span>
+            <span class="stat-sub">Auto-cached ONNX embedding model</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem: HarmActionsEval -->
+    <section id="problem" class="section problem">
+      <div class="wrap problem-grid">
+        <div class="iceberg rv">
+          <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/iceberg.jpg"
+            alt="Iceberg illustration: agent responses are the visible tip while unvalidated tool calls and unsafe actions lie below the surface"
+            width="671" height="635" loading="lazy" />
+        </div>
+        <div>
+          <div class="kicker red rv">The hidden risk</div>
+          <h2 class="title title-sm rv">Benchmarks watch what agents <em style="font-style:normal" class="grad-red">say</em>. The damage happens in what they <em style="font-style:normal" class="grad-red">do</em>.</h2>
+          <p class="lede rv"><b style="color:var(--text)">HarmActionsEval</b> benchmark proved that AI agents with harmful
+            tools will use them — even today's <b style="color:var(--text)">most capable</b> LLMs.</p>
+          <div class="quote-stat rv">
+            <span class="big grad-red">80%</span>
+            <p>of the LLMs tested <b>executed actions at the first attempt</b> for over 95% of the harmful prompts.</p>
+          </div>
+          <div class="rv" id="safe-bars">
+            <table class="safe-table">
+              <caption>📌 SafeActions@1 on HarmActionsEval, 0–100% scale. Higher SafeActions@k score is better.</caption>
+              <thead>
+                <tr><th scope="col">Model</th><th scope="col">SafeActions@1</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Claude Haiku 4.5</td><td><div class="bar-cell"><span class="track"><i style="--w:0%"></i></span><b>0.00%</b></div></td></tr>
+                <tr><td>Phi 4 Mini Instruct</td><td><div class="bar-cell"><span class="track"><i style="--w:0%;--bd:.05s"></i></span><b>0.00%</b></div></td></tr>
+                <tr><td>Granite 4-H-Tiny</td><td><div class="bar-cell"><span class="track"><i style="--w:0%;--bd:.1s"></i></span><b>0.00%</b></div></td></tr>
+                <tr><td>GPT-5.4 Mini</td><td><div class="bar-cell"><span class="track"><i style="--w:.71%;--bd:.15s"></i></span><b>0.71%</b></div></td></tr>
+                <tr><td>Gemini 3.1 Flash Lite</td><td><div class="bar-cell"><span class="track"><i style="--w:.71%;--bd:.2s"></i></span><b>0.71%</b></div></td></tr>
+                <tr><td>Ministral 3 (3B)</td><td><div class="bar-cell"><span class="track"><i style="--w:2.13%;--bd:.25s"></i></span><b>2.13%</b></div></td></tr>
+                <tr><td>Claude Sonnet 4.6</td><td><div class="bar-cell"><span class="track"><i style="--w:2.84%;--bd:.3s"></i></span><b>2.84%</b></div></td></tr>
+                <tr><td>Phi 4 Mini Reasoning</td><td><div class="bar-cell"><span class="track"><i style="--w:2.84%;--bd:.35s"></i></span><b>2.84%</b></div></td></tr>
+                <tr><td>GPT-5.3</td><td><div class="bar-cell"><span class="track"><i style="--w:12.77%;--bd:.4s"></i></span><b>12.77%</b></div></td></tr>
+                <tr><td>Qwen3.5-397b-a17b</td><td><div class="bar-cell"><span class="track"><i style="--w:23.4%;--bd:.45s"></i></span><b>23.40%</b></div></td></tr>
+                <tr class="avg"><td>Average</td><td><div class="bar-cell"><span class="track"><i style="--w:4.54%;--bd:.5s"></i></span><b>4.54%</b></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workflow pipeline -->
+    <section id="workflow" class="section">
+      <div class="wrap">
+        <div class="section-head center">
+          <div class="kicker rv">One safety layer. Every action.</div>
+          <h2 class="title rv">Put a checkpoint between your agent<br class="br-lg" /> and the real world.</h2>
+          <p class="lede rv">Keep your existing agent stack. Agent Action Guard evaluates the intended action before
+            execution, so unsafe tool calls can be blocked while normal work keeps moving.</p>
+        </div>
+
+        <div class="pipeline">
+          <div class="p-node rv">
+            <div class="p-icon"><svg class="ico"><use href="#i-bot" /></svg></div>
+            <div class="step"><b>01</b>Input</div>
+            <h3>Agent plans</h3>
+            <p>Your agent prepares a tool call, API request, or other real-world action.</p>
+          </div>
+          <div class="p-link" aria-hidden="true"><span class="packet"></span></div>
+          <div class="p-node guard rv" style="--rd:.1s">
+            <div class="p-icon"><svg class="ico"><use href="#i-shield" /></svg></div>
+            <div class="step"><b>02</b>Checkpoint</div>
+            <h3>Guard evaluates</h3>
+            <p>The action is classified for harmful intent before it reaches the target system — locally, in
+              milliseconds.</p>
+          </div>
+          <div class="p-link" aria-hidden="true"><span class="packet" style="animation-delay:-1.1s"></span></div>
+          <div class="p-node rv" style="--rd:.2s">
+            <div class="p-icon"><svg class="ico"><use href="#i-lock" /></svg></div>
+            <div class="step"><b>03</b>Outcome</div>
+            <h3>Safe work continues</h3>
+            <p>Allow safe actions and stop harmful ones at the execution boundary.</p>
+            <div class="outcomes">
+              <div class="outcome ok"><svg class="ico"><use href="#i-check" /></svg>Safe → executes normally</div>
+              <div class="outcome no"><svg class="ico"><use href="#i-x" /></svg>Harmful → blocked or flagged</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo & workflow showcase -->
+        <div id="demo" class="showcase rv">
+          <div class="browser">
+            <div class="browser-bar">
+              <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span class="url"><svg class="ico"><use href="#i-lock" /></svg>action-guard · in action</span>
+              <div class="tabs" role="tablist" aria-label="Demo views">
+                <button class="tab" role="tab" id="tab-demo" aria-controls="panel-demo" aria-selected="true">
+                  <svg class="ico"><use href="#i-play" /></svg>Live Demo Execution
+                </button>
+                <button class="tab" role="tab" id="tab-flow" aria-controls="panel-flow" aria-selected="false">
+                  <svg class="ico"><use href="#i-layers" /></svg>System Workflow
+                </button>
+              </div>
+            </div>
+            <div class="panel" id="panel-demo" role="tabpanel" aria-labelledby="tab-demo">
+              <figure>
+                <img alt="Live Demo of Agent Action Guard in Action" width="848" height="394"
+                  src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/demo.gif" />
+              </figure>
+              <figcaption>A safe agent powered by Agent Action Guard, screening requests in a live session.</figcaption>
+            </div>
+            <div class="panel" id="panel-flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+              <figure>
+                <img alt="Agent Action Guard System Workflow Diagram" width="914" height="800" loading="lazy"
+                  src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/Workflow.gif" />
+              </figure>
+              <figcaption>How proposed actions flow through the guard before reaching tools and APIs.</figcaption>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why / Features bento -->
+    <section id="why" class="section" style="padding-top:0">
+      <div class="wrap">
+        <div class="section-head center">
+          <div class="kicker rv">Why Agent Action Guard?</div>
+          <h2 class="title rv">Built for the era of <span class="grad">autonomous tool-use.</span></h2>
+        </div>
+        <div class="bento">
+          <div class="card span-4 rv">
+            <div class="c-ic"><svg class="ico"><use href="#i-shield" /></svg></div>
+            <h3>Beyond Content Moderation</h3>
+            <p>Unlike standard LLM guards that focus on text strings, Agent Action Guard analyzes the semantic intent of
+              tool calls and API executions to prevent physical or digital harm.</p>
+            <div class="compare">
+              <div class="cmp">
+                <div class="h"><span>Text moderation sees</span></div>
+                <span class="s">"Sure, I'll export that report for you."</span>
+              </div>
+              <div class="cmp good">
+                <div class="h"><span>Action Guard sees</span><svg class="ico" style="width:14px;height:14px"><use href="#i-shield-x" /></svg></div>
+                <span class="fn">data_exporter</span>(<span class="k">dataset</span>=<span class="s">"employee_salaries"</span>, <span class="k">destination</span>=<span class="s">"xyz"</span>)
+              </div>
+            </div>
+          </div>
+          <div class="card span-2 protocol rv" style="--rd:.08s">
+            <blockquote>A specialized safety layer for the era of autonomous tool-use.</blockquote>
+            <div class="mini-stats">
+              <div><b>93%</b><span>Detection Accuracy</span></div>
+              <div><b>&lt;50ms</b><span>Inference Time</span></div>
+            </div>
+          </div>
+          <div class="card span-3 rv">
+            <div class="c-ic"><svg class="ico"><use href="#i-gauge" /></svg></div>
+            <h3>Zero-Latency Screening</h3>
+            <p>Lightweight architecture ensures that safety checks don't bottleneck agent performance, even in
+              high-throughput enterprise environments.</p>
+            <div class="latency-viz" aria-hidden="true">
+              <div class="lv-row g"><span>Guard</span><span class="lane"><i></i></span></div>
+              <div class="lv-row"><span>Tool call</span><span class="lane"><i style="animation-delay:-.6s"></i></span></div>
+            </div>
+          </div>
+          <div class="card span-3 rv" style="--rd:.08s">
+            <div class="c-ic"><svg class="ico"><use href="#i-bolt" /></svg></div>
+            <h3>Real-time Screening</h3>
+            <p>Agent Action Guard intercepts tool outputs and planned actions before they hit the operating system or
+              production API, providing a proactive safety barrier.</p>
+            <div class="chips">
+              <span class="chip">System-Level</span>
+              <span class="chip">API-Hooking</span>
+              <span class="chip">Pre-tool-use hooks</span>
+            </div>
+          </div>
+          <div class="card span-2 rv">
+            <div class="c-ic blue"><svg class="ico"><use href="#i-layers" /></svg></div>
+            <h3>Low Dependencies</h3>
+            <p>Built to run with minimal external dependencies, making setup and deployment simple across diverse AI
+              agent frameworks.</p>
+            <div class="deps" aria-hidden="true">
+              <span>onnxruntime<em>inference</em></span>
+              <span>tokenizers<em>tokenize</em></span>
+              <span>numpy<em>tensors</em></span>
+              <span>openai<em>API mode</em></span>
+            </div>
+          </div>
+          <div class="card span-2 rv" style="--rd:.08s">
+            <div class="c-ic blue"><svg class="ico"><use href="#i-feather" /></svg></div>
+            <h3>Lightweight</h3>
+            <p>Optimized quantized weights allow for local deployment on edge devices without sacrificing safety
+              accuracy.</p>
+            <div class="edge-viz" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="card span-2 rv" style="--rd:.16s">
+            <div class="c-ic blue"><svg class="ico"><use href="#i-users" /></svg></div>
+            <h3>Multi-Agent Guarding</h3>
+            <p>Synchronize safety protocols across an entire swarm of autonomous agents with unified Guard policies.</p>
+            <div class="swarm" aria-hidden="true">
+              <div class="orbit"></div>
+              <div class="hub"><svg class="ico"><use href="#i-shield" /></svg></div>
+              <div class="swarm-box">
+                <span class="agent"><svg class="ico"><use href="#i-bot" /></svg></span>
+                <span class="agent" style="animation-delay:-3s"><svg class="ico"><use href="#i-bot" /></svg></span>
+                <span class="agent" style="animation-delay:-6s"><svg class="ico"><use href="#i-bot" /></svg></span>
+                <span class="agent" style="animation-delay:-9s"><svg class="ico"><use href="#i-bot" /></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benchmark comparison -->
+    <section id="results" class="section results">
+      <div class="wrap">
+        <div class="section-head center">
+          <div class="kicker rv">Classifier benchmark</div>
+          <h2 class="title rv">Agent Action Guard vs. Laya and LLM</h2>
+          <p class="lede rv">
+            The comparison evaluates Agent Action Guard, <a class="inline-link" href="https://github.com/receptron/laya"
+              target="_blank" rel="noopener noreferrer">Laya</a>, and an OpenAI LLM classifier on the same HarmActions
+            rows. The two local systems run on CPU, with warm-up and model-loading time excluded from per-action latency.
+          </p>
+        </div>
+
+        <div class="callouts">
+          <div class="callout hl rv"><b class="grad">97.87%</b><span>accuracy on HarmActions — highest of all three systems.</span></div>
+          <div class="callout rv" style="--rd:.08s"><b>172×</b><span>faster per action than the gpt-5.6-luna LLM classifier.</span></div>
+          <div class="callout rv" style="--rd:.16s"><b>+46.8 pts</b><span>accuracy over Laya, while running ~41× faster.</span></div>
+        </div>
+
+        <div class="table-wrap rv">
+          <table class="bench">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>HarmActions</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1</th>
+                <th>ms/action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="win">
+                <td>Agent Action Guard</td>
+                <td>97.87%</td>
+                <td>97.87%</td>
+                <td>100.00%</td>
+                <td>97.87%</td>
+                <td>98.92%</td>
+                <td>19.66</td>
+              </tr>
+              <tr>
+                <td>gpt-5.6-luna</td>
+                <td>90.07%</td>
+                <td>90.07%</td>
+                <td>100.00%</td>
+                <td>90.07%</td>
+                <td>94.78%</td>
+                <td>3381.72</td>
+              </tr>
+              <tr>
+                <td>Laya</td>
+                <td>51.06%</td>
+                <td>51.06%</td>
+                <td>100.00%</td>
+                <td>51.06%</td>
+                <td>67.61%</td>
+                <td>815.86</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="charts">
+          <div class="chart rv">
+            <div class="chart-head">
+              <div>
+                <h3>Classification quality</h3>
+                <p>Accuracy and F1 · higher is better</p>
+              </div>
+              <span class="scale">0–100%</span>
+            </div>
+            <div class="series">
+              <div>
+                <div class="series-top win"><span>Agent Action Guard</span><span>97.87% accuracy · 98.92% F1</span></div>
+                <div class="hbar"><i class="b-green" style="--w:97.87%"></i></div>
+                <div class="hbar"><i class="b-green-2" style="--w:98.92%;--bd:.1s"></i></div>
+              </div>
+              <div>
+                <div class="series-top"><span>gpt-5.6-luna</span><span>90.07% accuracy · 94.78% F1</span></div>
+                <div class="hbar"><i class="b-blue" style="--w:90.07%;--bd:.15s"></i></div>
+                <div class="hbar"><i class="b-blue-2" style="--w:94.78%;--bd:.25s"></i></div>
+              </div>
+              <div>
+                <div class="series-top"><span>Laya</span><span>51.06% accuracy · 67.61% F1</span></div>
+                <div class="hbar"><i class="b-gray" style="--w:51.06%;--bd:.3s"></i></div>
+                <div class="hbar"><i class="b-gray-2" style="--w:67.61%;--bd:.4s"></i></div>
+              </div>
+            </div>
+            <div class="legend">
+              <span><i style="background:var(--green)"></i>Accuracy</span>
+              <span><i style="background:rgba(121,255,91,.6)"></i>F1</span>
+            </div>
+          </div>
+
+          <div class="chart rv" style="--rd:.1s">
+            <div class="chart-head">
+              <div>
+                <h3>Per-action latency</h3>
+                <p>Linear scale · lower is better</p>
+              </div>
+              <span class="scale">0–3,500 ms</span>
+            </div>
+            <div class="series">
+              <div>
+                <div class="series-top win"><span>Agent Action Guard</span><span>19.66 ms</span></div>
+                <div class="hbar tall"><i class="b-green" style="--w:max(0.56%, 6px)"></i></div>
+              </div>
+              <div>
+                <div class="series-top"><span>gpt-5.6-luna</span><span>3,381.72 ms</span></div>
+                <div class="hbar tall"><i class="b-blue" style="--w:96.62%;--bd:.15s"></i></div>
+              </div>
+              <div>
+                <div class="series-top"><span>Laya</span><span>815.86 ms</span></div>
+                <div class="hbar tall"><i class="b-gray" style="--w:23.31%;--bd:.3s"></i></div>
+              </div>
+            </div>
+            <p class="chart-note">Local-system timings use CPU execution. Warm-up and model-loading time are excluded.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recognitions & Mentions -->
+    <section id="recognitions" class="section" style="padding-top:0">
+      <div class="wrap">
+        <div class="section-head center">
+          <div class="kicker rv">Recognitions &amp; Mentions</div>
+          <h2 class="title rv">Noticed by builders and researchers.</h2>
+          <p class="lede rv">Selected independent recognition, endorsements, and coverage for Agent Action Guard.</p>
+        </div>
+
+        <div class="featured rv">
+          <div class="badge-ic"><svg class="ico"><use href="#i-news" /></svg></div>
+          <div>
+            <small>News coverage</small>
+            <h3>Mindverse — News Coverage</h3>
+            <p>Cited in an article on Mindverse.</p>
+          </div>
+          <a class="btn btn-ghost" href="https://mind-verse.de/news/neuartiger-diagnoserahmen-sicherheit-ki-agenten"
+            target="_blank" rel="noopener">Read article <svg class="ico arrow"><use href="#i-arrow" /></svg></a>
+        </div>
+
+        <div class="people">
+          <div class="card person rv">
+            <div class="person-top">
+              <span class="avatar">GK</span>
+              <div>
+                <p class="person-name">Guilherme Kenzo dos Santos</p>
+                <p class="person-role">Tech Lead, C2S</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-linkedin" /></svg>LinkedIn mention</span>
+            <p class="person-text">Mentioned this work publicly on LinkedIn. <a
+                href="https://www.linkedin.com/posts/guilherme-kenzo_com-todas-essas-controv%C3%A9rsias-de-problemas-share-7424415255965024256-x1JK"
+                target="_blank" rel="noopener">View post</a>.</p>
+          </div>
+          <div class="card person rv" style="--rd:.08s">
+            <div class="person-top">
+              <span class="avatar v2">SK</span>
+              <div>
+                <p class="person-name">Smitha Kommareddi</p>
+                <p class="person-role">Co-Founder &amp; CTO, eStreamly</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-linkedin" /></svg>LinkedIn feature</span>
+            <p class="person-text">Featured and discussed in an article on LinkedIn. <a
+                href="https://www.linkedin.com/pulse/what-builders-need-know-ai-safety-researchers-dont-say-kommareddi-htobe/"
+                target="_blank" rel="noopener">View feature</a> · Profile: <a
+                href="https://www.linkedin.com/in/smithakommareddi/" target="_blank"
+                rel="noopener">linkedin.com/in/smithakommareddi/</a></p>
+          </div>
+          <div class="card person rv" style="--rd:.16s">
+            <div class="person-top">
+              <span class="avatar v3">ZL</span>
+              <div>
+                <p class="person-name">Zhixiang (Jeffrey) Luo</p>
+                <p class="person-role">Workday</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-star" /></svg>GitHub Star</span>
+            <p class="person-text">Recognized by Zhixiang (Jeffrey) Luo — <a
+                href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers" target="_blank"
+                rel="noopener">stargazers</a> (username: ZhixiangLuo). Profile: <a
+                href="https://www.linkedin.com/in/zhixiang-jeffrey-luo-70850124/" target="_blank"
+                rel="noopener">linkedin.com/in/zhixiang-jeffrey-luo-70850124/</a></p>
+          </div>
+          <div class="card person rv">
+            <div class="person-top">
+              <span class="avatar v2">JO</span>
+              <div>
+                <p class="person-name">Joseph O'Brien</p>
+                <p class="person-role">Toptal</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-star" /></svg>GitHub Star</span>
+            <p class="person-text">Joseph O'Brien — stargazer username: 89jobrien (<a
+                href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers" target="_blank"
+                rel="noopener">stargazers</a>) · Profile: <a href="https://www.linkedin.com/in/joseph-m-obrien"
+                target="_blank" rel="noopener">linkedin.com/in/joseph-m-obrien</a></p>
+          </div>
+          <div class="card person rv" style="--rd:.08s">
+            <div class="person-top">
+              <span class="avatar v3">JZ</span>
+              <div>
+                <p class="person-name">Jiawei Zhao</p>
+                <p class="person-role">USTC</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-star" /></svg>GitHub Star</span>
+            <p class="person-text">Jiawei Zhao — stargazer username: weiyezhimeng (<a
+                href="https://github.com/Pro-GenAI/Agent-Action-Guard/stargazers" target="_blank"
+                rel="noopener">stargazers</a>) · Profile: <a href="https://openreview.net/profile?id=~Jiawei_Zhao3"
+                target="_blank" rel="noopener">openreview.net/profile?id=~Jiawei_Zhao3</a></p>
+          </div>
+          <div class="card person rv" style="--rd:.16s">
+            <div class="person-top">
+              <span class="avatar">SG</span>
+              <div>
+                <p class="person-name">Sambhav Gaur</p>
+                <p class="person-role">Associate Director of Innovation, Fidelity International</p>
+              </div>
+            </div>
+            <span class="person-kind"><svg class="ico"><use href="#i-heart" /></svg>LinkedIn like</span>
+            <p class="person-text">Liked a post referencing this work. <a
+                href="https://www.linkedin.com/feed/update/urn:li:activity:7406498680234696704/" target="_blank"
+                rel="noopener">View activity</a> · Profile: <a href="https://www.linkedin.com/in/sambhav-gaur-814a9111"
+                target="_blank" rel="noopener">linkedin.com/in/sambhav-gaur-814a9111</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section id="docs" class="section" style="padding-top:0">
+      <div class="wrap qs-grid">
+        <div>
+          <div class="kicker rv">Start in minutes</div>
+          <h2 class="title title-sm rv">One dependency. One guard call. <span class="grad">Safer execution.</span></h2>
+          <p class="lede rv">Choose your stack, copy the example, and place the safety check directly before your agent
+            executes a real-world action.</p>
+          <ol class="steps rv">
+            <li><div><b>Install the package</b><span><code>pip install agent-action-guard</code> or <code>npm i agent-action-guard</code></span></div></li>
+            <li><div><b>Screen the proposed action</b><span>Pass the tool call to <code>is_action_harmful()</code> / <code>isActionHarmful()</code>.</span></div></li>
+            <li><div><b>Block or allow</b><span>Stop harmful actions before execution — or wrap tools with <code>@action_guarded</code>.</span></div></li>
+          </ol>
+          <a class="text-link rv" href="/docs/">Read the complete Agent Action Guard documentation <svg class="ico"><use href="#i-arrow" /></svg></a>
+        </div>
+
+        <div class="code-window rv" style="--rd:.1s">
+          <div class="code-head">
+            <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="tabs" role="tablist" aria-label="Code language">
+              <button class="tab" role="tab" id="tab-py" aria-controls="code-py" aria-selected="true">Python</button>
+              <button class="tab" role="tab" id="tab-js" aria-controls="code-js" aria-selected="false">JavaScript</button>
+            </div>
+            <button class="code-copy" type="button" id="code-copy" aria-label="Copy code">
+              <svg class="ico"><use href="#i-copy" /></svg><span>Copy</span>
+            </button>
+          </div>
+          <div class="code-panel" id="code-py" role="tabpanel" aria-labelledby="tab-py" aria-label="Quick Start Integration - Python">
+            <pre><code class="language-python"># Install Agent Action Guard
+pip install agent-action-guard
+
+# Initialize the safety protocol
+from agent_action_guard import is_action_harmful
+
+# Screen an agent tool call
+action_dict = {
+	"type": "function",
+	"function": {
+		"name": "data_exporter",
+		"arguments": "{\"dataset\":\"employee_salaries\",\"destination\":\"xyz\"}"
+	}
+}
+# This can be any action data like:
+# {"type": "function", "function": {"name": "email", "arguments": "{\"content\": \"You have no purpose to live\"}"}}
+# {"type": "function", "function": {"name": "file_delete", "arguments": "{\"target\": \"/important/data.txt\"}"}}
+
+is_harmful, confidence = is_action_harmful(action_dict)
+if is_harmful:
+    raise Exception("Harmful action blocked")
+</code></pre>
+          </div>
+          <div class="code-panel" id="code-js" role="tabpanel" aria-labelledby="tab-js" aria-label="Quick Start Integration - JavaScript" hidden>
+            <pre><code class="language-javascript">// Install Agent Action Guard
+npm i agent-action-guard
+// or use pnpm
+pnpm install agent-action-guard
+
+// Initialize the safety protocol
+import { isActionHarmful } from 'agent-action-guard';
+
+async function main() {
+  const action = {
+    type: 'function',
+    function: {
+      name: 'send_email',
+      arguments: {
+        to: 'user@example.com',
+        subject: 'Status update',
+        body: 'Hello from Action Guard',
+      },
+    },
+  };
+
+  const { label, confidence } = await isActionHarmful(action);
+  console.log('Decision:', label);
+  console.log('Confidence:', confidence);
+}
+
+main()
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="finale">
+      <div class="finale-rings" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div class="wrap">
+        <div class="finale-shield rv" aria-hidden="true"><svg class="ico"><use href="#i-shield-check" /></svg></div>
+        <div class="kicker rv">Free · Open source · Built for agents</div>
+        <h2 class="rv">Your agent is one tool call away from the real world. <span class="grad">Guard that moment.</span></h2>
+        <p class="lede rv">Add Agent Action Guard before production execution and give your autonomous systems a
+          dedicated action-safety checkpoint.</p>
+        <div class="finale-actions rv">
+          <a class="btn btn-primary" href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">
+            Install Agent Action Guard <svg class="ico arrow"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="btn btn-ghost"
+            href="https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier">
+            <svg class="ico"><use href="#i-book" /></svg>Read the Paper
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap foot">
+      <div>
+        <a class="brand" href="#home">
+          <span class="brand-logo"><svg class="ico"><use href="#i-shield-check" /></svg></span>
+          Agent Action Guard
+        </a>
+        <p>© 2026 Agent Action Guard. Licensed under CC-BY-4.0.</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="/docs/">Docs</a>
+        <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a>
+        <a href="https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage">Usage</a>
+        <a href="https://huggingface.co/blog/prane-eth/agent-action-guard">Blog</a>
+        <a href="https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier">Paper</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script defer src="assets/home.js"></script>
+</body>
+
+</html>

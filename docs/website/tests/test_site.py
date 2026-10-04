@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
@@ -54,10 +55,34 @@ class _HTMLFacts(HTMLParser):
             self._buffer.append(data)
 
 
+class _AssetRefs(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.local_assets: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        data = {key: value or "" for key, value in attrs}
+        ref = data.get("src") if tag == "script" else data.get("href") if tag == "link" else ""
+        if ref and not ref.startswith(("http://", "https://", "//", "/", "#")):
+            if tag == "script" or data.get("rel") == "stylesheet":
+                self.local_assets.append(ref)
+
+
 def parse(path: Path) -> _HTMLFacts:
     parser = _HTMLFacts()
     parser.feed(path.read_text(encoding="utf-8"))
     return parser
+
+
+def page_with_assets(path: Path) -> str:
+    """Return a page's HTML plus any local stylesheets/scripts it links to."""
+    facts = _AssetRefs()
+    html = path.read_text(encoding="utf-8")
+    facts.feed(html)
+    parts = [html]
+    for ref in facts.local_assets:
+        parts.append((path.parent / ref).read_text(encoding="utf-8"))
+    return "\n".join(parts)
 
 
 def meta_value(facts: _HTMLFacts, key: str, value: str) -> str | None:
@@ -115,8 +140,8 @@ class SiteSeoTests(unittest.TestCase):
         )
 
     def test_code_examples_use_language_aware_syntax_highlighting(self) -> None:
-        home = HOME.read_text(encoding="utf-8")
-        docs = DOCS.read_text(encoding="utf-8")
+        home = page_with_assets(HOME)
+        docs = page_with_assets(DOCS)
         highlight_src = (
             "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
         )
@@ -134,6 +159,74 @@ class SiteSeoTests(unittest.TestCase):
         self.assertIn('<code class="language-bash">', docs)
         self.assertIn("highlightElement(code)", home)
         self.assertIn("highlightAll()", docs)
+
+    def test_homepage_css_and_js_live_in_linked_assets(self) -> None:
+        html = HOME.read_text(encoding="utf-8")
+        refs = _AssetRefs()
+        refs.feed(html)
+        self.assertEqual(
+            sorted(refs.local_assets), ["assets/home.css", "assets/home.js"]
+        )
+        for ref in refs.local_assets:
+            with self.subTest(asset=ref):
+                self.assertTrue((SITE_ROOT / ref).read_text(encoding="utf-8").strip())
+        self.assertNotIn("<style", html)
+        # Only tiny bootstrap/JSON-LD scripts may stay inline.
+        inline = [
+            body
+            for body in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.S)
+            if body.strip()
+        ]
+        self.assertTrue(all(len(body) < 2500 for body in inline))
+
+
+    def test_supported_hook_targets_are_documented(self) -> None:
+        home = HOME.read_text(encoding="utf-8")
+        docs = DOCS.read_text(encoding="utf-8")
+        llms = (SITE_ROOT / "llms.txt").read_text(encoding="utf-8")
+
+        targets = {
+            "codex": "Codex",
+            "claude-code": "Claude Code",
+            "cursor": "Cursor",
+            "kiro": "Kiro",
+            "opencode": "OpenCode",
+            "agy": "Antigravity CLI",
+            "copilot": "GitHub Copilot CLI",
+            "openclaw": "OpenClaw",
+            "hermes": "Hermes Agent",
+        }
+
+        for target, label in targets.items():
+            with self.subTest(target=target):
+                self.assertIn(label, home)
+                self.assertIn(
+                    f"agent-action-guard hooks install --target {target}",
+                    docs,
+                )
+                self.assertIn(f"`{target}`", llms)
+
+        self.assertIn(
+            "openclaw plugins enable agent-action-guard",
+            docs,
+        )
+        self.assertIn("HERMES_ENABLE_PROJECT_PLUGINS=1", docs)
+        self.assertIn(
+            ".openclaw/extensions/agent-action-guard/",
+            docs,
+        )
+        self.assertIn(
+            ".hermes/plugins/agent-action-guard/",
+            docs,
+        )
+
+    def test_homepage_benchmark_numbers_match_readme(self) -> None:
+        readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
+        home = HOME.read_text(encoding="utf-8")
+        for value in ("97.87%", "98.92%", "19.66", "3381.72", "815.86", "90.07%"):
+            with self.subTest(value=value):
+                self.assertIn(value, readme)
+                self.assertIn(value, home)
 
 
 if __name__ == "__main__":

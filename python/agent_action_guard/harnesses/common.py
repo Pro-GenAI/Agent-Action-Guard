@@ -47,6 +47,15 @@ def normalize_hook_call(payload: dict[str, Any]) -> tuple[str, Any]:
         tool_input = payload["toolInput"]
     elif "input" in payload:
         tool_input = payload["input"]
+    elif "toolArgs" in payload:
+        tool_input = payload["toolArgs"]
+        if isinstance(tool_input, str):
+            try:
+                tool_input = json.loads(tool_input)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    "Hook payload tool arguments are invalid JSON"
+                ) from exc
     else:
         tool_input = {}
 
@@ -72,8 +81,7 @@ def classify_hook_payload(
         )
     else:
         reason = (
-            f"Agent Action Guard allowed '{tool_name}' "
-            f"(confidence {confidence:.2f})."
+            f"Agent Action Guard allowed '{tool_name}' (confidence {confidence:.2f})."
         )
     return HookResult(
         blocked=blocked,

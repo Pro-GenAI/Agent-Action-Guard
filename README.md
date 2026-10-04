@@ -44,12 +44,14 @@ pepip install agent-action-guard
 
 Python framework integrations are included in the same package: `agent_action_guard.langchain`, `agent_action_guard.llamaindex`, `agent_action_guard.openai_agents`, `agent_action_guard.autogen`, and `agent_action_guard.crewai`. No separate integration package is required.
 
-Pre-tool-use harness hooks are also built in for Codex, Claude Code, Cursor, and Kiro:
+Pre-tool-use harness hooks are also built in for Codex, Claude Code, Cursor, Kiro, OpenCode, Antigravity CLI (`agy`), GitHub Copilot CLI, OpenClaw, and Hermes Agent:
 
 ```bash
 agent-action-guard hooks install --target codex
-# or: claude-code, cursor, kiro
+# or: claude-code, cursor, kiro, opencode, agy, copilot, openclaw, hermes
 ```
+
+OpenClaw and Hermes intentionally retain their project-plugin trust gates. After installing the OpenClaw hook, explicitly enable `agent-action-guard` with `openclaw plugins enable agent-action-guard`. For Hermes, start trusted repositories with `HERMES_ENABLE_PROJECT_PLUGINS=1` so the generated `.hermes/plugins/agent-action-guard/` plugin is loaded.
 
 Want to run the evaluation benchmark too?
 

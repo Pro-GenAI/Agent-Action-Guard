@@ -436,12 +436,39 @@ def send_email(to: str, subject: str, body: str) -> str:
 
         <section id="hooks">
           <h2>Coding-agent pre-tool-use hooks</h2>
-          <p>Install project-level hooks so supported coding-agent harnesses screen a proposed tool call before execution.</p>
+          <p>Install project-level hooks so supported coding-agent harnesses screen a proposed tool call immediately before execution.</p>
           <pre><code class="language-bash">agent-action-guard hooks install --target codex
 agent-action-guard hooks install --target claude-code
 agent-action-guard hooks install --target cursor
-agent-action-guard hooks install --target kiro</code></pre>
-          <p>The hook normalizes the harness's tool name and tool input into the Action Guard action schema. Harmful calls at or above the configured threshold are blocked. Set <code>AAG_HOOK_CONF_THRESHOLD</code> or pass <code>--conf-threshold</code> to tune that threshold.</p>
+agent-action-guard hooks install --target kiro
+agent-action-guard hooks install --target opencode
+agent-action-guard hooks install --target agy
+agent-action-guard hooks install --target copilot
+agent-action-guard hooks install --target openclaw
+agent-action-guard hooks install --target hermes</code></pre>
+
+          <table>
+            <thead>
+              <tr><th>Target</th><th>Native integration</th><th>Project path</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>codex</code></td><td><code>PreToolUse</code> command hook</td><td><code>.codex/hooks.json</code></td></tr>
+              <tr><td><code>claude-code</code></td><td><code>PreToolUse</code> command hook</td><td><code>.claude/settings.json</code></td></tr>
+              <tr><td><code>cursor</code></td><td><code>preToolUse</code> command hook</td><td><code>.cursor/hooks.json</code></td></tr>
+              <tr><td><code>kiro</code></td><td><code>PreToolUse</code> command hook</td><td><code>.kiro/hooks/agent-action-guard.json</code></td></tr>
+              <tr><td><code>opencode</code></td><td><code>tool.execute.before</code> plugin hook</td><td><code>.opencode/plugins/agent-action-guard.js</code></td></tr>
+              <tr><td><code>agy</code></td><td><code>BeforeTool</code> command hook</td><td><code>.agents/hooks.json</code></td></tr>
+              <tr><td><code>copilot</code></td><td><code>preToolUse</code> command hook</td><td><code>.github/hooks/agent-action-guard.json</code></td></tr>
+              <tr><td><code>openclaw</code></td><td><code>before_tool_call</code> native plugin hook</td><td><code>.openclaw/extensions/agent-action-guard/</code></td></tr>
+              <tr><td><code>hermes</code></td><td><code>pre_tool_call</code> native plugin hook</td><td><code>.hermes/plugins/agent-action-guard/</code></td></tr>
+            </tbody>
+          </table>
+
+          <p>The hook normalizes the harness's tool name and tool input into the Action Guard action schema. Harmful calls at or above the configured threshold are blocked. Set <code>AAG_HOOK_CONF_THRESHOLD</code> or pass <code>--conf-threshold</code> to tune that threshold. Hook payload and bridge failures fail closed rather than silently allowing a tool call.</p>
+
+          <div class="callout">
+            <p><strong>Repository trust gates:</strong> OpenClaw workspace plugins remain disabled until you run <code>openclaw plugins enable agent-action-guard</code>. Hermes project plugins load only when you explicitly set <code>HERMES_ENABLE_PROJECT_PLUGINS=1</code> for a trusted repository.</p>
+          </div>
         </section>
 
         <section id="cli">
