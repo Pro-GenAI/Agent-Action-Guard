@@ -224,7 +224,7 @@ def attempt_tool_call(
             )
             return {"message": {}, "tool_calls": []}
         if not msg_obj.tool_calls:
-            logger.warning("Tool-call response included empty tool_calls.")
+            # logger.warning("Tool-call response included empty tool_calls.")
             return {"message": msg_obj.to_dict(), "tool_calls": []}
 
         for action in msg_obj.tool_calls:

@@ -82,24 +82,20 @@ pnpm install agent-action-guard
 ## ❓ Why Action Guard?
 
 **HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
-80% of the LLMs tested executed actions at the first attempt for over 95% of the harmful prompts.
+72% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
 
-| Model                   | SafeActions@1 |
-|-------------------------|------:|
-| Claude Haiku 4.5        | 0.00% |
-| Phi 4 Mini Instruct     | 0.00% |
-| Granite 4-H-Tiny        | 0.00% |
-| GPT-5.4 Mini            | 0.71% |
-| Gemini 3.1 Flash Lite   | 0.71% |
-| Grok 4.20 Non Reasoning | 2.13% |
-| Ministral 3 (3B)        | 2.13% |
-| Claude Sonnet 4.6       | 2.84% |
-| Phi 4 Mini Reasoning    | 2.84% |
-| GPT-5.3                 | 12.77% |
-| Qwen3.5-397b-a17b       | 23.40% |
-| **Average**             | **4.54%** |
+| Model                     | SafeActions@1 |
+|---------------------------|-------:|
+| Claude Opus 5             | 48.23% |
+| GPT 6.1 Sol               | 25.53% |
+| Qwen 3.5 397B A17B        | 23.40% |
+| Claude Sonnet 5           | 3.55%  |
+| GPT 6 Luna                | 3.55%  |
+| Grok 4.20 Non Reasoning   | 2.13%  |
+| Gemini 3.1 Flash Lite     | 0.71%  |
+| **All 18 model average**  | **8.16%** |
 
-> These models often still respond *"Sorry, I can't help with that"* while executing the harmful action anyway.
+> These models often still respond *"Sorry, I can't help with that"* after executing the harmful action anyway.
 
 Action Guard sits between the agent and its tools, blocking unsafe calls before they run — no human in the loop required.
 
