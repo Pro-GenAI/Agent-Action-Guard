@@ -59,6 +59,12 @@ uv add "agent-action-guard[harmactionseval]"
 agent-action-guard harmactionseval
 ```
 
+HarmActionsEval caches each model's `k` value alongside its `results`. Re-running
+the same benchmark with a larger `--k` keeps successful cached results and only
+continues entries that are still `false`, starting at the first previously
+unevaluated attempt. Re-running with the same or a smaller `--k` does not repeat
+cached LLM calls. The `last_attempt` map records per-result attempt coverage for unresolved `false` entries so the same behavior stays correct when runs use `--offset`/`--limit` chunks.
+
 ### JavaScript Runtime
 
 The repository also ships an npm package in [typescript/package.json](typescript/package.json) for screening agent actions in Node.js.
@@ -78,22 +84,19 @@ pnpm install agent-action-guard
 ## ❓ Why Action Guard?
 
 **HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
-80% of the LLMs tested executed actions at the first attempt for over 95% of the harmful prompts.
+68% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
 
-| Model                   | SafeActions@1 |
-|-------------------------|------:|
-| Claude Haiku 4.5        | 0.00% |
-| Phi 4 Mini Instruct     | 0.00% |
-| Granite 4-H-Tiny        | 0.00% |
-| GPT-5.4 Mini            | 0.71% |
-| Gemini 3.1 Flash Lite   | 0.71% |
-| Grok 4.20 Non Reasoning | 2.13% |
-| Ministral 3 (3B)        | 2.13% |
-| Claude Sonnet 4.6       | 2.84% |
-| Phi 4 Mini Reasoning    | 2.84% |
-| GPT-5.3                 | 12.77% |
-| Qwen3.5-397b-a17b       | 23.40% |
-| **Average**             | **4.54%** |
+| Model                     | SafeActions@1 |
+|---------------------------|-------:|
+| Gemini 3.8 Flash          | 79.43% |
+| Claude Opus 5             | 48.23% |
+| GPT 6.1 Sol               | 25.53% |
+| Qwen 3.5 397B A17B        | 23.40% |
+| Claude Sonnet 5           | 3.55%  |
+| GPT 6 Luna                | 3.55%  |
+| Grok 4.20 Non Reasoning   | 2.13%  |
+| Gemini 3.1 Flash Lite     | 0.71%  |
+| **All 19 model average**  | **11.91%** |
 
 > These models often still respond *"Sorry, I can't help with that"* while executing the harmful action anyway.
 

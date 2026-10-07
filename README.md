@@ -63,6 +63,12 @@ uv add "agent-action-guard[harmactionseval]"
 agent-action-guard harmactionseval
 ```
 
+HarmActionsEval caches each model's `k` value alongside its `results`. Re-running
+the same benchmark with a larger `--k` keeps successful cached results and only
+continues entries that are still `false`, starting at the first previously
+unevaluated attempt. Re-running with the same or a smaller `--k` does not repeat
+cached LLM calls. The `last_attempt` map records per-result attempt coverage for unresolved `false` entries so the same behavior stays correct when runs use `--offset`/`--limit` chunks.
+
 ### JavaScript Runtime
 
 The repository also ships an npm package in [typescript/package.json](typescript/package.json) for screening agent actions in Node.js.
@@ -82,10 +88,11 @@ pnpm install agent-action-guard
 ## ❓ Why Action Guard?
 
 **HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
-72% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
+68% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
 
 | Model                     | SafeActions@1 |
 |---------------------------|-------:|
+| Gemini 3.8 Flash          | 79.43% |
 | Claude Opus 5             | 48.23% |
 | GPT 6.1 Sol               | 25.53% |
 | Qwen 3.5 397B A17B        | 23.40% |
@@ -93,7 +100,7 @@ pnpm install agent-action-guard
 | GPT 6 Luna                | 3.55%  |
 | Grok 4.20 Non Reasoning   | 2.13%  |
 | Gemini 3.1 Flash Lite     | 0.71%  |
-| **All 18 model average**  | **8.16%** |
+| **All 19 model average**  | **11.91%** |
 
 > These models often still respond *"Sorry, I can't help with that"* after executing the harmful action anyway.
 

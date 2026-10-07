@@ -82,11 +82,38 @@ def _load_cache_from_path(path: Path, key: str) -> Dict[str, Any]:
         except json.JSONDecodeError:
             cache_dict = {}
 
-    if key not in cache_dict:
-        cache_dict[key] = {"results": {}}
+    if not isinstance(cache_dict, dict):
+        cache_dict = {}
 
-    if "results" not in cache_dict[key]:
+    if key not in cache_dict or not isinstance(cache_dict[key], dict):
+        cache_dict[key] = {"k": 0, "results": {}}
+
+    if not isinstance(cache_dict[key].get("results"), dict):
         cache_dict[key]["results"] = {}
+
+    cached_k = cache_dict[key].get("k")
+    if not isinstance(cached_k, int) or isinstance(cached_k, bool) or cached_k < 0:
+        # Caches written before the `k` field existed used the CLI default of 1.
+        # Empty/new caches start at 0 so the first requested run begins at attempt 1.
+        cache_dict[key]["k"] = 1 if cache_dict[key]["results"] else 0
+
+    cached_k = cache_dict[key]["k"]
+    last_attempt = cache_dict[key].get("last_attempt")
+    if not isinstance(last_attempt, dict):
+        legacy_result_k = cache_dict[key].get("result_k")
+        last_attempt = legacy_result_k if isinstance(legacy_result_k, dict) else {}
+
+    for action_key, result in cache_dict[key]["results"].items():
+        if result:
+            last_attempt.pop(action_key, None)
+            continue
+
+        action_k = last_attempt.get(action_key)
+        if not isinstance(action_k, int) or isinstance(action_k, bool) or action_k < 0:
+            last_attempt[action_key] = cached_k
+
+    cache_dict[key]["last_attempt"] = last_attempt
+    cache_dict[key].pop("result_k", None)
 
     return cache_dict
 
@@ -255,13 +282,17 @@ def attempt_tool_call(
 
 
 def evaluate(
-    k: int = 2,
+    k: int = 1,
     offset: int = 0,
     limit: Optional[int] = None,
     output_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
     all_harmful_actions = load_dataset()
     actions = slice_actions(all_harmful_actions, offset=offset, limit=limit)
+    model_cache = cache[model_key]
+    cached_k = model_cache["k"]
+    cached_results = model_cache["results"]
+    last_attempt = model_cache["last_attempt"]
 
     logger.debug(
         "Loaded %d harmful/unethical actions for evaluation.",
@@ -304,8 +335,17 @@ def evaluate(
 
             harm_at_attempt: Union[bool, int] = False
 
-            if str(action_id) in cache[model_key]["results"]:
-                harm_at_attempt = cache[model_key]["results"][str(action_id)]
+            action_key = str(action_id)
+            has_cached_result = action_key in cached_results
+            cached_action_k = cached_k
+            if has_cached_result:
+                harm_at_attempt = cached_results[action_key]
+                cached_action_k = last_attempt.get(action_key, cached_k)
+
+            # A successful cached tool call remains valid for every larger k. A
+            # cached false result is only final when this action was already
+            # evaluated at least through the requested k.
+            if has_cached_result and (harm_at_attempt or k <= cached_action_k):
                 results.append(
                     {"action_id": action_id, "predicted_harmful": harm_at_attempt}
                 )
@@ -324,7 +364,8 @@ def evaluate(
 
             tool = create_tool_from_action(action["action"])
 
-            for attempt in range(1, k + 1):
+            first_attempt = cached_action_k + 1 if has_cached_result else 1
+            for attempt in range(first_attempt, k + 1):
                 tool_calls = attempt_tool_call(prompt, attempt=attempt, tool=tool)
                 if WAIT_INTERVAL:
                     logger.debug(
@@ -345,13 +386,21 @@ def evaluate(
                 )
                 raise ValueError("Tool call FAILED for a sample task.")
 
-            cache[model_key]["results"][str(action_id)] = harm_at_attempt
+            cached_results[action_key] = harm_at_attempt
+            if harm_at_attempt:
+                last_attempt.pop(action_key, None)
+            else:
+                last_attempt[action_key] = k
             _save_cache_to_path(cache_path, cache)
 
             results.append(
                 {"action_id": action_id, "predicted_harmful": harm_at_attempt}
             )
             progress.advance(task_id)
+
+    if k > cached_k:
+        model_cache["k"] = k
+        _save_cache_to_path(cache_path, cache)
 
     results = [r for r in results if r["action_id"] >= 0]
 
@@ -407,7 +456,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--k",
         type=int,
         default=1,
-        help="Number of attempts per prompt (default: 2).",
+        help="Number of attempts per prompt (default: 1).",
     )
     parser.add_argument(
         "--offset",

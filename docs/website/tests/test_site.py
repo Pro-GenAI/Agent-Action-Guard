@@ -10,6 +10,7 @@ from xml.etree import ElementTree
 SITE_ROOT = Path(__file__).resolve().parents[1]
 HOME = SITE_ROOT / "index.html"
 DOCS = SITE_ROOT / "docs" / "index.html"
+LEADERBOARD = SITE_ROOT.parent / "agent-leaderboard-site" / "index.html"
 
 
 class _HTMLFacts(HTMLParser):
@@ -227,6 +228,67 @@ class SiteSeoTests(unittest.TestCase):
             with self.subTest(value=value):
                 self.assertIn(value, readme)
                 self.assertIn(value, home)
+
+    def test_harmactionseval_snapshot_is_synchronized(self) -> None:
+        readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
+        python_readme = (SITE_ROOT.parents[1] / "python" / "README.md").read_text(
+            encoding="utf-8"
+        )
+        home = HOME.read_text(encoding="utf-8")
+        leaderboard = LEADERBOARD.read_text(encoding="utf-8")
+
+        scores = [
+            float(value)
+            for value in re.findall(
+                r'<td[^>]*text-lg[^>]*>([0-9]+\.[0-9]+)%</td>',
+                leaderboard,
+            )
+        ]
+        ranks = re.findall(
+            r'<td class="px-8 py-5 text-sm font-headline font-bold '
+            r'text-on-surface/60">(\d{2})</td>',
+            leaderboard,
+        )
+        self.assertEqual(ranks, [f"{rank:02d}" for rank in range(1, 20)])
+        self.assertEqual(len(scores), 19)
+
+        average = sum(scores) / len(scores)
+        top_score = max(scores)
+        high_execution_share = round(
+            100 * sum(score < 5.0 for score in scores) / len(scores)
+        )
+
+        self.assertAlmostEqual(average, 11.91, places=2)
+        self.assertEqual(top_score, 79.43)
+        self.assertEqual(high_execution_share, 68)
+
+        for value in ("Gemini 3.8 Flash", f"{top_score:.2f}%", f"{average:.2f}%"):
+            with self.subTest(value=value):
+                self.assertIn(value, readme)
+                self.assertIn(value, python_readme)
+                self.assertIn(value, home)
+                self.assertIn(value, leaderboard)
+
+        execution_share = f"{high_execution_share}%"
+        self.assertIn(execution_share, readme)
+        self.assertIn(execution_share, python_readme)
+        self.assertIn(execution_share, home)
+
+        model_count = len(scores)
+        average_label = f"All {model_count} model average"
+        self.assertIn(average_label, readme)
+        self.assertIn(average_label, python_readme)
+        self.assertIn(average_label, home)
+        self.assertLess(
+            leaderboard.index("Gemini 3.8 Flash"),
+            leaderboard.index("Claude Opus 5"),
+        )
+        self.assertIn(f"{model_count} models", leaderboard)
+        self.assertIn(
+            f"<strong>{model_count}</strong><span>Models tested</span>",
+            leaderboard,
+        )
+        self.assertIn(f'(value / {top_score:.2f}) * 100', leaderboard)
 
 
 if __name__ == "__main__":
