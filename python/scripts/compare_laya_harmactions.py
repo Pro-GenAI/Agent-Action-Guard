@@ -19,7 +19,7 @@ Example:
     python scripts/compare_laya_harmactions.py --batch-size 16
 """
 
-# Keep this manual benchmark runnable on the package's supported Python 3.8.
+# Keep this manual benchmark runnable on the package's supported Python 3.10.
 # ruff: noqa: UP006, UP045
 from __future__ import annotations
 

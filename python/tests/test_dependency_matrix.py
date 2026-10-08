@@ -13,6 +13,17 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(dependency_matrix)
 
 
+def test_python_package_metadata_excludes_unsupported_minors():
+    metadata = PYPROJECT_PATH.read_text(encoding="utf-8")
+    assert 'requires-python = ">=3.10"' in metadata
+    for minor in range(10, 15):
+        assert f'"Programming Language :: Python :: 3.{minor}"' in metadata
+    for minor in (8, 9):
+        assert f'"Programming Language :: Python :: 3.{minor}"' not in metadata
+    assert 'target-version = ["py310"]' in metadata
+    assert 'target-version = "py310"' in metadata
+
+
 def test_dev_extra_includes_security_scanners():
     pyproject_text = PYPROJECT_PATH.read_text(encoding="utf-8")
     for requirement in ("bandit", "pip-audit", "detect-secrets", "semgrep", "ruff"):
@@ -21,8 +32,6 @@ def test_dev_extra_includes_security_scanners():
 
 def test_default_python_versions_cover_all_declared_supported_minors():
     assert dependency_matrix.DEFAULT_PYTHON_VERSIONS == (
-        "3.8",
-        "3.9",
         "3.10",
         "3.11",
         "3.12",
@@ -33,8 +42,8 @@ def test_default_python_versions_cover_all_declared_supported_minors():
 
 def test_normalize_python_versions_supports_space_comma_and_deduplication():
     assert dependency_matrix._normalize_python_versions(
-        ["3.8,3.10", "3.12", "3.10"]
-    ) == ["3.8", "3.10", "3.12"]
+        ["3.10,3.11", "3.12", "3.10"]
+    ) == ["3.10", "3.11", "3.12"]
 
 
 def test_normalize_python_versions_rejects_patch_versions():
@@ -45,7 +54,7 @@ def test_normalize_python_versions_rejects_patch_versions():
 @pytest.mark.parametrize(
     ("python_version", "expected_tokenizers_min"),
     [
-        ("3.8", "0.13.3"),
+        ("3.10", "0.13.3"),
         ("3.12", "0.13.3"),
         ("3.13", "0.21.0"),
         ("3.14", "0.21.0"),
@@ -194,9 +203,9 @@ def test_ensure_python_uses_uv_managed_python_install(monkeypatch):
         lambda command, **_kwargs: calls.append(command) or "",
     )
 
-    dependency_matrix._ensure_python("3.8")
+    dependency_matrix._ensure_python("3.10")
 
-    assert calls == [["uv", "python", "install", "3.8"]]
+    assert calls == [["uv", "python", "install", "3.10"]]
 
 
 def test_assert_python_version_compares_against_each_matrix_version(monkeypatch):

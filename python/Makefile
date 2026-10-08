@@ -1,10 +1,11 @@
 UV ?= uv
 TEST_WORKERS ?= logical
 TEST_DIST ?= worksteal
+PYTHON_TEST_VERSIONS ?=
 SOURCE_DIRS := agent_action_guard examples scripts tests training
 PY_FILES := $(shell find $(SOURCE_DIRS) -type f -name '*.py') sitecustomize.py
 
-.PHONY: install install-dev format lint quality test security dependency-matrix dependency-matrix-bounds latency-backends
+.PHONY: install install-dev format lint quality test test-matrix security dependency-matrix dependency-matrix-bounds latency-backends
 
 install:
 	$(UV) sync
@@ -28,6 +29,9 @@ quality: format lint
 
 test:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(UV) run --with pytest --with pytest-xdist --with rich pytest -p xdist.plugin -n $(TEST_WORKERS) --dist=$(TEST_DIST)
+
+test-matrix:
+	UV="$(UV)" PYTHON_TEST_VERSIONS="$(PYTHON_TEST_VERSIONS)" bash scripts/run_tests_uv_matrix.sh
 
 security:
 	$(UV) run python scripts/security_audit.py

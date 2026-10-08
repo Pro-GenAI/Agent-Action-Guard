@@ -778,6 +778,7 @@ section { position: relative; }
 .callout span { display: block; margin-top: .5rem; color: var(--muted); font-size: .92rem; }
 .callout.hl { border-color: rgba(121, 255, 91, .3); background: radial-gradient(20rem 12rem at 0% 0%, rgba(42, 229, 0, .16), transparent 70%), linear-gradient(180deg, #121812, var(--panel)); }
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); margin-bottom: 20px; }
+.full-results-link { margin: 14px 0 0; text-align: right; color: var(--dim); font: 600 .82rem/1.4 var(--font-b); }
 .bench { width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; font: 500 .92rem/1.2 var(--font-b); }
 .bench th { padding: 1rem 1.2rem; color: var(--blue); background: rgba(255, 255, 255, .025); font: 700 .7rem/1 var(--font-l); letter-spacing: .16em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
 .bench td { padding: 1.05rem 1.2rem; border-bottom: 1px solid var(--line); color: var(--muted); font-variant-numeric: tabular-nums; }

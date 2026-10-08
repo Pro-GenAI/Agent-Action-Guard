@@ -26,7 +26,7 @@
 
 ## 🚀 Quick Start
 
-Python package support: **Python 3.8 through Python 3.14**.
+Python package support: **Python 3.10 through Python 3.14**.
 
 > **Python 3.14 on Intel macOS:** ONNX Runtime does not currently publish a CPython 3.14 x86_64 macOS wheel. Agent Action Guard automatically uses ONNX's `ReferenceEvaluator` on that platform; other supported platforms continue to use ONNX Runtime. The repository-local `.python-version` is Python 3.14, so `uv sync` exercises the current supported runtime by default.
 

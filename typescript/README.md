@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/dm/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white" alt="npm downloads" /></a>
-  <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+" />
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 20+" />
   <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge" alt="CC BY 4.0 license" /></a>
 </p>
 
@@ -30,7 +30,7 @@ Or with pnpm:
 pnpm add agent-action-guard
 ```
 
-**Node.js 18+ · ESM · usable with zero embedding configuration.** The runtime compatibility matrix covers Node.js 18, 20, 22, 24, and 26.
+**Node.js 20+ · ESM · usable with zero embedding configuration.** The runtime compatibility matrix covers Node.js 20, 22, 24, and 26.
 
 On first use, Action Guard can automatically download and cache the default MiniLM ONNX embedding assets. You can also point it at your own local ONNX model or an OpenAI-compatible embedding API.
 
@@ -232,7 +232,7 @@ Use Action Guard as a runtime safety layer alongside your existing authenticatio
 
 ## Compatibility
 
-The package supports **Node.js 18+** and is tested across Node.js 18, 20, 22, and 24. Runtime dependency compatibility is tested separately across supported versions of `@huggingface/tokenizers`, `onnxruntime-node`, and the OpenAI JavaScript SDK.
+The package supports **Node.js 20+** and is tested across Node.js 20, 22, 24, and 26. Runtime dependency compatibility is tested separately across supported versions of `@huggingface/tokenizers`, `onnxruntime-node`, and the OpenAI JavaScript SDK.
 
 For contributors:
 

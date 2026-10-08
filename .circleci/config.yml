@@ -1,0 +1,166 @@
+version: 2.1
+
+parameters:
+  run_mac_ci:
+    type: boolean
+    default: false
+
+executors:
+  apple_silicon:
+    macos:
+      xcode: "27.0.0"
+    resource_class: m4pro.medium
+
+commands:
+  verify_apple_silicon:
+    steps:
+      - run:
+          name: Verify Apple Silicon runner
+          command: |
+            set -euo pipefail
+            echo "macOS: $(sw_vers -productVersion)"
+            echo "architecture: $(uname -m)"
+            test "$(uname -m)" = "arm64"
+
+  install_uv:
+    steps:
+      - run:
+          name: Install uv
+          command: |
+            set -euo pipefail
+            if ! command -v uv >/dev/null 2>&1; then
+              brew install uv
+            fi
+            uv --version
+
+  install_nvm:
+    steps:
+      - run:
+          name: Install nvm for Bash-based Node matrix
+          command: |
+            set -euo pipefail
+            if ! brew list nvm >/dev/null 2>&1; then
+              brew install nvm
+            fi
+            mkdir -p "$HOME/.nvm"
+            printf 'export NVM_DIR="$HOME/.nvm"\n. "%s/nvm.sh"\n' "$(brew --prefix nvm)" >> "$BASH_ENV"
+            . "$(brew --prefix nvm)/nvm.sh"
+            nvm --version
+
+jobs:
+  python_tests:
+    executor: apple_silicon
+    steps:
+      - checkout
+      - verify_apple_silicon
+      - install_uv
+      - restore_cache:
+          keys:
+            - uv-v2-{{ arch }}-{{ checksum "python/uv.lock" }}
+            - uv-v2-{{ arch }}-
+      - run:
+          name: Python 3.10–3.14 test matrix
+          command: |
+            set -euo pipefail
+            cd python
+            make test-matrix
+      - save_cache:
+          key: uv-v2-{{ arch }}-{{ checksum "python/uv.lock" }}
+          paths:
+            - ~/.cache/uv
+
+  python_security:
+    executor: apple_silicon
+    steps:
+      - checkout
+      - verify_apple_silicon
+      - install_uv
+      - restore_cache:
+          keys:
+            - uv-v2-{{ arch }}-{{ checksum "python/uv.lock" }}
+            - uv-v2-{{ arch }}-
+      - run:
+          name: Install Python development and security dependencies
+          command: |
+            set -euo pipefail
+            cd python
+            make install-dev
+      - run:
+          name: Python security audit
+          command: |
+            set -euo pipefail
+            cd python
+            make security
+      - store_artifacts:
+          path: python/security-reports
+          destination: python-security-reports
+      - save_cache:
+          key: uv-v2-{{ arch }}-{{ checksum "python/uv.lock" }}
+          paths:
+            - ~/.cache/uv
+
+  typescript_tests:
+    executor: apple_silicon
+    steps:
+      - checkout
+      - verify_apple_silicon
+      - install_nvm
+      - restore_cache:
+          keys:
+            - npm-v2-{{ arch }}-{{ checksum "typescript/package-lock.json" }}
+            - npm-v2-{{ arch }}-
+      - run:
+          name: Node 20–26 test matrix
+          command: |
+            set -euo pipefail
+            cd typescript
+            make test-matrix
+      - save_cache:
+          key: npm-v2-{{ arch }}-{{ checksum "typescript/package-lock.json" }}
+          paths:
+            - ~/.npm
+            - ~/.nvm/.cache
+
+  typescript_security:
+    executor: apple_silicon
+    steps:
+      - checkout
+      - verify_apple_silicon
+      - install_uv
+      - install_nvm
+      - restore_cache:
+          keys:
+            - npm-v2-{{ arch }}-{{ checksum "typescript/package-lock.json" }}
+            - npm-v2-{{ arch }}-
+      - run:
+          name: Prepare Node and TypeScript development security tools
+          command: |
+            set -euo pipefail
+            nvm install 22
+            nvm use 22
+            cd typescript
+            make install-dev
+      - run:
+          name: TypeScript security audit
+          command: |
+            set -euo pipefail
+            nvm use 22
+            cd typescript
+            make security
+      - store_artifacts:
+          path: typescript/security-reports
+          destination: typescript-security-reports
+      - save_cache:
+          key: npm-v2-{{ arch }}-{{ checksum "typescript/package-lock.json" }}
+          paths:
+            - ~/.npm
+            - ~/.nvm/.cache
+
+workflows:
+  apple_silicon_ci:
+    when: << pipeline.parameters.run_mac_ci >>
+    jobs:
+      - python_tests
+      - python_security
+      - typescript_tests
+      - typescript_security
