@@ -229,6 +229,23 @@ class SiteSeoTests(unittest.TestCase):
                 self.assertIn(value, readme)
                 self.assertIn(value, home)
 
+    def test_homepage_benchmark_links_to_full_results(self) -> None:
+        home = HOME.read_text(encoding="utf-8")
+        facts = parse(HOME)
+
+        self.assertIn("View full benchmark results", home)
+        self.assertIn("https://agent-leaderboard.github.io/", facts.links)
+        problem_section = re.search(
+            r'<section id="problem".*?</section>',
+            home,
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(problem_section)
+        self.assertIn(
+            "https://agent-leaderboard.github.io/",
+            problem_section.group(0),
+        )
+
     def test_harmactionseval_snapshot_is_synchronized(self) -> None:
         readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
         python_readme = (SITE_ROOT.parents[1] / "python" / "README.md").read_text(

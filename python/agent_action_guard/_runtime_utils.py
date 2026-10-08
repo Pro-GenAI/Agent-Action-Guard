@@ -377,13 +377,18 @@ class EmbeddingModel:
             "attention_mask": attention_mask,
             "token_type_ids": type_ids,
         }
+        # onnxruntime exposes get_inputs(); ONNX ReferenceEvaluator exposes
+        # input_names instead (used on Python 3.14 Intel macOS).
+        input_names = (
+            [meta.name for meta in session.get_inputs()]
+            if hasattr(session, "get_inputs")
+            else session.input_names
+        )
         feed = {}
-        for input_meta in session.get_inputs():
-            if input_meta.name not in inputs:
-                raise ValueError(
-                    f"Unsupported ONNX embedding model input: {input_meta.name}"
-                )
-            feed[input_meta.name] = inputs[input_meta.name]
+        for name in input_names:
+            if name not in inputs:
+                raise ValueError(f"Unsupported ONNX embedding model input: {name}")
+            feed[name] = inputs[name]
 
         outputs = session.run(None, feed)
         if not outputs:

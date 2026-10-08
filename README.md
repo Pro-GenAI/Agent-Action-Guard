@@ -27,7 +27,7 @@
 
 ## 🚀 Quick Start
 
-Python package support: **Python 3.8 through Python 3.14**.
+Python package support: **Python 3.10 through Python 3.14**.
 
 ```bash
 pip install agent-action-guard

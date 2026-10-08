@@ -189,32 +189,40 @@ function builtinPatternScan() {
 }
 
 function main() {
-	let failures = 0;
+	if (!commandExists('bash')) {
+		console.error('Security audit requires Bash (Linux environment recommended). Bash was not found; aborting before security checks.');
+		process.exitCode = 1;
+		return;
+	}
+	const failures = [];
 	const missing = [];
+	const record = (name, status) => {
+		if (status !== 0) failures.push(name);
+	};
 
-	failures += builtinPatternScan() !== 0 ? 1 : 0;
+	record('dangerous-patterns', builtinPatternScan());
 
-	failures +=
+	record(
+		'npm-audit',
 		runCheck(
 			'npm-audit',
 			'npm',
 			['audit', '--json', '--audit-level=low'],
 			'npm-audit.json',
-		) !== 0
-			? 1
-			: 0;
+		),
+	);
 
 	if (fs.existsSync(path.join(ROOT, 'pnpm-lock.yaml'))) {
 		if (commandExists('pnpm')) {
-			failures +=
+			record(
+				'pnpm-audit',
 				runCheck(
 					'pnpm-audit',
 					'pnpm',
 					['audit', '--json'],
 					'pnpm-audit.json',
-				) !== 0
-					? 1
-					: 0;
+				),
+			);
 		} else {
 			console.log(
 				'[pnpm-audit] skipped: pnpm-lock.yaml exists but pnpm is not installed',
@@ -225,7 +233,8 @@ function main() {
 
 	if (!NO_SEMGREP) {
 		if (commandExists('semgrep')) {
-			failures +=
+			record(
+				'semgrep',
 				runCheck(
 					'semgrep',
 					'semgrep',
@@ -257,9 +266,8 @@ function main() {
 						'runtime-fixtures',
 					],
 					'semgrep.json',
-				) !== 0
-					? 1
-					: 0;
+				),
+			);
 		} else {
 			console.log('[semgrep] skipped: executable not installed');
 			missing.push('semgrep');
@@ -267,7 +275,8 @@ function main() {
 	}
 
 	if (commandExists('detect-secrets')) {
-		failures +=
+		record(
+			'detect-secrets',
 			runDetectSecrets([
 				'scan',
 				'--all-files',
@@ -281,9 +290,8 @@ function main() {
 				'typescript/runtime-fixtures',
 				'typescript/package.json',
 				'typescript/package-lock.json',
-			]) !== 0
-				? 1
-				: 0;
+			]),
+		);
 	} else {
 		console.log('[detect-secrets] skipped: executable not installed');
 		missing.push('detect-secrets');
@@ -293,10 +301,26 @@ function main() {
 		console.log(
 			`Missing scanners/tools: ${[...new Set(missing)].sort().join(', ')}`,
 		);
-		if (STRICT_TOOLS) failures += 1;
+		if (STRICT_TOOLS) failures.push('missing required scanners/tools');
 	}
 
-	process.exitCode = failures > 0 ? 1 : 0;
+	const color = process.stdout.isTTY === true;
+	const red = color ? '\x1b[31m' : '';
+	const reset = color ? '\x1b[0m' : '';
+	console.log('\n=== TypeScript security audit summary ===');
+	console.log(`Failed checks: ${failures.length}`);
+	console.log(
+		`Missing scanners/tools: ${missing.length ? [...new Set(missing)].sort().join(', ') : 'none'}`,
+	);
+	if (failures.length) {
+		for (const name of failures) console.log(`${red}FAIL: ${name}${reset}`);
+		console.log(`${red}Result: SECURITY AUDIT FAILED${reset}`);
+	} else {
+		console.log(
+			`Result: security audit passed${missing.length ? ' (some scanners skipped)' : ''}`,
+		);
+	}
+	process.exitCode = failures.length > 0 ? 1 : 0;
 }
 
 main();

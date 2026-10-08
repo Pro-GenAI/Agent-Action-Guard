@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const DEFAULT_NODE_VERSIONS = ['18', '20', '22', '24', '26'];
+export const DEFAULT_NODE_VERSIONS = ['20', '22', '24', '26'];
 
 export function normalizeNodeVersions(values) {
 	const versions = [];
@@ -17,6 +17,9 @@ export function normalizeNodeVersions(values) {
 				throw new Error(
 					`Invalid Node version ${JSON.stringify(version)}; expected MAJOR, MAJOR.MINOR, or MAJOR.MINOR.PATCH`,
 				);
+			}
+			if (Number(version.split('.')[0]) < 20) {
+				throw new Error(`Unsupported Node version ${version}; Node 20 or later is required`);
 			}
 			if (!versions.includes(version)) {
 				versions.push(version);
@@ -78,7 +81,8 @@ export function buildNvmTestCommand({ nvmScript, version, testFiles }) {
 		`actual="$(node -p 'process.versions.node')"`,
 		'case "$actual" in "$requested"|"$requested".*) ;; *) echo "Expected Node $requested, got $actual" >&2; exit 2 ;; esac',
 		'echo "Using Node $actual ($(npm --version | sed \'s/^/npm /\'))"',
-		'npm ci --no-audit --no-fund',
+		'ONNXRUNTIME_NODE_INSTALL=skip npm ci --no-audit --no-fund',
+		'npm run build',
 		`node --test ${quotedTests}`,
 	].join('\n');
 }
@@ -97,6 +101,18 @@ export function runNodeVersionMatrix({
 	const continueOnFailure = env.CONTINUE_ON_FAILURE !== '0';
 	const succeeded = [];
 	const failed = [];
+
+	const writeSummary = () => {
+		write('\n=== Node version matrix summary ===');
+		write(`Succeeded: ${succeeded.length}`);
+		write(`Failed: ${failed.length}`);
+		write(
+			`Succeeded versions: ${succeeded.length > 0 ? succeeded.join(', ') : 'none'}`,
+		);
+		write(
+			`Failed versions: ${failed.length > 0 ? failed.join(', ') : 'none'}`,
+		);
+	};
 
 	for (const version of selectedVersions) {
 		write(`\n=== Node ${version} ===`);
@@ -127,22 +143,30 @@ export function runNodeVersionMatrix({
 
 		failed.push(version);
 		if (!continueOnFailure) {
+			writeSummary();
+			write('Result: Node version matrix failed.');
 			return result.status ?? 1;
 		}
 	}
 
-	write('\n=== Node version matrix summary ===');
-	write(`Succeeded: ${succeeded.length}`);
-	write(`Failed: ${failed.length}`);
+	writeSummary();
 	if (failed.length > 0) {
-		write(`Failed versions: ${failed.join(', ')}`);
+		write('Result: Node version matrix failed.');
 		return 1;
 	}
 	write('Result: all Node version runs succeeded.');
 	return 0;
 }
 
+export function assertBashAvailable(spawn = spawnSync) {
+	const probe = spawn('bash', ['--version'], { stdio: 'ignore', shell: false });
+	if (probe.error || probe.status !== 0) {
+		throw new Error('Node test matrix requires Bash and nvm. Bash was not found or could not start; install Bash (for example via WSL on Windows) before running make test-matrix.');
+	}
+}
+
 export function main(argv = process.argv.slice(2), env = process.env) {
+	assertBashAvailable();
 	const versions = resolveNodeVersions(argv, env);
 	return runNodeVersionMatrix({ versions, env });
 }

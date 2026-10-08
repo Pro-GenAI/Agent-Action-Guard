@@ -1,8 +1,9 @@
 SHELL := /bin/sh
 UV ?= uv
 SECURITY_VENV := .security-tools
+NODE_TEST_VERSIONS ?=
 
-.PHONY: install install-dev format lint quality test security dependency-matrix dependency-matrix-bounds latency-backends
+.PHONY: install install-dev format lint quality test test-matrix security dependency-matrix dependency-matrix-bounds latency-backends
 
 install:
 	npm install --omit=dev
@@ -21,6 +22,9 @@ lint:
 
 test:
 	npm test
+
+test-matrix:
+	NODE_TEST_VERSIONS="$(NODE_TEST_VERSIONS)" npm run test:all-versions
 
 security:
 	PATH="$(CURDIR)/$(SECURITY_VENV)/bin:$(CURDIR)/node_modules/.bin:$$PATH" npm run security:audit

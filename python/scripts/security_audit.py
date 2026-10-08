@@ -221,10 +221,21 @@ def run_builtin_pattern_scan() -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    failures = 0
+    if shutil.which("bash") is None:
+        print(
+            "Security audit requires Bash (Linux environment recommended). "
+            "Bash was not found; aborting before security checks.",
+            file=sys.stderr,
+        )
+        return 1
+    failures: list[str] = []
     missing: list[str] = []
 
-    failures += int(run_builtin_pattern_scan() != 0)
+    def record(name: str, status: int) -> None:
+        if status != 0:
+            failures.append(name)
+
+    record("dangerous-patterns", run_builtin_pattern_scan())
 
     module_checks = (
         (
@@ -271,7 +282,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     for name, module_name, command, report in module_checks:
         if python_module_exists(module_name):
-            failures += int(run_check(Check(name, command, report)) != 0)
+            record(name, run_check(Check(name, command, report)))
         else:
             print(f"[{name}] skipped: Python module '{module_name}' is not installed")
             missing.append(module_name)
@@ -302,9 +313,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             if export.returncode != 0:
                 print("[pip-audit] dependency export failed")
-                failures += 1
+                failures.append("pip-audit (dependency export)")
             elif python_module_exists("pip_audit"):
-                failures += int(
+                record(
+                    "pip-audit",
                     run_check(
                         Check(
                             "pip-audit",
@@ -322,7 +334,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                             "pip-audit.json",
                         )
                     )
-                    != 0
                 )
             else:
                 print("[pip-audit] skipped: Python module 'pip_audit' is not installed")
@@ -332,7 +343,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             missing.append("uv")
 
     if executable_exists("detect-secrets"):
-        failures += int(
+        record(
+            "detect-secrets",
             run_detect_secrets(
                 Check(
                     "detect-secrets",
@@ -353,7 +365,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                     cwd=REPO_ROOT,
                 )
             )
-            != 0
         )
     else:
         print("[detect-secrets] skipped: executable not installed")
@@ -361,7 +372,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if not args.no_semgrep:
         if executable_exists("semgrep"):
-            failures += int(
+            record(
+                "semgrep",
                 run_check(
                     Check(
                         "semgrep",
@@ -396,7 +408,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "semgrep.json",
                     )
                 )
-                != 0
             )
         else:
             print("[semgrep] skipped: executable not installed")
@@ -405,8 +416,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     if missing:
         print("Missing scanners/tools: " + ", ".join(sorted(set(missing))))
         if args.strict_tools:
-            failures += 1
+            failures.append("missing required scanners/tools")
 
+    color = sys.stdout.isatty()
+    red, reset = ("\033[31m", "\033[0m") if color else ("", "")
+    print("\n=== Python security audit summary ===")
+    print(f"Failed checks: {len(failures)}")
+    print(f"Missing scanners/tools: {', '.join(sorted(set(missing))) if missing else 'none'}")
+    if failures:
+        for name in failures:
+            print(f"{red}FAIL: {name}{reset}")
+        print(f"{red}Result: SECURITY AUDIT FAILED{reset}")
+    else:
+        print("Result: security audit passed" + (" (some scanners skipped)" if missing else ""))
     return 1 if failures else 0
 
 
