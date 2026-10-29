@@ -242,13 +242,27 @@ export function actionGuarded(
 	if (typeof func !== 'function') {
 		throw new TypeError('actionGuarded expects a function.');
 	}
+	if (
+		typeof confThreshold !== 'number' ||
+		!Number.isFinite(confThreshold) ||
+		confThreshold < 0 ||
+		confThreshold > 1
+	) {
+		throw new TypeError(
+			'confThreshold must be a finite threshold between 0 and 1.',
+		);
+	}
 
 	return async function guardedAction(...args) {
-		const lastArg = args.at(-1);
 		const kwargs =
-			lastArg && typeof lastArg === 'object' && !Array.isArray(lastArg)
-				? lastArg
-				: {};
+			args.length === 1 &&
+			args[0] &&
+			typeof args[0] === 'object' &&
+			!Array.isArray(args[0])
+				? args[0]
+				: args.length
+					? { args }
+					: {};
 
 		const actionDict = {
 			type: 'function',

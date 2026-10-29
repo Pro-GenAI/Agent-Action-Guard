@@ -38,7 +38,10 @@ export function defaultOnnxAssetUrl(filename) {
 function isHttpUrl(value) {
 	try {
 		const parsed = new URL(value);
-		return ['http:', 'https:'].includes(parsed.protocol) && Boolean(parsed.host);
+		return (
+			['http:', 'https:'].includes(parsed.protocol) &&
+			Boolean(parsed.host)
+		);
 	} catch {
 		return false;
 	}
@@ -76,14 +79,22 @@ function normalizedUrlCacheName(url) {
 }
 
 function looksLikeHfRepoId(value) {
-	if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) {
+	if (
+		!/^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)
+	) {
 		return false;
 	}
 	const candidate = path.resolve(value);
 	if (fs.existsSync(candidate) || fs.existsSync(path.dirname(candidate))) {
 		return false;
 	}
-	return !value.startsWith('/') && !value.startsWith('./') && !value.startsWith('../') && !value.startsWith('~') && !value.includes('\\');
+	return (
+		!value.startsWith('/') &&
+		!value.startsWith('./') &&
+		!value.startsWith('../') &&
+		!value.startsWith('~') &&
+		!value.includes('\\')
+	);
 }
 
 function hfRepoBaseUrl(repoId) {
@@ -92,8 +103,15 @@ function hfRepoBaseUrl(repoId) {
 
 function normalizeHfSourceUrl(url) {
 	const parsed = new URL(url);
-	if (!['huggingface.co', 'www.huggingface.co'].includes(parsed.hostname.toLowerCase())) {
-		return { url: parsed.toString(), isBase: parsed.pathname.endsWith('/') };
+	if (
+		!['huggingface.co', 'www.huggingface.co'].includes(
+			parsed.hostname.toLowerCase(),
+		)
+	) {
+		return {
+			url: parsed.toString(),
+			isBase: parsed.pathname.endsWith('/'),
+		};
 	}
 
 	const parts = parsed.pathname.split('/').filter(Boolean);
@@ -117,7 +135,9 @@ function normalizeHfSourceUrl(url) {
 }
 
 function remoteModelUrl(source, defaultFilename) {
-	const sourceUrl = looksLikeHfRepoId(source) ? hfRepoBaseUrl(source) : source;
+	const sourceUrl = looksLikeHfRepoId(source)
+		? hfRepoBaseUrl(source)
+		: source;
 	const normalized = normalizeHfSourceUrl(sourceUrl);
 	if (!normalized.isBase) {
 		return normalized.url;
@@ -135,7 +155,12 @@ function siblingUrl(url, filename) {
 	return parsed.toString();
 }
 
-function remoteCachePath(sourceUrl, kind, defaultFilename, homeDir = os.homedir()) {
+function remoteCachePath(
+	sourceUrl,
+	kind,
+	defaultFilename,
+	homeDir = os.homedir(),
+) {
 	const parsed = new URL(sourceUrl);
 	let basename = path.posix.basename(parsed.pathname);
 	try {
@@ -143,7 +168,10 @@ function remoteCachePath(sourceUrl, kind, defaultFilename, homeDir = os.homedir(
 	} catch {
 		// Keep the encoded basename when it is not valid percent-encoding.
 	}
-	let normalizedFilename = normalizeSourceComponent(basename, defaultFilename);
+	let normalizedFilename = normalizeSourceComponent(
+		basename,
+		defaultFilename,
+	);
 	const expectedExtension = path.extname(defaultFilename).toLowerCase();
 	if (expectedExtension && !normalizedFilename.endsWith(expectedExtension)) {
 		normalizedFilename += expectedExtension;
@@ -182,7 +210,15 @@ async function downloadFile(url, destination, fetchImpl = globalThis.fetch) {
 			Readable.fromWeb(response.body),
 			fs.createWriteStream(temporaryPath, { flags: 'wx' }),
 		);
-		await rename(temporaryPath, destination);
+		try {
+			await rename(temporaryPath, destination);
+		} catch (error) {
+			// Windows rejects renaming over a destination that a concurrent
+			// download already installed; the cached asset is then complete.
+			if (!fs.existsSync(destination)) {
+				throw error;
+			}
+		}
 	} finally {
 		await rm(temporaryPath, { force: true });
 	}
@@ -221,7 +257,10 @@ export async function resolveOnnxModelFiles({
 	const configured = process.env[AAG_EMBED_ONNX_ENV];
 	if (configured) {
 		if (isHttpUrl(configured) || looksLikeHfRepoId(configured)) {
-			return resolveRemoteOnnxModelFiles(configured, { fetchImpl, homeDir });
+			return resolveRemoteOnnxModelFiles(configured, {
+				fetchImpl,
+				homeDir,
+			});
 		}
 		const configuredPath = path.resolve(configured);
 		const modelPath = configuredPath.toLowerCase().endsWith('.onnx')
@@ -276,7 +315,12 @@ export async function resolveGgufModelFile({
 
 	if (isHttpUrl(configured) || looksLikeHfRepoId(configured)) {
 		const modelUrl = remoteModelUrl(configured, 'model.gguf');
-		const modelPath = remoteCachePath(modelUrl, 'gguf', 'model.gguf', homeDir);
+		const modelPath = remoteCachePath(
+			modelUrl,
+			'gguf',
+			'model.gguf',
+			homeDir,
+		);
 		await downloadFile(modelUrl, modelPath, fetchImpl);
 		return modelPath;
 	}
@@ -347,7 +391,9 @@ export class EmbeddingModel {
 			return this.ggufRuntimePromise;
 		}
 
-		const modelPath = await resolveGgufModelFile({ fetchImpl: this.fetchImpl });
+		const modelPath = await resolveGgufModelFile({
+			fetchImpl: this.fetchImpl,
+		});
 		if (!fs.existsSync(modelPath)) {
 			throw new Error(`GGUF embedding model not found: ${modelPath}`);
 		}
@@ -654,6 +700,13 @@ export class EmbeddingModel {
 	}
 }
 
+function argumentText(value) {
+	// Keep primitive formatting while retaining every nested JSON value.
+	return value !== null && typeof value === 'object'
+		? JSON.stringify(value)
+		: String(value);
+}
+
 export function flattenActionToText(actionData) {
 	if (!actionData || typeof actionData !== 'object') {
 		return `Perform action: ${String(actionData)}`;
@@ -664,7 +717,7 @@ export function flattenActionToText(actionData) {
 	}
 
 	if (!actionData.function || typeof actionData.function !== 'object') {
-		return `Call function with data: ${String(actionData.function)}`;
+		return `Call function with data: ${argumentText(actionData.function)}`;
 	}
 
 	const funcName = actionData.function.name || 'unknown_function';
@@ -672,7 +725,7 @@ export function flattenActionToText(actionData) {
 
 	if (argsRaw && typeof argsRaw === 'object' && !Array.isArray(argsRaw)) {
 		const argsFlat = Object.entries(argsRaw)
-			.map(([key, value]) => `${key}=${String(value)}`)
+			.map(([key, value]) => `${key}=${argumentText(value)}`)
 			.join(', ');
 		return `Call function ${funcName}: ${argsFlat}`;
 	}
@@ -686,7 +739,7 @@ export function flattenActionToText(actionData) {
 				!Array.isArray(parsed)
 			) {
 				const argsFlat = Object.entries(parsed)
-					.map(([key, value]) => `${key}=${String(value)}`)
+					.map(([key, value]) => `${key}=${argumentText(value)}`)
 					.join(', ');
 				return `Call function ${funcName}: ${argsFlat}`;
 			}
@@ -695,7 +748,7 @@ export function flattenActionToText(actionData) {
 		}
 	}
 
-	return `Call function ${funcName} with arguments: ${String(argsRaw)}`;
+	return `Call function ${funcName} with arguments: ${argumentText(argsRaw)}`;
 }
 
 export const embedModel = new EmbeddingModel();

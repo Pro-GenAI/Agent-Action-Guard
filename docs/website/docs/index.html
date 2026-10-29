@@ -2,6 +2,8 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; connect-src 'none'; font-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-/6+mokUb5LoJ2izkXabmc8Ms0vy/hK/Q/YkBx1FS5UY=' 'sha256-NjwQOwHuRa0NWesrA+augdjeU83jgZnWbDTOXv0SIyM='" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Agent Action Guard Documentation — Python, JavaScript & Agent Safety Integrations</title>
   <meta name="description" content="Official Agent Action Guard documentation: install the Python or JavaScript package, screen AI agent tool calls, configure embedding backends, integrations, hooks, CLI, and HTTP API." />
@@ -16,14 +18,10 @@
   <meta property="og:title" content="Agent Action Guard Documentation" />
   <meta property="og:description" content="Install and integrate Agent Action Guard for runtime AI-agent action screening in Python and JavaScript." />
   <meta property="og:url" content="https://action-guard.github.io/docs/" />
-  <meta property="og:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
-  <meta property="og:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Agent Action Guard Documentation" />
   <meta name="twitter:description" content="Python, JavaScript, integrations, hooks, CLI, HTTP API, and embedding configuration for Agent Action Guard." />
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/cover.jpg" />
-  <meta name="twitter:image:alt" content="Agent Action Guard — runtime safety guardrails for AI agents" />
 
   <script type="application/ld+json">
   {
@@ -61,7 +59,7 @@
         "operatingSystem": "Cross-platform",
         "url": "https://action-guard.github.io/",
         "downloadUrl": "https://pypi.org/project/agent-action-guard/",
-        "softwareRequirements": "Python 3.8-3.14 or supported Node.js runtime"
+        "softwareRequirements": "Python 3.10-3.14 or Node.js 20+"
       },
       {
         "@type": "BreadcrumbList",
@@ -84,7 +82,7 @@
   }
   </script>
 
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="../assets/vendor/highlight-11.11.1.min.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -218,6 +216,8 @@
     }
     aside a:hover { color: var(--accent); }
 
+    article, .card { min-width: 0; }
+    .table-scroll { max-width: 100%; overflow-x: auto; }
     article section {
       padding: 0 0 3rem;
       margin-bottom: 3rem;
@@ -248,15 +248,34 @@
     }
 
     @media (max-width: 820px) {
-      .layout { grid-template-columns: 1fr; gap: 1.5rem; }
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
       aside { position: static; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
       .cards { grid-template-columns: 1fr; }
       .topbar-inner { align-items: flex-start; padding: .8rem 0; }
       .topnav { justify-content: flex-end; }
     }
+
+/* Keyboard access and policy navigation. */
+[hidden] { display: none !important; }
+#main-content { scroll-margin-top: 100px; }
+:focus-visible { outline: 2px solid #79ff5b; outline-offset: 4px; }
+.skip-link { position: fixed; left: 1rem; top: 1rem; z-index: 10000; transform: translateY(-200%); padding: .75rem 1rem; border-radius: .4rem; background: #79ff5b; color: #052100; font: 700 1rem/1.4 system-ui, sans-serif; }
+.skip-link:hover { color: #052100; }
+.skip-link:focus { transform: none; color: #052100; }
+.policy-links { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem 1.25rem; margin: 1rem 0; }
+
   </style>
+  <meta property="og:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:secure_url" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Agent Action Guard — screen tool calls before execution" />
+  <meta name="twitter:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta name="twitter:image:alt" content="Agent Action Guard — screen tool calls before execution" />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/">Agent Action Guard</a>
@@ -268,7 +287,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="hero" aria-labelledby="docs-title">
       <div class="eyebrow">Official documentation</div>
       <h1 id="docs-title">Agent Action Guard documentation</h1>
@@ -304,7 +323,7 @@
               <pre><code class="language-bash">pip install agent-action-guard
 # or
 uv add agent-action-guard</code></pre>
-              <p>Supported package range: Python 3.8 through 3.14.</p>
+              <p>Supported package range: Python 3.10 through 3.14.</p>
             </div>
             <div class="card">
               <h3>JavaScript / Node.js</h3>
@@ -382,9 +401,10 @@ await ensureActionSafety(action, { raiseException: true });</code></pre>
           <h2>Embedding backends</h2>
           <p>Agent Action Guard supports local GGUF, local or remote ONNX assets, OpenAI-compatible embedding APIs, and a zero-configuration ONNX default.</p>
 
-          <table>
+          <div class="table-scroll" role="region" aria-label="Embedding backend precedence" tabindex="0">
+<table>
             <thead>
-              <tr><th>Priority</th><th>Configuration</th><th>Behavior</th></tr>
+              <tr><th scope="col">Priority</th><th scope="col">Configuration</th><th scope="col">Behavior</th></tr>
             </thead>
             <tbody>
               <tr><td>1</td><td><code>AAG_EMBED_GGUF</code></td><td>Uses an explicit GGUF source. Python loads llama.cpp bindings only when this backend is selected.</td></tr>
@@ -393,6 +413,7 @@ await ensureActionSafety(action, { raiseException: true });</code></pre>
               <tr><td>4</td><td>No embedding variables</td><td>Downloads and caches the default <code>sentence-transformers/all-MiniLM-L6-v2</code> ONNX assets.</td></tr>
             </tbody>
           </table>
+          </div>
 
           <h3>Explicit ONNX source</h3>
           <pre><code class="language-bash">export AAG_EMBED_ONNX="/models/all-MiniLM-L6-v2/model.onnx"
@@ -447,9 +468,10 @@ agent-action-guard hooks install --target copilot
 agent-action-guard hooks install --target openclaw
 agent-action-guard hooks install --target hermes</code></pre>
 
-          <table>
+          <div class="table-scroll" role="region" aria-label="Native coding-agent hook targets" tabindex="0">
+<table>
             <thead>
-              <tr><th>Target</th><th>Native integration</th><th>Project path</th></tr>
+              <tr><th scope="col">Target</th><th scope="col">Native integration</th><th scope="col">Project path</th></tr>
             </thead>
             <tbody>
               <tr><td><code>codex</code></td><td><code>PreToolUse</code> command hook</td><td><code>.codex/hooks.json</code></td></tr>
@@ -463,6 +485,7 @@ agent-action-guard hooks install --target hermes</code></pre>
               <tr><td><code>hermes</code></td><td><code>pre_tool_call</code> native plugin hook</td><td><code>.hermes/plugins/agent-action-guard/</code></td></tr>
             </tbody>
           </table>
+          </div>
 
           <p>The hook normalizes the harness's tool name and tool input into the Action Guard action schema. Harmful calls at or above the configured threshold are blocked. Set <code>AAG_HOOK_CONF_THRESHOLD</code> or pass <code>--conf-threshold</code> to tune that threshold. Hook payload and bridge failures fail closed rather than silently allowing a tool call.</p>
 
@@ -480,6 +503,9 @@ agent-action-guard hooks install --target hermes</code></pre>
           <h3>Run the local HTTP service</h3>
           <pre><code class="language-bash">agent-action-guard serve</code></pre>
           <p>The service exposes <code>GET /health</code> and <code>POST /v1/classify</code>. The default bind address is <code>127.0.0.1:8000</code>, with host, port, and default batch-size configuration available through the CLI.</p>
+          <p>The built-in service has no authentication or TLS. Other local processes can reach the loopback service. For remote access, restrict network access and use an authenticated TLS-terminating proxy; do not expose the service directly to the internet. Submitted action text may be sent to your configured embedding provider.</p>
+          <p>Apply request and concurrency limits at the proxy. Classifier failures return a generic error response; restrict access to trusted clients and review proxy error responses for unintended disclosures. Avoid logging action bodies or credentials.</p>
+          <p>Keep embedding model sources and API endpoints under operator control. Model source settings accept HTTP(S) URLs, including private network addresses; do not let untrusted users choose those settings for a shared service.</p>
         </section>
 
         <section id="evaluation">
@@ -492,6 +518,7 @@ agent-action-guard harmactionseval --k 3</code></pre>
 
         <section id="production">
           <h2>Production guidance</h2>
+          <p><strong>Know where action data goes.</strong> Local embedding assets keep action text on your device; an embedding API sends that text to your configured provider. Model downloads still contact their asset host. See <a href="/privacy/">privacy and data use</a> before processing sensitive actions.</p>
           <ul>
             <li><strong>Screen at the execution boundary.</strong> Guard the normalized action immediately before a side-effecting tool runs.</li>
             <li><strong>Keep policy layered.</strong> Treat the classifier as one control; combine it with authorization, allowlists, rate limits, sandboxing, and human approval for high-impact actions.</li>
@@ -508,7 +535,8 @@ agent-action-guard harmactionseval --k 3</code></pre>
   </main>
 
   <footer>
-    <p>Agent Action Guard documentation · <a href="/">Website</a> · <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a></p>
+    <p>Agent Action Guard documentation · <a href="/">Website</a> · <a href="/privacy/">Privacy &amp; data use</a> · <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a></p>
+  <nav class="policy-links" aria-label="Footer"><a href="/terms/">Terms &amp; refunds</a><a href="/privacy/#cookies">Cookies</a><a href="/privacy/#data-requests">Data requests</a></nav>
   </footer>
   <script>
     window.addEventListener("DOMContentLoaded", () => {

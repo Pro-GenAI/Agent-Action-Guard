@@ -30,10 +30,10 @@ Quick install
   pip install "agent-action-guard[all]"
 
 Core repository paths
-- agent_action_guard/: Runtime classifier package, model assets, benchmark module.
-- tests/: Unit tests for classifier behavior.
-- examples/: Integration examples and embedding host scripts.
-- training/: Model training scripts and related artifacts.
+- python/agent_action_guard/: Runtime classifier package, model assets, benchmark module.
+- python/tests/: Unit tests for classifier behavior.
+- python/examples/: Integration examples and embedding host scripts.
+- python/training/: Model training scripts and related artifacts.
 - USAGE.md: Integration and environment setup details.
 - README.md: Project overview, motivation, benchmark snapshot, links.
 

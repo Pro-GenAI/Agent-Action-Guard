@@ -32,3 +32,8 @@ def test_security_audit_has_named_failures_and_terminal_colors():
     assert "sys.stdout.isatty()" in source
     assert "=== Python security audit summary ===" in source
     assert "Result: SECURITY AUDIT FAILED" in source
+
+
+def test_detect_secrets_ignores_test_fixtures_with_windows_paths():
+    source = SCRIPT.read_text(encoding="utf-8")
+    assert 'filename.replace("\\\\", "/")' in source

@@ -165,6 +165,8 @@ agent-action-guard --file actions.jsonl --batch-size 32
 
 The CLI reports total, safe, and unsafe action counts. Start the local HTTP API with `agent-action-guard serve`; it binds to `127.0.0.1:8000` by default and exposes `GET /health` plus `POST /v1/classify`. Use `--host`, `--port`, and `--batch-size` to configure the server. See the repository `USAGE.md` for request and response examples.
 
+The built-in HTTP service has no authentication or TLS; other local processes can reach it. For remote access, restrict network access and place it behind an authenticated TLS-terminating proxy. Action text may be sent to the configured embedding provider.
+
 ## Embedding backends
 
 You do not need to configure an embedding backend to try the package.

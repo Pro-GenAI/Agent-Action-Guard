@@ -22,3 +22,7 @@ evaluation_results*
 .env
 temp/
 security-reports/
+.agents/
+.claude/
+skills-lock.json
+docs/SECURITY_*.md

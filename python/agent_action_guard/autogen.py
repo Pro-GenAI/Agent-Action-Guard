@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from ._framework_utils import check_tool_action, guard_callable, maybe_await, tool_name
+from ._guard_utils import argument_builder
 
 
 class GuardedTool:
@@ -13,6 +14,11 @@ class GuardedTool:
     def __init__(self, tool: Any, *, conf_threshold: float = 0.5) -> None:
         self._tool = tool
         self.conf_threshold = conf_threshold
+        self._arguments = {
+            name: argument_builder(getattr(tool, name))
+            for name in ["__call__"]
+            if callable(getattr(tool, name, None))
+        }
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._tool, name)
@@ -30,7 +36,7 @@ class GuardedTool:
         return await maybe_await(self._tool.run(args, *extra, **kwargs))
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        payload = kwargs if kwargs else {"args": list(args)}
+        payload = (self._arguments["__call__"])(args, kwargs)
         check_tool_action(
             tool_name(self._tool), payload, conf_threshold=self.conf_threshold
         )

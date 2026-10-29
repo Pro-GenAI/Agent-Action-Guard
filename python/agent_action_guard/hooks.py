@@ -102,6 +102,17 @@ def _install_claude_code(root: Path) -> Path:
                 ],
             }
         )
+
+    def harden(items):
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            if item.get("command") == command:
+                item["onFailure"] = "block"
+            if isinstance(item.get("hooks"), list):
+                harden(item["hooks"])
+
+    harden(entries)
     _write_json_file(path, data)
     return path
 
@@ -487,7 +498,7 @@ def build_hooks_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--conf-threshold",
         type=float,
-        default=float(os.getenv("AAG_HOOK_CONF_THRESHOLD", "0.5")),
+        default=os.getenv("AAG_HOOK_CONF_THRESHOLD", "0.5"),
     )
     return parser
 
@@ -511,9 +522,35 @@ def main(argv: list[str] | None = None) -> int:
             payload,
             conf_threshold=args.conf_threshold,
         )
-    except (TypeError, ValueError) as exc:
-        print(f"agent-action-guard hook error: {exc}", file=sys.stderr)
-        return 2
+    except Exception:  # Fail closed without disclosing provider errors or action text.
+        reason = (
+            "Agent Action Guard could not screen this tool call; execution blocked."
+        )
+        output: dict[str, Any] | None
+        code, stderr = 0, ""
+        if args.target in {"codex", "claude-code"}:
+            output = {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason,
+                }
+            }
+        elif args.target == "cursor":
+            output = {
+                "permission": "deny",
+                "user_message": reason,
+                "agent_message": reason,
+            }
+        elif args.target == "agy":
+            output = {"decision": "deny", "reason": reason}
+        elif args.target == "openclaw":
+            output = {"block": True, "blockReason": reason}
+        elif args.target == "hermes":
+            output = {"action": "block", "message": reason}
+        else:
+            code, stderr, output = 2, reason, None
+        stdout = json.dumps(output) if output else ""
 
     if stdout:
         print(stdout)

@@ -6,9 +6,11 @@ Lightweight inference without PyTorch dependency.
 from __future__ import annotations
 
 import functools
+import inspect
 
 import numpy as np
 
+from ._guard_utils import argument_builder, validate_threshold
 from ._runtime_utils import (
     ALL_CLASSES,
     ONNX_MODEL_PATH,
@@ -126,29 +128,45 @@ def ensure_action_safety(action_dict, raise_exception: bool = False) -> bool:
 def action_guarded(conf_threshold: float = 0.5):
     """
     Decorator to guard a function by treating it as an AI tool.
-    Uses func.__name__ as the tool name and kwargs as arguments for safety check.
+    Screens all bound arguments, including positional inputs and defaults.
     If the action is harmful and confidence >= conf_threshold, it raises HarmfulActionException.
     """
 
+    validate_threshold(conf_threshold)
+
     def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Construct action_dict from function name and kwargs
+        arguments = argument_builder(func)
+        action_name = getattr(func, "__name__", type(func).__name__)
+
+        def check(args, kwargs):
             action_dict = {
                 "type": "function",
                 "function": {
-                    "name": func.__name__,
-                    "arguments": kwargs,
+                    "name": action_name,
+                    "arguments": arguments(args, kwargs),
                 },
             }
-
             is_harmful, confidence = is_action_harmful(action_dict)
             if is_harmful and confidence >= conf_threshold:
                 raise HarmfulActionException(
-                    f"Guarded action '{func.__name__}' classified as harmful "
+                    f"Guarded action '{action_name}' classified as harmful "
                     f"({is_harmful}) with confidence {confidence:.2f}"
                 )
 
+        if inspect.iscoroutinefunction(func) or inspect.iscoroutinefunction(
+            getattr(func, "__call__", None)
+        ):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                check(args, kwargs)
+                return await func(*args, **kwargs)
+
+            return async_wrapper
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            check(args, kwargs)
             return func(*args, **kwargs)
 
         return wrapper

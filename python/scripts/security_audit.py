@@ -152,10 +152,12 @@ def run_detect_secrets(check: Check) -> int:
     finding_count = 0
     ignored_test_keywords = 0
     for filename, entries in results.items():
+        # detect-secrets reports backslash paths on Windows.
+        normalized = filename.replace("\\", "/")
         is_test_fixture = (
-            "/tests/" in filename
-            or "/test/" in filename
-            or "/runtime-fixtures/" in filename
+            "/tests/" in normalized
+            or "/test/" in normalized
+            or "/runtime-fixtures/" in normalized
         )
         for entry in entries:
             if is_test_fixture and entry.get("type") == "Secret Keyword":
@@ -333,7 +335,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                             ),
                             "pip-audit.json",
                         )
-                    )
+                    ),
                 )
             else:
                 print("[pip-audit] skipped: Python module 'pip_audit' is not installed")
@@ -364,7 +366,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "detect-secrets.json",
                     cwd=REPO_ROOT,
                 )
-            )
+            ),
         )
     else:
         print("[detect-secrets] skipped: executable not installed")
@@ -407,7 +409,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         ),
                         "semgrep.json",
                     )
-                )
+                ),
             )
         else:
             print("[semgrep] skipped: executable not installed")
@@ -422,13 +424,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     red, reset = ("\033[31m", "\033[0m") if color else ("", "")
     print("\n=== Python security audit summary ===")
     print(f"Failed checks: {len(failures)}")
-    print(f"Missing scanners/tools: {', '.join(sorted(set(missing))) if missing else 'none'}")
+    print(
+        f"Missing scanners/tools: {', '.join(sorted(set(missing))) if missing else 'none'}"
+    )
     if failures:
         for name in failures:
             print(f"{red}FAIL: {name}{reset}")
         print(f"{red}Result: SECURITY AUDIT FAILED{reset}")
     else:
-        print("Result: security audit passed" + (" (some scanners skipped)" if missing else ""))
+        print(
+            "Result: security audit passed"
+            + (" (some scanners skipped)" if missing else "")
+        )
     return 1 if failures else 0
 
 

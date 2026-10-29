@@ -45,6 +45,8 @@ classifiers = [
     "Topic :: Security",
 ]
 dependencies = [
+    "certifi>=2026.10.19",
+    "filelock>=4.2.1; python_version >= '3.11'",
     "numpy>=1.21.6",
     "onnxruntime>=1.14.0,<2.0.0; python_version < '3.14' or sys_platform != 'darwin' or platform_machine != 'x86_64'",
     "onnx>=1.21.0,<2.0.0; python_version >= '3.14' and sys_platform == 'darwin' and platform_machine == 'x86_64'",
@@ -117,7 +119,8 @@ dev = [
     "pip-audit",
     "detect-secrets",
     "semgrep",
-    "cryptography<49",
+    "cryptography>=50.0.2; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+    "cryptography>=48.0.1,<49; sys_platform == 'darwin' and platform_machine == 'x86_64'",
     "python-dotenv>=0.21.0,<2.0.0",
     "requests>=2.28.0,<3.0.0",
     "rich>=12.0.0,<15.0.0",
@@ -139,6 +142,7 @@ extend-exclude = '''
 
 [tool.isort]
 profile = "black"
+known_first_party = ["agent_action_guard", "experiments"]
 line_length = 88
 skip_glob = ["build/*", "dist/*", "unused/*", "agent_action_guard.egg-info/*"]
 
@@ -148,10 +152,15 @@ target-version = "py310"
 extend-exclude = ["build", "dist", "unused", "agent_action_guard.egg-info"]
 
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
 extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["agent_action_guard", "experiments"]
 
 [tool.mypy]
 python_version = "3.10"
+explicit_package_bases = true
 files = [
     "agent_action_guard",
     "training",
@@ -171,8 +180,15 @@ ignore-paths = ["^build/.*", "^dist/.*", "^unused/.*", "^agent_action_guard\\.eg
 [tool.pylint.format]
 max-line-length = 88
 
+[tool.pylint.design]
+max-returns = 14
+
 [tool.pylint."messages control"]
 disable = [
+    # Lazy imports and white-box/JSON assertions are intentional in this project.
+    "import-outside-toplevel",
+    "protected-access",
+    "use-implicit-booleaness-not-comparison",
     "broad-exception-raised",
     "broad-exception-caught",
     "duplicate-code",

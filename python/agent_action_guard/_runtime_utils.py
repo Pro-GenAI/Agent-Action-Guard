@@ -72,14 +72,23 @@ def _download_file(url: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     temp_path = None
     try:
-        with urllib.request.urlopen(  # nosec B310  # noqa: S310, RUF100
-            url, timeout=120
-        ) as response, tempfile.NamedTemporaryFile(
-            mode="wb", delete=False, dir=str(destination.parent)
-        ) as temp_file:
+        with (
+            urllib.request.urlopen(  # nosec B310  # noqa: S310, RUF100
+                url, timeout=120
+            ) as response,
+            tempfile.NamedTemporaryFile(
+                mode="wb", delete=False, dir=str(destination.parent)
+            ) as temp_file,
+        ):
             temp_path = Path(temp_file.name)
             shutil.copyfileobj(response, temp_file)
-        temp_path.replace(destination)
+        try:
+            temp_path.replace(destination)
+        except OSError:
+            # Windows raises PermissionError when a concurrent download already
+            # installed (and may be reading) the destination; that is success.
+            if not destination.exists():
+                raise
     finally:
         if temp_path is not None and temp_path.exists():
             temp_path.unlink()
@@ -257,7 +266,7 @@ class EmbeddingModel:
     def __init__(self, model_name: str | None = None):
         env_model_name = os.getenv("EMBED_MODEL_NAME")
         self.model_name = model_name or env_model_name or DEFAULT_EMBED_MODEL_NAME
-        self.client = None
+        self.client: Any = None
         self.gguf_model = None
         self.onnx_session = None
         self.onnx_tokenizer = None
@@ -284,7 +293,7 @@ class EmbeddingModel:
         if self.client is not None:
             return self.client
 
-        client_kwargs = {}
+        client_kwargs: dict[str, Any] = {}
         api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("EMBEDDING_BASE_URL")
         if base_url:

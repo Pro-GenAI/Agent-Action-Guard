@@ -341,7 +341,7 @@ def export_model_to_onnx(
 
         torch.onnx.export(
             model_to_export,
-            dummy_input,  # type: ignore
+            dummy_input,
             str(onnx_path),
             input_names=["input"],
             output_names=["logits"],

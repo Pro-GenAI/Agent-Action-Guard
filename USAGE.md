@@ -165,6 +165,8 @@ agent-action-guard hooks run --target <target>
 
 The hook reads the harness JSON payload from stdin and classifies the proposed `tool_name` / `tool_input`. Harmful calls at or above the threshold are blocked. Configure the threshold with `AAG_HOOK_CONF_THRESHOLD` or `--conf-threshold`.
 
+Reinstall hooks after upgrading to apply failure-handling repairs. Claude Code 2.1.295+ is required for the generated `onFailure: "block"` setting, which also blocks command startup failures and timeouts. Classifier/bridge failures emit each target's blocking protocol without disclosing provider details. See [security maintenance](docs/security-maintenance.md) for dependency/platform limits and migration notes.
+
 PyPI package scope:
 - `pip install agent-action-guard` (or `uv add agent-action-guard`) installs the runtime classifier and dependencies for local ONNX embedding inference. The default embedding model and tokenizer are downloaded and cached on first use rather than bundled in the wheel.
 - Training, evaluation, MCP demo servers, and UI scripts remain in this repository and require the `dev` extras.
@@ -382,7 +384,13 @@ agent-action-guard serve
 # defaults to http://127.0.0.1:8000
 ```
 
-Bind a different interface or port, and optionally set a default inference batch size:
+The built-in service has no authentication or TLS. Loopback limits network exposure but does not isolate it from other local processes. Anyone who can reach it can submit actions, which may be sent to your configured embedding provider. For remote access, put it behind an authenticated TLS-terminating proxy and restrict network access; do not expose it directly to the internet.
+
+The service does not implement rate limiting. Enforce request and concurrency limits at the proxy. Classifier failures return a generic 500 response; malformed requests receive a 400 validation response. Restrict access to trusted clients and review proxy error responses for unintended disclosures. Avoid logging action bodies or credentials at the proxy.
+
+Keep embedding model source and API endpoint configuration under operator control. Local-source variables also accept HTTP(S) URLs, including private network addresses; do not let untrusted users choose those values for a shared service. See [the local security exercise](docs/SECURITY_TEST_REVIEW.md) for tested and untested scenarios.
+
+Bind a different interface or port, and optionally set a default inference batch size. Only use a network-facing address inside a protected deployment:
 
 ```bash
 agent-action-guard serve --host 0.0.0.0 --port 8080 --batch-size 64
@@ -473,3 +481,27 @@ npm run test:latency-backends -- --iterations 10 --batch-size 8
 ```
 
 Both scripts use built-in representative actions by default. Pass `--file actions.json` or `--file actions.jsonl` to benchmark your own actions, and `--limit N` to bound API usage. The default warmup is one run per backend, which excludes model download/session/client initialization from measured steady-state latency. Use `--warmup 0` when you explicitly want cold-start cost included.
+
+### Privacy and action data
+
+Both the Python and JavaScript packages classify actions locally. The default
+embedding backend downloads and caches model assets; it does not send action
+text to the model download host. Use pre-provisioned local files/directories with
+`AAG_EMBED_GGUF` or `AAG_EMBED_ONNX` to avoid model downloads. For offline use,
+provision the package dependencies and optional GGUF bindings in advance too.
+
+Without an explicit local-source setting, embedding API configuration can send
+action text to your configured endpoint. Review its privacy/retention terms
+before screening sensitive actions. GGUF takes precedence over ONNX, which takes
+precedence over API configuration. Optional LLM evaluations send actions to model
+providers and retain result caches. Your application's logging and HTTP-service
+access/retention remain under your control. See the [privacy notice](https://action-guard.github.io/privacy/)
+and [feature review](docs/PRIVACY_REVIEW.md).
+
+For access, correction, or deletion of personal information sent to the
+maintainer, use the [data-request contact route](https://action-guard.github.io/privacy/#data-requests).
+For local usage, review and remove your own saved action files, CLI output,
+application logs, and evaluation caches when no longer needed. Downloaded model
+assets under `~/.cache/agent-action-guard/` are separate from those files. A
+maintainer request cannot erase your local files or records retained by a
+provider you configured; contact the relevant operator for those records.

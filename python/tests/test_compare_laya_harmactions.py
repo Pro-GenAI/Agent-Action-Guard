@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "compare_laya_harmactions.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1] / "scripts" / "compare_laya_harmactions.py"
+)
 SPEC = importlib.util.spec_from_file_location("compare_laya_harmactions", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)

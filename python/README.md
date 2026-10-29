@@ -12,9 +12,9 @@
 <!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E) -->
 
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=Downloads)](https://pepy.tech/projects/agent-action-guard)
-[![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
-[![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]()
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]()
+![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)
+![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md)
 
 <!-- [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/prane-eth/agent-action-guard) -->
@@ -67,7 +67,7 @@ cached LLM calls. The `last_attempt` map records per-result attempt coverage for
 
 ### JavaScript Runtime
 
-The repository also ships an npm package in [typescript/package.json](typescript/package.json) for screening agent actions in Node.js.
+The repository also ships an npm package in [typescript/package.json](../typescript/package.json) for screening agent actions in Node.js.
 
 ```bash
 npm install agent-action-guard
@@ -83,7 +83,7 @@ pnpm install agent-action-guard
 
 ## ❓ Why Action Guard?
 
-**HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
+**HarmActionsEval** found harmful tool use in every evaluated model under its reported adversarial prompts and tool setup. These results describe the tested conditions, not every deployment.
 68% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
 
 | Model                     | SafeActions@1 |
@@ -142,7 +142,7 @@ The benchmark uses the same HarmActions rows for all classifiers; CPU execution 
 - 📏 **HarmActionsEval** — benchmark with the *SafeActions@k* metric
 - 🧠 **Action Guard** — real-time neural classifier optimized for agent loops
 - 🏋️ Trained on HarmActions
-- ✅ Classifies every tool call before execution
+- ✅ Screens wrapped tool calls before execution
 - 🚫 Blocks harmful and unethical actions automatically
 - ⚡ Lightweight for real-time use
 

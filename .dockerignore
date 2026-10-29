@@ -1,4 +1,17 @@
 .git
+**/.env
+**/.env.*
+**/.env*
+**/*.pem
+**/*.key
+**/node_modules
+**/.security-tools
+**/.security-venv
+**/.cache
+**/.uv-venvs
+**/security-reports
+**/test-results
+**/playwright-report
 **/.venv
 **/.venv-*
 **/__pycache__

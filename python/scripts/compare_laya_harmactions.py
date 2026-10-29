@@ -32,7 +32,7 @@ import sys
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, cast
 
 import openai
 from rich.progress import (
@@ -68,7 +68,11 @@ for _env_name in (
 ):
     os.environ.pop(_env_name, None)
 
-from agent_action_guard import is_actions_harmful
+# Backend configuration must precede importing the runtime.
+# pylint: disable-next=wrong-import-position
+from agent_action_guard import (  # noqa: E402
+    is_actions_harmful,
+)
 
 DATASET_PATH = PYTHON_ROOT / "agent_action_guard" / "harmactions_dataset.json"
 
@@ -283,7 +287,7 @@ class LayaWorker:
             env["LAYA_MODEL_DIR"] = str(model_dir.resolve())
 
         cwd.mkdir(parents=True, exist_ok=True)
-        self.process = subprocess.Popen(
+        self.process = subprocess.Popen(  # pylint: disable=consider-using-with
             [node, "--input-type=module", "--eval", LAYA_WORKER_JS],
             cwd=str(cwd),
             env=env,
@@ -392,8 +396,7 @@ def run_laya(
     except Exception:
         worker.terminate()
         raise
-    else:
-        worker.close()
+    worker.close()
     elapsed_ms = (time.perf_counter() - started) * 1000.0
     return predictions, elapsed_ms
 
@@ -435,7 +438,7 @@ def run_llm(
                     reasoning={"effort": "none"},
                     instructions=LLM_INSTRUCTIONS,
                     input=_llm_input(row),
-                    text={"format": LLM_RESPONSE_FORMAT},
+                    text={"format": cast(Any, LLM_RESPONSE_FORMAT)},
                 )
                 latency_ms = (time.perf_counter() - request_started) * 1000.0
                 result = _parse_llm_result(response)
@@ -461,10 +464,14 @@ def run_llm(
             progress.advance(task_id)
 
     elapsed_ms = (time.perf_counter() - started) * 1000.0
-    return predictions, elapsed_ms, {
-        "cache_hits": cache_hits,
-        "cache_misses": cache_misses,
-    }
+    return (
+        predictions,
+        elapsed_ms,
+        {
+            "cache_hits": cache_hits,
+            "cache_misses": cache_misses,
+        },
+    )
 
 
 def metrics(predictions: Sequence[Prediction], elapsed_ms: float) -> Dict[str, Any]:

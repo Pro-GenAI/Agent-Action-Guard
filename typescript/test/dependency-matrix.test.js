@@ -4,9 +4,17 @@ import test from 'node:test';
 import {
 	buildScenarios,
 	collectDependencyVersions,
+	DEPENDENCY_RANGES,
 	sampleVersions,
 	selectDependencyVersions,
 } from '../scripts/test-dependency-matrix.js';
+
+test('tokenizer compatibility retains 0.1.x and includes the current 0.2.x API', () => {
+	assert.equal(
+		DEPENDENCY_RANGES['@huggingface/tokenizers'],
+		'^0.1.0 || ^0.2.0',
+	);
+});
 
 test('sampleVersions keeps dependency bounds and spreads intermediate samples', () => {
 	assert.deepEqual(sampleVersions(['1', '2', '3', '4', '5'], 3), [

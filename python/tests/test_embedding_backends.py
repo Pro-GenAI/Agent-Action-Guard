@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import types
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -339,9 +340,9 @@ def test_onnx_config_takes_precedence_and_generates_embeddings(monkeypatch, tmp_
                 )
             ]
 
-    fake_onnxruntime = types.ModuleType("onnxruntime")
+    fake_onnxruntime: Any = types.ModuleType("onnxruntime")
     fake_onnxruntime.InferenceSession = FakeEmbeddingSession
-    fake_tokenizers = types.ModuleType("tokenizers")
+    fake_tokenizers: Any = types.ModuleType("tokenizers")
     fake_tokenizers.Tokenizer = FakeTokenizer
     monkeypatch.setitem(sys.modules, "onnxruntime", fake_onnxruntime)
     monkeypatch.setitem(sys.modules, "tokenizers", fake_tokenizers)
@@ -536,8 +537,8 @@ def test_missing_local_onnx_model_has_actionable_error(monkeypatch, tmp_path):
     _clear_embedding_env(monkeypatch)
     monkeypatch.setenv("AAG_EMBED_ONNX", str(tmp_path / "missing.onnx"))
     runtime_module = _load_runtime_utils_module()
-    fake_onnxruntime = types.ModuleType("onnxruntime")
-    fake_tokenizers = types.ModuleType("tokenizers")
+    fake_onnxruntime: Any = types.ModuleType("onnxruntime")
+    fake_tokenizers: Any = types.ModuleType("tokenizers")
     fake_tokenizers.Tokenizer = object
     monkeypatch.setitem(sys.modules, "onnxruntime", fake_onnxruntime)
     monkeypatch.setitem(sys.modules, "tokenizers", fake_tokenizers)
@@ -552,8 +553,8 @@ def test_missing_local_tokenizer_has_actionable_error(monkeypatch, tmp_path):
     model_file.touch()
     monkeypatch.setenv("AAG_EMBED_ONNX", str(model_file))
     runtime_module = _load_runtime_utils_module()
-    fake_onnxruntime = types.ModuleType("onnxruntime")
-    fake_tokenizers = types.ModuleType("tokenizers")
+    fake_onnxruntime: Any = types.ModuleType("onnxruntime")
+    fake_tokenizers: Any = types.ModuleType("tokenizers")
     fake_tokenizers.Tokenizer = object
     monkeypatch.setitem(sys.modules, "onnxruntime", fake_onnxruntime)
     monkeypatch.setitem(sys.modules, "tokenizers", fake_tokenizers)
@@ -584,11 +585,11 @@ def test_tokenizer_without_pad_token_is_rejected_before_session_creation(
         def token_to_id(self, token):
             assert token == "[PAD]"
 
-    fake_onnxruntime = types.ModuleType("onnxruntime")
+    fake_onnxruntime: Any = types.ModuleType("onnxruntime")
     fake_onnxruntime.InferenceSession = lambda *_args, **_kwargs: pytest.fail(
         "session must not be created for an invalid tokenizer"
     )
-    fake_tokenizers = types.ModuleType("tokenizers")
+    fake_tokenizers: Any = types.ModuleType("tokenizers")
     fake_tokenizers.Tokenizer = FakeTokenizer
     monkeypatch.setitem(sys.modules, "onnxruntime", fake_onnxruntime)
     monkeypatch.setitem(sys.modules, "tokenizers", fake_tokenizers)
@@ -606,7 +607,7 @@ def _make_direct_onnx_model(runtime_module, output, input_names=None):
 
     class FakeTokenizer:
         def encode_batch(self, texts):
-            self.texts = texts
+            self.texts = texts  # pylint: disable=attribute-defined-outside-init
             return [FakeEncoding() for _ in texts]
 
     class FakeSession:

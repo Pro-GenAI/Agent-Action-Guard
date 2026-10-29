@@ -12,10 +12,12 @@
 [![npm](https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/agent-action-guard)
 <!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E) -->
 
-[![PyPI Downloads](https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=Downloads)](https://pepy.tech/projects/agent-action-guard)
-[![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)]()
-[![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)]()
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)]()
+<!-- [![PyPI Downloads](https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=Downloads)](https://pepy.tech/projects/agent-action-guard) -->
+<a href="https://pepy.tech/projects/agent-action-guard"><img src="https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=PyPI%20Downloads" alt="PyPI Downloads" height="25"></a>
+![NPM Downloads](https://img.shields.io/npm/d18m/agent-action-guard?style=for-the-badge&label=npm%20downloads)
+![AI](https://img.shields.io/badge/AI-C21B00?style=for-the-badge&logo=openaigym&logoColor=white)
+![LLMs](https://img.shields.io/badge/LLMs-1A535C?style=for-the-badge&logo=openai&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=ffdd54)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md)
 
 <!-- [![Blog](https://img.shields.io/badge/Blog-FFFFFF?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/blog/prane-eth/agent-action-guard) -->
@@ -87,7 +89,7 @@ pnpm install agent-action-guard
 
 ## ❓ Why Action Guard?
 
-**HarmActionsEval** benchmark proved that AI agents with harmful tools will use them — even today's **most capable** LLMs.
+**HarmActionsEval** found harmful tool use in every evaluated model under its reported adversarial prompts and tool setup. These results describe the tested conditions, not every deployment.
 68% of the completed LLM evaluations executed actions at the first attempt for over 95% of the harmful prompts.
 
 | Model                     | SafeActions@1 |
@@ -155,7 +157,7 @@ The charts use the same values as the table above: higher is better for classifi
 - 📏 **HarmActionsEval** — benchmark with the *SafeActions@k* metric
 - 🧠 **Action Guard** — real-time neural classifier optimized for agent loops
 	- 🏋️ Trained on HarmActions
-	- ✅ Classifies every tool call before execution
+	- ✅ Screens wrapped tool calls before execution
 	- 🚫 Blocks harmful and unethical actions automatically
 	- ⚡ Lightweight for real-time use
 
@@ -187,6 +189,12 @@ Share a quick note in [Discussions](https://github.com/Pro-GenAI/Agent-Action-Gu
 ## 📄 License
 
 Licensed under [CC BY 4.0](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md). If you prefer not to provide attribution, send a brief acknowledgment to praneeth.vad@gmail.com with the details of your usage and the potential impact on your project.
+
+Website and runtime data handling is described in the [privacy notice](https://action-guard.github.io/privacy/). Both packages classify locally; configuring an embedding API sends action text to that endpoint. Pre-provision local embedding assets for offline use. The [privacy and launch-feature review](docs/PRIVACY_REVIEW.md) records the website audit and checks for future accounts, tracking, email, billing, or uploads.
+
+See [project terms and payment/refund scope](https://action-guard.github.io/terms/), [cookie information](https://action-guard.github.io/privacy/#cookies), and [access/correction/deletion requests](https://action-guard.github.io/privacy/#data-requests). The review includes the twenty-area launch checklist and accessibility checks; these describe the current implementation rather than certifying legal compliance.
+
+The [website launch review](docs/LAUNCH_REVIEW.md) records responsive/link checks, sharing previews, browser-test commands, and verified source backups. Both static sites remain tracking-free and use the existing public contact email.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/Pro-GenAI/Agent-Action-Guard/main/assets/project_banner.gif" alt="Project banner" height="220"/>

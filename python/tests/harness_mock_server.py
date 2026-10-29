@@ -14,7 +14,9 @@ from pathlib import Path
 from typing import Any
 
 MOCK_MODEL = "agent-action-guard-harmful-mock"
-DATASET_PATH = Path(__file__).parents[1] / "agent_action_guard" / "harmactions_dataset.json"
+DATASET_PATH = (
+    Path(__file__).parents[1] / "agent_action_guard" / "harmactions_dataset.json"
+)
 MARKER_NAME = "aag-harness-tool-executed"
 
 
@@ -78,7 +80,13 @@ def _cursor_model_details() -> bytes:
 def _event_header(name: str, value: str) -> bytes:
     name_bytes = name.encode()
     value_bytes = value.encode()
-    return bytes([len(name_bytes)]) + name_bytes + bytes([7]) + struct.pack(">H", len(value_bytes)) + value_bytes
+    return (
+        bytes([len(name_bytes)])
+        + name_bytes
+        + bytes([7])
+        + struct.pack(">H", len(value_bytes))
+        + value_bytes
+    )
 
 
 def aws_event_frame(event_type: str, payload: dict[str, Any]) -> bytes:
@@ -110,6 +118,7 @@ class HarnessMockServer:
             def do_POST(self) -> None:
                 owner._handle(self)
 
+            # pylint: disable-next=arguments-differ
             def log_message(self, _format: str, *args: Any) -> None:
                 return
 
@@ -194,7 +203,10 @@ class HarnessMockServer:
             )
             return
         if path == f"/v1/models/{MOCK_MODEL}":
-            self._send(handler, _json_bytes({"id": MOCK_MODEL, "object": "model", "type": "model"}))
+            self._send(
+                handler,
+                _json_bytes({"id": MOCK_MODEL, "object": "model", "type": "model"}),
+            )
             return
         if path.endswith("/GetUsableModels"):
             self._send(
@@ -253,7 +265,9 @@ class HarnessMockServer:
             self._kiro_stream(handler)
             return
 
-        self._send(handler, _json_bytes({"error": "unsupported mock route"}), status=404)
+        self._send(
+            handler, _json_bytes({"error": "unsupported mock route"}), status=404
+        )
 
     def _openai_responses(self, handler: BaseHTTPRequestHandler, body: bytes) -> None:
         request = json.loads(body or b"{}")
@@ -265,7 +279,7 @@ class HarnessMockServer:
                 for item in request.get("tools", [])
                 if isinstance(item, dict) and item.get("name")
             ]
-            selected = next(
+            selected: dict[str, Any] = next(
                 (item for item in tools if "shell" in item["name"].lower()),
                 next(
                     (item for item in tools if "command" in item["name"].lower()),
@@ -285,8 +299,11 @@ class HarnessMockServer:
                 "arguments": json.dumps({argument_name: harmful_command()}),
                 "status": "completed",
             }
-            events = [
-                {"type": "response.created", "response": {"id": response_id, "status": "in_progress"}},
+            events: list[dict[str, Any]] = [
+                {
+                    "type": "response.created",
+                    "response": {"id": response_id, "status": "in_progress"},
+                },
                 {"type": "response.output_item.added", "output_index": 0, "item": item},
                 {
                     "type": "response.function_call_arguments.done",
@@ -301,7 +318,11 @@ class HarnessMockServer:
                         "id": response_id,
                         "status": "completed",
                         "output": [item],
-                        "usage": {"input_tokens": 1, "output_tokens": 1, "total_tokens": 2},
+                        "usage": {
+                            "input_tokens": 1,
+                            "output_tokens": 1,
+                            "total_tokens": 2,
+                        },
                     },
                 },
             ]
@@ -327,11 +348,17 @@ class HarnessMockServer:
                                 ],
                             }
                         ],
-                        "usage": {"input_tokens": 1, "output_tokens": 1, "total_tokens": 2},
+                        "usage": {
+                            "input_tokens": 1,
+                            "output_tokens": 1,
+                            "total_tokens": 2,
+                        },
                     },
                 }
             ]
-        payload = "".join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
+        payload = "".join(
+            f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events
+        )
         payload += "data: [DONE]\n\n"
         self._send(handler, payload.encode(), content_type="text/event-stream")
 
@@ -383,12 +410,16 @@ class HarnessMockServer:
         request = json.loads(body or b"{}")
         turn = self._count("anthropic")
         tool_names = [
-            item.get("name")
+            str(item["name"])
             for item in request.get("tools", [])
             if isinstance(item, dict) and isinstance(item.get("name"), str)
         ]
         tool_name = next(
-            (name for name in tool_names if name.lower() in {"bash", "shell", "execute_bash"}),
+            (
+                name
+                for name in tool_names
+                if name.lower() in {"bash", "shell", "execute_bash"}
+            ),
             next((name for name in tool_names if "bash" in name.lower()), "Bash"),
         )
         if turn == 0:
@@ -461,7 +492,7 @@ class HarnessMockServer:
                     "text": "The harmful tool action was denied.",
                 },
             }
-        events = [
+        events: list[dict[str, Any]] = [
             message_start,
             block_start,
             block_delta,
@@ -474,8 +505,7 @@ class HarnessMockServer:
             {"type": "message_stop"},
         ]
         payload = "".join(
-            f"event: {event['type']}\ndata: {json.dumps(event)}\n\n"
-            for event in events
+            f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events
         )
         self._send(handler, payload.encode(), content_type="text/event-stream")
 
@@ -495,7 +525,10 @@ class HarnessMockServer:
                     ),
                     aws_event_frame(
                         "messageMetadataEvent",
-                        {"conversationId": "aag-conversation", "utteranceId": "aag-utterance"},
+                        {
+                            "conversationId": "aag-conversation",
+                            "utteranceId": "aag-utterance",
+                        },
                     ),
                 ]
             )
@@ -508,7 +541,10 @@ class HarnessMockServer:
                     ),
                     aws_event_frame(
                         "messageMetadataEvent",
-                        {"conversationId": "aag-conversation", "utteranceId": "aag-utterance-2"},
+                        {
+                            "conversationId": "aag-conversation",
+                            "utteranceId": "aag-utterance-2",
+                        },
                     ),
                 ]
             )

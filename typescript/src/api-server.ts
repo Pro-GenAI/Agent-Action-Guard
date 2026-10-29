@@ -8,28 +8,36 @@ export const DEFAULT_HOST = '127.0.0.1';
 export const DEFAULT_PORT = 8000;
 export const DEFAULT_MAX_BODY_BYTES = 1_048_576;
 
+class InputValidationError extends Error {}
+
 export async function classifyPayload(
 	payload,
 	{ classifyActions = isActionsHarmful, batchSize = null } = {},
 ) {
 	if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-		throw new Error('Request body must be a JSON object');
+		throw new InputValidationError('Request body must be a JSON object');
 	}
 
 	const hasAction = Object.hasOwn(payload, 'action');
 	const hasActions = Object.hasOwn(payload, 'actions');
 	if (hasAction === hasActions) {
-		throw new Error("Provide exactly one of 'action' or 'actions'");
+		throw new InputValidationError(
+			"Provide exactly one of 'action' or 'actions'",
+		);
 	}
 
 	const actions = hasActions ? payload.actions : [payload.action];
 	if (!Array.isArray(actions) || actions.length === 0) {
-		throw new Error("'actions' must be a non-empty JSON array");
+		throw new InputValidationError(
+			"'actions' must be a non-empty JSON array",
+		);
 	}
 	for (let index = 0; index < actions.length; index += 1) {
 		const action = actions[index];
 		if (!action || typeof action !== 'object' || Array.isArray(action)) {
-			throw new Error(`action ${index + 1} must be a JSON object`);
+			throw new InputValidationError(
+				`action ${index + 1} must be a JSON object`,
+			);
 		}
 	}
 
@@ -38,10 +46,14 @@ export async function classifyPayload(
 		requestBatchSize !== null &&
 		(!Number.isInteger(requestBatchSize) || requestBatchSize <= 0)
 	) {
-		throw new Error("'batch_size' must be a positive integer");
+		throw new InputValidationError(
+			"'batch_size' must be a positive integer",
+		);
 	}
 
-	const results = await classifyActions(actions, { batchSize: requestBatchSize });
+	const results = await classifyActions(actions, {
+		batchSize: requestBatchSize,
+	});
 	const items = results.map(({ label, confidence }) => ({
 		label,
 		confidence,
@@ -73,7 +85,15 @@ export function createApiServer({
 	maxBodyBytes = DEFAULT_MAX_BODY_BYTES,
 } = {}) {
 	return createServer((request, response) => {
-		const url = new URL(request.url ?? '/', 'http://localhost');
+		let url;
+		try {
+			url = new URL(request.url ?? '/', 'http://localhost');
+		} catch {
+			response.setHeader('connection', 'close');
+			sendJson(response, 400, { error: 'Invalid request target' });
+			request.resume();
+			return;
+		}
 
 		if (request.method === 'GET' && url.pathname === '/health') {
 			sendJson(response, 200, { status: 'ok' });
@@ -112,7 +132,9 @@ export function createApiServer({
 			try {
 				payload = JSON.parse(Buffer.concat(chunks).toString('utf8'));
 			} catch {
-				sendJson(response, 400, { error: 'Request body must be valid JSON' });
+				sendJson(response, 400, {
+					error: 'Request body must be valid JSON',
+				});
 				return;
 			}
 			try {
@@ -122,7 +144,7 @@ export function createApiServer({
 				});
 				sendJson(response, 200, result);
 			} catch (error) {
-				if (error instanceof Error) {
+				if (error instanceof InputValidationError) {
 					sendJson(response, 400, { error: error.message });
 					return;
 				}
@@ -149,6 +171,8 @@ export async function startApiServer({
 	const address = server.address();
 	const actualPort =
 		typeof address === 'object' && address !== null ? address.port : port;
-	console.log(`Agent Action Guard API listening on http://${host}:${actualPort}`);
+	console.log(
+		`Agent Action Guard API listening on http://${host}:${actualPort}`,
+	);
 	return server;
 }

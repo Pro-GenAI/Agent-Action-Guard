@@ -241,6 +241,8 @@
   // Spotlight + tilt on cards.
   if (!reducedMotion && finePointer) {
     document.querySelectorAll('.card').forEach((card) => {
+      // Keep interactive hit targets stable while the pointer enters the card.
+      if (card.querySelector('button, a, input, select, textarea')) return;
       card.addEventListener('pointermove', (event) => {
         const rect = card.getBoundingClientRect();
         const x = event.clientX - rect.left;
@@ -257,26 +259,33 @@
 
   // Generic tab groups.
   const bindTabs = (tabs, onChange) => {
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        tabs.forEach((other) => {
-          const selected = other === tab;
-          other.setAttribute('aria-selected', String(selected));
-          const panelId = other.getAttribute('aria-controls');
-          const panel = panelId && document.getElementById(panelId);
-          if (panel) {
-            panel.hidden = !selected;
-            if (selected) { panel.classList.remove('panel-anim'); void panel.offsetWidth; panel.classList.add('panel-anim'); }
-          }
-        });
-        onChange?.(tab);
+    const activate = (tab) => {
+      tabs.forEach((other) => {
+        const selected = other === tab;
+        other.setAttribute('aria-selected', String(selected));
+        other.tabIndex = selected ? 0 : -1;
+        const panelId = other.getAttribute('aria-controls');
+        const panel = panelId && document.getElementById(panelId);
+        if (panel) {
+          panel.hidden = !selected;
+          if (selected) { panel.classList.remove('panel-anim'); void panel.offsetWidth; panel.classList.add('panel-anim'); }
+        }
       });
+      onChange?.(tab);
+    };
+    const initial = tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') || tabs[0];
+    if (initial) activate(initial);
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab));
       tab.addEventListener('keydown', (event) => {
-        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
         const index = tabs.indexOf(tab);
-        const next = tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+        const next = tabs[nextIndex];
         next.focus();
-        next.click();
+        activate(next);
       });
     });
   };
@@ -294,42 +303,61 @@
     textarea.setAttribute('readonly', '');
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
+    const focused = document.activeElement;
     document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    textarea.remove();
+    try {
+      textarea.select();
+      if (!document.execCommand('copy')) throw new Error('Clipboard copy unavailable');
+    } finally {
+      textarea.remove();
+      focused?.focus();
+    }
   };
-  const flashCopied = (button, label) => {
+  const feedbackTimers = new Map();
+  const showCopyResult = (button, label, feedback, success) => {
     const use = button.querySelector('use');
     const span = button.querySelector('span');
-    button.classList.add('is-copied');
-    use?.setAttribute('href', '#i-check');
-    if (span) span.textContent = 'Copied';
-    button.setAttribute('aria-label', 'Copied');
-    setTimeout(() => {
+    clearTimeout(feedbackTimers.get(button));
+    button.classList.toggle('is-copied', success);
+    use?.setAttribute('href', success ? '#i-check' : '#i-copy');
+    if (span) span.textContent = success ? 'Copied' : 'Retry copy';
+    button.setAttribute('aria-label', success ? `${label}: copied` : `${label}: retry`);
+    if (feedback) feedback.textContent = success
+      ? `${label === 'Copy code' ? 'Code' : 'Install command'} copied to clipboard.`
+      : 'Copy unavailable. Select the text and copy it manually.';
+    feedbackTimers.set(button, setTimeout(() => {
       button.classList.remove('is-copied');
       use?.setAttribute('href', '#i-copy');
       if (span) span.textContent = 'Copy';
       button.setAttribute('aria-label', label);
-    }, 1400);
+      feedbackTimers.delete(button);
+    }, 1400));
+  };
+  const pendingCopies = new Set();
+  const copyWithFeedback = async (button, value, label, feedbackId) => {
+    if (pendingCopies.has(button)) return;
+    pendingCopies.add(button);
+    button.setAttribute('aria-busy', 'true');
+    const feedback = document.getElementById(feedbackId);
+    if (feedback) feedback.textContent = 'Copying…';
+    try {
+      await copyText(value);
+      showCopyResult(button, label, feedback, true);
+    } catch {
+      showCopyResult(button, label, feedback, false);
+    } finally {
+      pendingCopies.delete(button);
+      button.setAttribute('aria-busy', 'false');
+    }
   };
 
-  const installCode = document.getElementById('install-code');
   const installTabs = [...document.querySelectorAll('.install-tab')];
-  installTabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      installTabs.forEach((other) => other.setAttribute('aria-selected', String(other === tab)));
-      installCode.textContent = tab.dataset.cmd;
-    });
-  });
+  bindTabs(installTabs);
   const heroCopy = document.getElementById('hero-copy-install');
   heroCopy?.addEventListener('click', async () => {
-    try {
-      await copyText(installCode.textContent);
-      flashCopied(heroCopy, 'Copy install command');
-    } catch (error) {
-      console.warn('Copy failed', error);
-    }
+    const selected = installTabs.find((tab) => tab.getAttribute('aria-selected') === 'true');
+    if (!selected) return;
+    await copyWithFeedback(heroCopy, selected.dataset.cmd, 'Copy install command', 'install-copy-status');
   });
 
   const codeCopy = document.getElementById('code-copy');
@@ -337,12 +365,7 @@
     const panel = [...document.querySelectorAll('.code-panel')].find((p) => !p.hidden);
     const code = panel?.querySelector('pre code');
     if (!code) return;
-    try {
-      await copyText(code.innerText);
-      flashCopied(codeCopy, 'Copy code');
-    } catch (error) {
-      console.warn('Copy failed', error);
-    }
+    await copyWithFeedback(codeCopy, code.innerText, 'Copy code', 'code-copy-status');
   });
 
   window.addEventListener("DOMContentLoaded", () => {

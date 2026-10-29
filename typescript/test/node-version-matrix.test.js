@@ -7,10 +7,13 @@ import test from 'node:test';
 import {
 	DEFAULT_NODE_VERSIONS,
 	assertBashAvailable,
+	buildDirectNodeTestCommand,
 	buildNvmTestCommand,
+	findInstalledNodeDir,
 	normalizeNodeVersions,
 	resolveNodeVersions,
 	resolveNvmScript,
+	resolveNvmWindowsInstalls,
 	runNodeVersionMatrix,
 	shellQuote,
 } from '../scripts/test-all-versions.js';
@@ -146,4 +149,76 @@ test('runNodeVersionMatrix can stop on the first failure and still prints a summ
 	assert.ok(output.includes('Succeeded versions: 18'));
 	assert.ok(output.includes('Failed versions: 20'));
 	assert.ok(output.includes('Result: Node version matrix failed.'));
+});
+
+test('resolveNvmWindowsInstalls only applies to Windows and honours NVM_INSTALLS_DIR', () => {
+	const exists = (dir) => dir === 'C:\\nvm\\installs';
+	assert.equal(
+		resolveNvmWindowsInstalls({ NVM_INSTALLS_DIR: 'C:\\nvm\\installs' }, 'linux', exists),
+		null,
+	);
+	assert.equal(
+		resolveNvmWindowsInstalls({ NVM_INSTALLS_DIR: 'C:\\nvm\\installs' }, 'win32', exists),
+		'C:\\nvm\\installs',
+	);
+	assert.equal(resolveNvmWindowsInstalls({}, 'win32', () => false), null);
+});
+
+test('findInstalledNodeDir picks the newest matching installed version', () => {
+	const names = ['v20.20.2', 'v22.23.3', 'v22.23.4', 'v24.22.1', 'v22.100.0', 'node_modules'];
+	const readdir = () => names;
+	assert.equal(findInstalledNodeDir('/i', '22', readdir), path.join('/i', 'v22.100.0'));
+	assert.equal(findInstalledNodeDir('/i', '22.23', readdir), path.join('/i', 'v22.23.4'));
+	assert.equal(findInstalledNodeDir('/i', '24.22.1', readdir), path.join('/i', 'v24.22.1'));
+	assert.equal(findInstalledNodeDir('/i', '2', readdir), null);
+	assert.equal(findInstalledNodeDir('/i', '26', readdir), null);
+});
+
+test('direct Node command avoids nvm.sh and verifies the selected version', () => {
+	const command = buildDirectNodeTestCommand({ version: '22', testFiles: ['test/a.test.js'] });
+	assert.doesNotMatch(command, /nvm /);
+	assert.match(command, /cygpath -u "\$AAG_NODE_DIR"/);
+	assert.ok(command.indexOf('cygpath') < command.indexOf('npm ci'));
+	assert.match(command, /node --test 'test\/a\.test\.js'/);
+});
+
+test('Windows matrix installs missing Node via nvm and passes its directory to bash', () => {
+	const calls = [];
+	const output = [];
+	const state = { installed: false };
+	const status = runNodeVersionMatrix({
+		versions: ['26'],
+		installsDir: '/i',
+		testFiles: ['test/x.test.js'],
+		env: {},
+		spawn: (command, args, options) => {
+			calls.push({ command, args, env: options.env });
+			if (command === 'nvm') {
+				state.installed = true;
+			}
+			return { status: 0 };
+		},
+		write: (message) => output.push(message),
+		readdir: () => (state.installed ? ['v26.1.0'] : []),
+	});
+	assert.equal(status, 0);
+	assert.equal(calls[0].command, 'nvm');
+	assert.deepEqual(calls[0].args, ['install', '26']);
+	assert.equal(calls[1].command, 'bash');
+	assert.equal(calls[1].env.AAG_NODE_DIR, path.join('/i', 'v26.1.0'));
+});
+
+test('Windows matrix reports a failed version when Node cannot be installed', () => {
+	const output = [];
+	const status = runNodeVersionMatrix({
+		versions: ['26'],
+		installsDir: '/i',
+		testFiles: [],
+		env: {},
+		spawn: () => ({ status: 1 }),
+		write: (message) => output.push(message),
+		readdir: () => [],
+	});
+	assert.equal(status, 1);
+	assert.ok(output.includes('Failed versions: 26'));
 });

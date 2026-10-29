@@ -10,6 +10,7 @@ import {
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { URL, fileURLToPath } from 'node:url';
 
 import {
 	DEFAULT_EMBED_MODEL_NAME,
@@ -534,4 +535,15 @@ test('concurrent first-use cache resolution succeeds without partial assets', as
 		restoreEmbeddingEnv(originalEnv);
 		await rm(tempHome, { recursive: true, force: true });
 	}
+});
+
+test('downloadFile tolerates a Windows rename race when the destination exists', async () => {
+	const source = await readFile(
+		fileURLToPath(new URL('../src/runtime-utils.ts', import.meta.url)),
+		'utf8',
+	);
+	assert.match(
+		source,
+		/await rename\(temporaryPath, destination\);\s*\} catch \(error\) \{[\s\S]*?existsSync\(destination\)[\s\S]*?throw error/,
+	);
 });

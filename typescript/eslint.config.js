@@ -1,5 +1,15 @@
 export default [
 	{
+		ignores: [
+			'node_modules/**',
+			'build/**',
+			'dist/**',
+			'coverage/**',
+			'.security-tools/**',
+			'security-reports/**',
+		],
+	},
+	{
 		files: ['**/*.{js,ts}'],
 		ignores: ['node_modules/**', 'build/**', 'dist/**', 'coverage/**'],
 		languageOptions: {

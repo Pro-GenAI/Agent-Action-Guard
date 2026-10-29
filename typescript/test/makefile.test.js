@@ -28,7 +28,7 @@ test('install-dev provisions all TypeScript security audit tools', () => {
 	assert.match(MAKEFILE, /\$\(UV\) venv --python 3\.12 \$\(SECURITY_VENV\)/);
 	assert.match(
 		MAKEFILE,
-		/\$\(UV\) pip install --python \$\(SECURITY_VENV\)\/bin\/python semgrep detect-secrets "cryptography<50" --only-binary cryptography/,
+		/\$\(UV\) pip install --python \$\(SECURITY_VENV\)\/\$\(SECURITY_BIN\)\/\$\(SECURITY_PY\) semgrep detect-secrets "cryptography>=50\.0\.2;.*--only-binary cryptography/,
 	);
 	assert.equal(typeof PACKAGE_JSON.devDependencies.pnpm, 'string');
 });
@@ -36,7 +36,7 @@ test('install-dev provisions all TypeScript security audit tools', () => {
 test('security uses local npm and Python security tool paths', () => {
 	assert.match(
 		MAKEFILE,
-		/PATH="\$\(CURDIR\)\/\$\(SECURITY_VENV\)\/bin:\$\(CURDIR\)\/node_modules\/\.bin:\$\$PATH"/,
+		/PATH="\$\(CURDIR\)\/\$\(SECURITY_VENV\)\/\$\(SECURITY_BIN\):\$\(CURDIR\)\/node_modules\/\.bin:\$\$PATH"/,
 	);
 });
 

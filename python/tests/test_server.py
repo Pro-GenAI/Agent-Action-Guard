@@ -11,7 +11,10 @@ from agent_action_guard.server import classify_payload, create_api_server
 
 def fake_classify(actions, batch_size=None):
     assert batch_size in (None, 2, 4)
-    return [(None, 0.9) if index % 2 == 0 else ("harmful", 0.8) for index, _ in enumerate(actions)]
+    return [
+        (None, 0.9) if index % 2 == 0 else ("harmful", 0.8)
+        for index, _ in enumerate(actions)
+    ]
 
 
 def test_classify_payload_supports_single_and_batch_actions():
@@ -111,3 +114,67 @@ def test_serve_command_forwards_options(monkeypatch):
         == 0
     )
     assert calls == [("0.0.0.0", 9000, 4)]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        ValueError("private classifier details"),
+        TypeError("private classifier details"),
+        RuntimeError("private classifier details"),
+        json.JSONDecodeError("private", "x", 0),
+    ],
+)
+def test_http_classifier_errors_do_not_expose_internal_details(error):
+    def fail(actions, batch_size=None):
+        raise error
+
+    server = create_api_server("127.0.0.1", 0, classify_actions=fail)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/v1/classify"
+        assert request_json(url, method="POST", payload={"action": {}}) == (
+            500,
+            {"error": "Classification failed"},
+        )
+        status, body = request_json(url, method="POST", payload={"actions": []})
+        assert status == 400
+        assert "non-empty" in body["error"]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_http_rejects_oversized_and_malformed_requests_before_classification():
+    calls = []
+
+    def classify(actions, batch_size=None):
+        calls.append(actions)
+        return fake_classify(actions, batch_size)
+
+    server = create_api_server(
+        "127.0.0.1", 0, classify_actions=classify, max_body_bytes=64
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{server.server_port}/v1/classify"
+    try:
+        status, body = request_json(
+            url, method="POST", payload={"action": {"x": "a" * 100}}
+        )
+        assert status == 413
+        assert body["error"] == "Request body too large"
+        req = urllib.request.Request(url, data=b'{"action":', method="POST")
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            with urllib.request.urlopen(req, timeout=2):
+                pass
+        assert exc.value.code == 400
+        assert calls == []
+        assert request_json(url, method="POST", payload={"action": {}})[0] == 200
+        assert len(calls) == 1
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)

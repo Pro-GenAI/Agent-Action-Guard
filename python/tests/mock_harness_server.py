@@ -9,9 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
 MOCK_MODEL = "aag-mock-harness-model"
-HARMFUL_COMMAND = (
-    "printf 'malware_generation payload=spyware' > aag-harmful-executed"
-)
+HARMFUL_COMMAND = "printf 'malware_generation payload=spyware' > aag-harmful-executed"
 
 
 class MockLLMServer:
@@ -68,13 +66,9 @@ class MockLLMServer:
             def _connect_proto(self, messages: list[bytes]) -> None:
                 frames = []
                 for message in messages:
-                    frames.append(
-                        b"\x00" + len(message).to_bytes(4, "big") + message
-                    )
+                    frames.append(b"\x00" + len(message).to_bytes(4, "big") + message)
                 trailer = b"{}"
-                frames.append(
-                    b"\x02" + len(trailer).to_bytes(4, "big") + trailer
-                )
+                frames.append(b"\x02" + len(trailer).to_bytes(4, "big") + trailer)
                 self._bytes(
                     200,
                     b"".join(frames),
@@ -105,9 +99,7 @@ class MockLLMServer:
                 chunks = []
                 for event in events:
                     prefix = f"event: {event['type']}\n" if named_events else ""
-                    chunks.append(
-                        f"{prefix}data: {json.dumps(event)}\n\n".encode()
-                    )
+                    chunks.append(f"{prefix}data: {json.dumps(event)}\n\n".encode())
                 body = b"".join(chunks)
                 self.send_response(200)
                 self.send_header("content-type", "text/event-stream")
@@ -160,7 +152,12 @@ class MockLLMServer:
                 owner.post_bodies.append((self.path, decoded_body))
                 target = self.headers.get("x-amz-target", "")
                 if target.endswith("GetProfile"):
-                    self._json(200, {"profileArn": "arn:aws:codewhisperer:us-east-1:000000000000:profile/mock"})
+                    self._json(
+                        200,
+                        {
+                            "profileArn": "arn:aws:codewhisperer:us-east-1:000000000000:profile/mock"
+                        },
+                    )
                     return
                 if target.endswith("ListAvailableModels"):
                     self._json(
@@ -181,9 +178,13 @@ class MockLLMServer:
                     owner._handle_cursor(self)
                     return
                 if path == "/auth/exchange_user_api_key":
-                    payload = base64.urlsafe_b64encode(
-                        json.dumps({"exp": 4102444800}).encode()
-                    ).decode().rstrip("=")
+                    payload = (
+                        base64.urlsafe_b64encode(
+                            json.dumps({"exp": 4102444800}).encode()
+                        )
+                        .decode()
+                        .rstrip("=")
+                    )
                     self._json(
                         200,
                         {
@@ -241,7 +242,7 @@ class MockLLMServer:
         self._server.server_close()
         self._thread.join(timeout=2)
 
-    def _handle_cursor(self, handler: BaseHTTPRequestHandler) -> None:
+    def _handle_cursor(self, handler: Any) -> None:
         call_id = "aag-cursor-call-1"
         exec_id = "aag-cursor-exec-1"
         shell_args = (

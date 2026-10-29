@@ -8,9 +8,15 @@ SCRIPT_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "test_dependency_matrix.py"
 )
 SPEC = importlib.util.spec_from_file_location("dependency_matrix_script", SCRIPT_PATH)
+assert SPEC is not None
 dependency_matrix = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(dependency_matrix)
+
+
+def _record_run(calls, command):
+    calls.append(command)
+    return ""
 
 
 def test_python_package_metadata_excludes_unsupported_minors():
@@ -126,11 +132,11 @@ def test_full_matrix_varies_each_dependency_from_the_minimum_profile():
 
 
 def test_version_installability_probe_uses_uv_dry_run_and_binary_wheels(monkeypatch):
-    calls = []
+    calls: list[list[str]] = []
     monkeypatch.setattr(
         dependency_matrix,
         "_run",
-        lambda command, **_kwargs: calls.append(command) or "",
+        lambda command, **_kwargs: _record_run(calls, command),
     )
 
     assert dependency_matrix._version_is_installable(
@@ -180,12 +186,12 @@ def test_openai_3_3_1_is_selected_as_the_newest_supported_release(monkeypatch):
 
 
 def test_create_venv_requests_the_selected_python_from_uv(monkeypatch, tmp_path):
-    calls = []
+    calls: list[list[str]] = []
     monkeypatch.setattr(dependency_matrix, "_uv_available", lambda: True)
     monkeypatch.setattr(
         dependency_matrix,
         "_run",
-        lambda command, **_kwargs: calls.append(command) or "",
+        lambda command, **_kwargs: _record_run(calls, command),
     )
 
     venv_path = tmp_path / "py312"
@@ -195,12 +201,12 @@ def test_create_venv_requests_the_selected_python_from_uv(monkeypatch, tmp_path)
 
 
 def test_ensure_python_uses_uv_managed_python_install(monkeypatch):
-    calls = []
+    calls: list[list[str]] = []
     monkeypatch.setattr(dependency_matrix, "_uv_available", lambda: True)
     monkeypatch.setattr(
         dependency_matrix,
         "_run",
-        lambda command, **_kwargs: calls.append(command) or "",
+        lambda command, **_kwargs: _record_run(calls, command),
     )
 
     dependency_matrix._ensure_python("3.10")
@@ -317,11 +323,11 @@ def test_optional_dependency_name_with_hyphen_is_detected_as_target():
 
 
 def test_install_dependencies_passes_resolution_strategy_to_uv(monkeypatch):
-    calls = []
+    calls: list[list[str]] = []
     monkeypatch.setattr(
         dependency_matrix,
         "_run",
-        lambda command, **_kwargs: calls.append(command) or "",
+        lambda command, **_kwargs: _record_run(calls, command),
     )
 
     dependency_matrix._install_dependencies(

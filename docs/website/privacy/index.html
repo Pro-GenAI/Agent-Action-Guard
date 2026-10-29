@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; connect-src 'none'; font-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-vLog9Gox3CtlGC9QxlO//9QXHhcD3iNGcCMWZTM1oEM='" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy &amp; Data Use | Agent Action Guard</title>
+  <meta name="description" content="How Agent Action Guard's websites and Python and JavaScript packages handle website requests, local inference, embedding APIs, and privacy questions." />
+  <meta name="robots" content="index,follow" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="canonical" href="https://action-guard.github.io/privacy/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Privacy &amp; Data Use | Agent Action Guard" />
+  <meta property="og:description" content="Website privacy, local classification, optional embedding APIs, and contact information." />
+  <meta property="og:url" content="https://action-guard.github.io/privacy/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Privacy &amp; Data Use | Agent Action Guard" />
+  <meta name="twitter:description" content="Website privacy and runtime data handling for Agent Action Guard." />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Privacy & Data Use","url":"https://action-guard.github.io/privacy/"}</script>
+  <link rel="stylesheet" href="../assets/privacy.css?v=20261029-5" />
+  <meta property="og:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:secure_url" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Agent Action Guard — screen tool calls before execution" />
+  <meta name="twitter:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta name="twitter:image:alt" content="Agent Action Guard — screen tool calls before execution" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header><nav aria-label="Main"><a href="/">Home</a><a href="https://action-guard.github.io/docs/">Documentation</a><a href="https://agent-leaderboard.github.io/">Leaderboard</a></nav></header>
+  <main id="main-content" tabindex="-1">
+    <h1>Privacy &amp; data use</h1>
+    <p class="updated">Updated 29 October 2026</p>
+    <p>This notice describes the static Agent Action Guard website, documentation, and HarmActionsEval leaderboard at <code>action-guard.github.io</code> and <code>agent-leaderboard.github.io</code>, and the data flow of the project's Python and JavaScript packages.</p>
+
+    <h2 id="website-requests">Visiting the websites</h2>
+    <p>The authored pages do not use analytics, advertising trackers, session recording, keystroke logging, cookies, or persistent browser storage. Fonts, styles, syntax highlighting, illustrations, and provider logos are served from the same website origin. Animations and pointer effects run in your browser and are not sent to the project.</p>
+    <p>GitHub Pages serves these sites and receives normal request information, including your IP address and browser/request metadata. Hosting processing and retention are governed by <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>. This notice does not promise that the hosting provider keeps no logs.</p>
+    <p>Links to GitHub, package registries, model providers, papers, and other external sites take you to services with their own privacy practices. The authored pages do not embed those services or automatically load their assets.</p>
+
+    <h2 id="data-collected">What information is handled, and by whom?</h2>
+    <dl class="data-inventory">
+      <dt>Website request information</dt>
+      <dd>GitHub Pages receives IP addresses and browser/request metadata to deliver these pages. GitHub controls its hosting records and retention under its linked privacy statement; the project does not run a visitor analytics database.</dd>
+      <dt>Email you choose to send</dt>
+      <dd>The maintainer and email services handling the message receive your sender address, message, and any attachments you send. The maintainer uses correspondence to answer the request and retains it as needed for that purpose and applicable obligations. There is no fixed deletion deadline promised here. Use the <a href="#data-requests">data-request route</a> for access, correction, or deletion questions.</dd>
+      <dt>Actions processed by the packages</dt>
+      <dd>Normal local classification does not send action payloads to the maintainer. Your chosen embedding API can receive action text, and optional LLM evaluation can send actions to a model provider. Your application controls saved actions, logs, and result caches. See <a href="#runtime-data">runtime data flow</a> before processing sensitive inputs.</dd>
+    </dl>
+
+    <h2 id="third-parties">External links, embeds, and consent</h2>
+    <p>There are no embedded videos, social feeds, maps, third-party forms, or remote font/CDN assets in the authored pages. An external link is a navigation choice; the destination's data practices apply after you open it. Provider logos and local demo animations do not connect to the named provider.</p>
+    <p>Email links open your mail application. The site does not submit a message or add you to a marketing list; sending remains your choice. There is no site form or marketing-consent checkbox. If forms or third-party embeds are introduced, review their data recipients and purpose before loading them, and provide any applicable consent and withdrawal controls.</p>
+
+    <h2 id="cookies">Cookies and similar technologies</h2>
+    <p>The authored sites set no cookies or browser storage and load no analytics or advertising SDKs. There are no optional tracking technologies to enable, so the pages have no cookie-consent banner or stored consent preference. GitHub Pages still processes hosting requests as described above. If tracking is introduced, its purpose, providers, retention, and any required consent controls must be reviewed before it is enabled.</p>
+
+    <h2 id="children">Accounts, payments, and uploads</h2>
+    <p>These static sites have no account signup, newsletter registration, checkout, subscriptions, or user-content upload feature. They are developer and research resources, not services directed to children under 13, and do not request ages or dates of birth.</p>
+
+    <h2 id="runtime-data">Using the Python or JavaScript package</h2>
+    <p>Action classification runs locally. By default, embedding model assets are downloaded and cached on your device; the model host receives asset requests, not your action text. To use pre-provisioned local embedding assets, set <code>AAG_EMBED_GGUF</code> or <code>AAG_EMBED_ONNX</code> to a local file or directory. Remote model sources still require downloads.</p>
+    <p>If you configure an embedding API using <code>EMBED_MODEL_NAME</code>, <code>EMBEDDING_BASE_URL</code>, <code>EMBEDDING_API_KEY</code>, or <code>OPENAI_API_KEY</code>, action text is sent to the configured embedding provider unless an explicit local-source setting takes precedence. GGUF takes precedence over ONNX; ONNX takes precedence over API settings. Review the provider's privacy and retention terms before submitting sensitive data.</p>
+    <p>Normal classification does not send telemetry to the project maintainers. Optional LLM evaluation workflows send actions to your configured model provider and persist result caches. Your application, CLI output, integrations, logs, or operator-hosted HTTP service may also retain action data. You control access and retention in your deployment; this notice does not replace its privacy notice.</p>
+
+    <h2 id="data-requests">Access, correction, and data deletion requests</h2>
+    <p>You can <a href="mailto:praneeth.vad@gmail.com?subject=Agent%20Action%20Guard%20data%20request">request access, correction, or deletion of personal information sent to the project maintainer</a>. Describe the information or page concerned and provide only enough detail to locate it. Do not send passwords, API keys, or identity documents with your initial request. Requests will be reviewed according to the data involved and applicable obligations.</p>
+    <p>The static sites have no user accounts or action-history database to delete. For local package use, you control your action files, CLI output, application logs, and evaluation result caches; review and remove your own saved copies when no longer needed. Downloaded model assets under <code>~/.cache/agent-action-guard/</code> are separate from those action/results files. A request to the maintainer does not remove files on your device or data held by your hosting or embedding provider; contact the relevant operator for those records.</p>
+
+    <h2 id="project-details">Project details and copyright concerns</h2>
+    <p>Agent Action Guard is the open-source project maintained by <a href="https://github.com/Pro-GenAI/Agent-Action-Guard">Pro-GenAI on GitHub</a>. Project contact: Praneeth, <a href="mailto:praneeth.vad@gmail.com">praneeth.vad@gmail.com</a>. These sites do not offer a paid hosted service. See the <a href="/terms/">project terms and payment/refund information</a>.</p>
+    <p>Contact the project maintainer at <a href="mailto:praneeth.vad@gmail.com">praneeth.vad@gmail.com</a> for privacy questions or concerns about project material. Include the relevant page or repository path, and avoid sending secrets or unnecessary personal information. Correspondence is used to address your request and may be retained as needed for that purpose. This contact is not represented as a registered DMCA agent.</p>
+    <p>The project's <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md">CC BY 4.0 license</a> applies to project material as specified there. Bundled fonts and libraries retain their accompanying <a href="../assets/THIRD_PARTY.md">third-party licenses and credits</a>; provider marks belong to their respective owners.</p>
+    <p>We will update this notice when the project's data practices change. See the repository's <a href="../assets/privacy-review.md">privacy and launch-feature review</a> for the current implementation inventory.</p>
+  </main>
+  <footer><nav aria-label="Footer"><a href="/terms/">Terms &amp; refunds</a><a href="/privacy/#cookies">Cookies</a><a href="/privacy/#data-requests">Data requests</a><a href="/">Website</a><a href="https://github.com/Pro-GenAI/Agent-Action-Guard">Source &amp; licenses</a></nav></footer>
+</body>
+</html>

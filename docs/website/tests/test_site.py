@@ -5,6 +5,7 @@ import re
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 SITE_ROOT = Path(__file__).resolve().parents[1]
@@ -63,10 +64,19 @@ class _AssetRefs(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         data = {key: value or "" for key, value in attrs}
-        ref = data.get("src") if tag == "script" else data.get("href") if tag == "link" else ""
-        if ref and not ref.startswith(("http://", "https://", "//", "/", "#")):
-            if tag == "script" or data.get("rel") == "stylesheet":
-                self.local_assets.append(ref)
+        ref = (
+            data.get("src")
+            if tag == "script"
+            else data.get("href")
+            if tag == "link"
+            else ""
+        )
+        if (
+            ref
+            and not ref.startswith(("http://", "https://", "//", "/", "#"))
+            and (tag == "script" or data.get("rel") == "stylesheet")
+        ):
+            self.local_assets.append(ref)
 
 
 def parse(path: Path) -> _HTMLFacts:
@@ -82,7 +92,7 @@ def page_with_assets(path: Path) -> str:
     facts.feed(html)
     parts = [html]
     for ref in facts.local_assets:
-        parts.append((path.parent / ref).read_text(encoding="utf-8"))
+        parts.append((path.parent / urlsplit(ref).path).read_text(encoding="utf-8"))
     return "\n".join(parts)
 
 
@@ -98,6 +108,20 @@ class SiteSeoTests(unittest.TestCase):
         cases = [
             (HOME, "https://action-guard.github.io/"),
             (DOCS, "https://action-guard.github.io/docs/"),
+            (
+                SITE_ROOT / "privacy/index.html",
+                "https://action-guard.github.io/privacy/",
+            ),
+            (LEADERBOARD, "https://agent-leaderboard.github.io/"),
+            (SITE_ROOT / "terms/index.html", "https://action-guard.github.io/terms/"),
+            (
+                LEADERBOARD.parent / "terms/index.html",
+                "https://agent-leaderboard.github.io/terms/",
+            ),
+            (
+                LEADERBOARD.parent / "privacy/index.html",
+                "https://agent-leaderboard.github.io/privacy/",
+            ),
         ]
         for path, canonical in cases:
             with self.subTest(path=path):
@@ -137,15 +161,15 @@ class SiteSeoTests(unittest.TestCase):
             {
                 "https://action-guard.github.io/",
                 "https://action-guard.github.io/docs/",
+                "https://action-guard.github.io/privacy/",
+                "https://action-guard.github.io/terms/",
             },
         )
 
     def test_code_examples_use_language_aware_syntax_highlighting(self) -> None:
         home = page_with_assets(HOME)
         docs = page_with_assets(DOCS)
-        highlight_src = (
-            "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
-        )
+        highlight_src = "vendor/highlight-11.11.1.min.js"
 
         for name, page in (("home", home), ("docs", docs)):
             with self.subTest(page=name):
@@ -166,20 +190,29 @@ class SiteSeoTests(unittest.TestCase):
         refs = _AssetRefs()
         refs.feed(html)
         self.assertEqual(
-            sorted(refs.local_assets), ["assets/home.css", "assets/home.js"]
+            sorted(urlsplit(ref).path for ref in refs.local_assets),
+            [
+                "assets/fonts/fonts.css",
+                "assets/home.css",
+                "assets/home.js",
+                "assets/vendor/highlight-11.11.1.min.js",
+            ],
         )
         for ref in refs.local_assets:
             with self.subTest(asset=ref):
-                self.assertTrue((SITE_ROOT / ref).read_text(encoding="utf-8").strip())
+                self.assertTrue(
+                    (SITE_ROOT / urlsplit(ref).path).read_text(encoding="utf-8").strip()
+                )
         self.assertNotIn("<style", html)
         # Only tiny bootstrap/JSON-LD scripts may stay inline.
         inline = [
             body
-            for body in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.S)
+            for body in re.findall(
+                r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.DOTALL
+            )
             if body.strip()
         ]
         self.assertTrue(all(len(body) < 2500 for body in inline))
-
 
     def test_supported_hook_targets_are_documented(self) -> None:
         home = HOME.read_text(encoding="utf-8")
@@ -257,13 +290,13 @@ class SiteSeoTests(unittest.TestCase):
         scores = [
             float(value)
             for value in re.findall(
-                r'<td[^>]*text-lg[^>]*>([0-9]+\.[0-9]+)%</td>',
+                r"<td[^>]*text-lg[^>]*>([0-9]+\.[0-9]+)%</td>",
                 leaderboard,
             )
         ]
         ranks = re.findall(
             r'<td class="px-8 py-5 text-sm font-headline font-bold '
-            r'text-on-surface/60">(\d{2})</td>',
+            r'text-on-surface/80">(\d{2})</td>',
             leaderboard,
         )
         self.assertEqual(ranks, [f"{rank:02d}" for rank in range(1, 20)])
@@ -305,7 +338,7 @@ class SiteSeoTests(unittest.TestCase):
             f"<strong>{model_count}</strong><span>Models tested</span>",
             leaderboard,
         )
-        self.assertIn(f'(value / {top_score:.2f}) * 100', leaderboard)
+        self.assertIn(f"(value / {top_score:.2f}) * 100", leaderboard)
 
 
 if __name__ == "__main__":

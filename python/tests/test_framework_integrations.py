@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 
+import agent_action_guard._framework_utils as framework_utils
 from agent_action_guard import (
     HarmfulActionException,
     autogen,
@@ -10,7 +11,6 @@ from agent_action_guard import (
     llamaindex,
     openai_agents,
 )
-from agent_action_guard import _framework_utils as framework_utils
 
 
 @pytest.fixture

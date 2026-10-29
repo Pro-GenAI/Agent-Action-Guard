@@ -1,17 +1,25 @@
 UV ?= uv
+SECURITY_ARGS ?=
 TEST_WORKERS ?= logical
 TEST_DIST ?= worksteal
 PYTHON_TEST_VERSIONS ?=
 SOURCE_DIRS := agent_action_guard examples scripts tests training
-PY_FILES := $(shell find $(SOURCE_DIRS) -type f -name '*.py') sitecustomize.py
+# Recursively expanded so it is only evaluated by `lint`; avoids Windows' find.exe.
+PY_FILES = $(shell $(UV) run --no-project python -c "import pathlib,sys; print(' '.join(sorted(p.as_posix() for d in sys.argv[1:] for p in pathlib.Path(d).rglob('*.py'))))" $(SOURCE_DIRS)) sitecustomize.py
 
-.PHONY: install install-dev format lint quality test test-matrix security dependency-matrix dependency-matrix-bounds latency-backends
+.PHONY: verify install install-dev format lint quality test test-matrix security dependency-matrix dependency-matrix-bounds latency-backends
 
 install:
 	$(UV) sync
 
 install-dev:
 	$(UV) sync --extra dev
+
+verify:
+	$(MAKE) install-dev
+	$(MAKE) test
+	$(MAKE) test-matrix
+	$(MAKE) security
 
 format:
 	$(UV) run --with isort isort $(SOURCE_DIRS) sitecustomize.py
@@ -21,7 +29,7 @@ lint:
 	$(UV) run --with ruff ruff check $(SOURCE_DIRS) sitecustomize.py
 	$(UV) run --with black black --check $(SOURCE_DIRS) sitecustomize.py
 	$(UV) run --with isort isort --check-only $(SOURCE_DIRS) sitecustomize.py
-	$(UV) run --with mypy mypy $(SOURCE_DIRS) sitecustomize.py
+	$(UV) run --no-project --python 3.10 --with mypy --with numpy --with openai --with pytest mypy $(SOURCE_DIRS) sitecustomize.py
 	$(UV) run --with flake8 flake8 --jobs=1 $(SOURCE_DIRS) sitecustomize.py
 	PYLINTHOME=/tmp/pylint-cache $(UV) run --with pylint pylint $(PY_FILES)
 
@@ -34,7 +42,7 @@ test-matrix:
 	UV="$(UV)" PYTHON_TEST_VERSIONS="$(PYTHON_TEST_VERSIONS)" bash scripts/run_tests_uv_matrix.sh
 
 security:
-	$(UV) run python scripts/security_audit.py
+	$(UV) run python scripts/security_audit.py $(SECURITY_ARGS)
 
 dependency-matrix:
 	$(UV) run python scripts/test_dependency_matrix.py

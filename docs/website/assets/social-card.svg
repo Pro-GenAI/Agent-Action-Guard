@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs><radialGradient id="glow"><stop stop-color="#14391a"/><stop offset="1" stop-color="#0b0e13"/></radialGradient></defs>
+  <rect width="1200" height="630" fill="#0b0e13"/>
+  <rect x="590" width="610" height="630" fill="url(#glow)"/>
+  <path d="M0 530H1200M0 120H1200M1000 0V630" stroke="#25302c"/>
+  <rect x="66" y="62" width="86" height="86" rx="24" fill="#142519" stroke="#38633b"/>
+  <g transform="translate(85 80) scale(2.4)" fill="none" stroke="#79ff5b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 20 6v6c0 5-8 9-8 9s-8-4-8-9V6l8-4Z"/><path d="m8 11 3 3 5-6"/></g>
+  <g font-family="DejaVu Sans,Arial,sans-serif">
+    <text x="178" y="116" fill="#79ff5b" font-size="23" font-weight="bold" letter-spacing="3">OPEN-SOURCE / AGENT SAFETY</text>
+    <text x="66" y="267" fill="#f0f3f7" font-size="72" font-weight="bold" letter-spacing="-3">Agent Action Guard</text>
+    <text x="68" y="350" fill="#79ff5b" font-size="39" font-weight="bold">Screen tool calls before execution</text>
+    <text x="70" y="418" fill="#b9c3d1" font-size="25">Python + JavaScript / Local inference / Native hooks</text>
+    <text x="70" y="578" fill="#b9c3d1" font-size="24">action-guard.github.io</text>
+  </g>
+</svg>

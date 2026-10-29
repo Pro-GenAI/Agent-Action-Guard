@@ -13,6 +13,30 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+const IS_WINDOWS = process.platform === 'win32';
+
+// Make the repo-local scanner venv and npm bins discoverable on every platform
+// (the Makefile's POSIX-style PATH is not reliable under Windows).
+process.env.PATH = [
+	path.join(ROOT, '.security-tools', IS_WINDOWS ? 'Scripts' : 'bin'),
+	path.join(ROOT, 'node_modules', '.bin'),
+	process.env.PATH ?? '',
+].join(path.delimiter);
+
+// Windows resolves npm-installed .cmd shims (e.g. pnpm) only via a shell. Pass
+// one quoted command string so Node does not warn about shell + args (DEP0190).
+function spawnTool(command, args, options) {
+	if (!IS_WINDOWS) {
+		// nosemgrep: javascript.lang.security.detect-child-process.detect-child-process -- fixed scanner commands, no user input
+		return spawnSync(command, args, { ...options, shell: false });
+	}
+	const quoted = [command, ...args].map((part) =>
+		/^[\w./:=@+-]+$/.test(part) ? part : `"${part.replaceAll('"', '\\"')}"`,
+	);
+	// nosemgrep: javascript.lang.security.audit.spawn-shell-true.spawn-shell-true, javascript.lang.security.detect-child-process.detect-child-process -- fixed scanner commands, no user input
+	return spawnSync(quoted.join(' '), { ...options, shell: true });
+}
 const REPO_ROOT = path.resolve(ROOT, '..');
 const REPORT_DIR = path.join(ROOT, 'security-reports');
 const STRICT_TOOLS = process.argv.includes('--strict-tools');
@@ -65,20 +89,18 @@ function ensureReportDir() {
 }
 
 function commandExists(command) {
-	const probe = spawnSync(command, ['--version'], {
+	const probe = spawnTool(command, ['--version'], {
 		cwd: ROOT,
 		stdio: 'ignore',
-		shell: false,
 	});
 	return !probe.error && probe.status === 0;
 }
 
 function runCheck(name, command, args, reportName, cwd = ROOT) {
 	ensureReportDir();
-	const result = spawnSync(command, args, {
+	const result = spawnTool(command, args, {
 		cwd,
 		encoding: 'utf8',
-		shell: false,
 		maxBuffer: 64 * 1024 * 1024,
 	});
 	const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
@@ -116,10 +138,12 @@ function runDetectSecrets(commandArgs) {
 	let findingCount = 0;
 	let ignoredTestKeywords = 0;
 	for (const [filename, entries] of Object.entries(payload.results ?? {})) {
+		// detect-secrets reports backslash paths on Windows.
+		const normalized = filename.replaceAll('\\', '/');
 		const isTestFixture =
-			filename.includes('/test/') ||
-			filename.includes('/tests/') ||
-			filename.includes('/runtime-fixtures/');
+			normalized.includes('/test/') ||
+			normalized.includes('/tests/') ||
+			normalized.includes('/runtime-fixtures/');
 		for (const entry of entries) {
 			if (isTestFixture && entry.type === 'Secret Keyword') {
 				ignoredTestKeywords += 1;

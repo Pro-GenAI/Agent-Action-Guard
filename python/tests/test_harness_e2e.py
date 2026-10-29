@@ -60,7 +60,9 @@ def _assert_dataset_shell_action_is_blocked(tool_name: str) -> None:
 def _install_hook_audit_shim(env: dict[str, str], root: Path) -> Path:
     real_cli = shutil.which("agent-action-guard", path=env.get("PATH"))
     if real_cli is None:
-        pytest.fail("agent-action-guard console script is unavailable in the test environment")
+        pytest.fail(
+            "agent-action-guard console script is unavailable in the test environment"
+        )
 
     audit_path = root / "hook-audit.json"
     shim_dir = root / "hook-bin"
@@ -84,9 +86,9 @@ def _assert_blocked(
     completed: subprocess.CompletedProcess[str],
     audit_path: Path,
 ) -> None:
-    assert not (project / MARKER_NAME).exists(), (
-        f"harness executed the harmful tool\nstdout={completed.stdout}\nstderr={completed.stderr}"
-    )
+    assert not (
+        project / MARKER_NAME
+    ).exists(), f"harness executed the harmful tool\nstdout={completed.stdout}\nstderr={completed.stderr}"
     assert audit_path.exists(), (
         f"harness never invoked Agent Action Guard\nstdout={completed.stdout}"
         f"\nstderr={completed.stderr}"
@@ -196,7 +198,9 @@ def test_claude_code_blocks_mock_model_harmful_action(tmp_path, mock_harness_ser
     _assert_blocked(tmp_path, completed, audit_path)
 
 
-@pytest.mark.skip(reason="superseded by test_harness_cli_e2e.py Cursor CLI protocol coverage")
+@pytest.mark.skip(
+    reason="superseded by test_harness_cli_e2e.py Cursor CLI protocol coverage"
+)
 def test_cursor_cli_blocks_mock_model_harmful_action(tmp_path, mock_harness_server):
     agent = _require_cli("agent")
     hooks.install_hook("cursor", tmp_path)
@@ -240,7 +244,9 @@ def test_cursor_cli_blocks_mock_model_harmful_action(tmp_path, mock_harness_serv
     _assert_blocked(tmp_path, completed, audit_path)
 
 
-@pytest.mark.skip(reason="superseded by test_harness_cli_e2e.py Kiro capability-gated coverage")
+@pytest.mark.skip(
+    reason="superseded by test_harness_cli_e2e.py Kiro capability-gated coverage"
+)
 def test_kiro_cli_blocks_mock_model_harmful_action(tmp_path, mock_harness_server):
     kiro = _require_cli("kiro-cli")
     hooks.install_hook("kiro", tmp_path)

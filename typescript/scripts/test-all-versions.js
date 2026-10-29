@@ -57,6 +57,76 @@ export function resolveNvmScript(
 	return nvmScript;
 }
 
+// nvm-windows 2.x has no nvm.sh and `nvm use` switches the machine-wide default,
+// so on Windows we run the already-installed (or `nvm install`ed) Node directly.
+export function resolveNvmWindowsInstalls(
+	env = process.env,
+	platform = process.platform,
+	exists = fs.existsSync,
+) {
+	if (platform !== 'win32') {
+		return null;
+	}
+	const candidates = [
+		env.NVM_INSTALLS_DIR,
+		env.LOCALAPPDATA &&
+			path.join(env.LOCALAPPDATA, 'Author Software', 'nvm', 'installs'),
+		env.NVM_HOME && path.join(env.NVM_HOME, 'installs'),
+		env.NVM_HOME,
+	];
+	return candidates.find((dir) => dir && exists(dir)) ?? null;
+}
+
+function compareVersions(a, b) {
+	const pa = a.replace(/^v/, '').split('.').map(Number);
+	const pb = b.replace(/^v/, '').split('.').map(Number);
+	for (let i = 0; i < 3; i += 1) {
+		if ((pa[i] ?? 0) !== (pb[i] ?? 0)) {
+			return (pa[i] ?? 0) - (pb[i] ?? 0);
+		}
+	}
+	return 0;
+}
+
+export function findInstalledNodeDir(installsDir, version, readdir = fs.readdirSync) {
+	const wanted = String(version).replace(/^v/, '');
+	const matches = readdir(installsDir)
+		.filter((name) => /^v\d+\.\d+\.\d+$/.test(name))
+		.filter((name) => {
+			const bare = name.slice(1);
+			return bare === wanted || bare.startsWith(`${wanted}.`);
+		})
+		.sort(compareVersions);
+	return matches.length > 0
+		? path.join(installsDir, matches[matches.length - 1])
+		: null;
+}
+
+export function buildDirectNodeTestCommand({ version, testFiles }) {
+	const quotedTests = testFiles.map(shellQuote).join(' ');
+	return [
+		'set -euo pipefail',
+		// AAG_NODE_DIR is a Windows path; convert it for Git Bash/MSYS.
+		'export PATH="$(cygpath -u "$AAG_NODE_DIR"):$PATH"',
+		`requested=${shellQuote(version)}`,
+		`actual="$(node -p 'process.versions.node')"`,
+		'case "$actual" in "$requested"|"$requested".*) ;; *) echo "Expected Node $requested, got $actual" >&2; exit 2 ;; esac',
+		'echo "Using Node $actual ($(npm --version | sed \'s/^/npm /\'))"',
+		'ONNXRUNTIME_NODE_INSTALL=skip npm ci --no-audit --no-fund',
+		'npm run build',
+		`node --test ${quotedTests}`,
+	].join('\n');
+}
+
+function ensureNodeInstalled(installsDir, version, spawn, readdir) {
+	let dir = findInstalledNodeDir(installsDir, version, readdir);
+	if (!dir) {
+		spawn('nvm', ['install', version], { stdio: 'inherit', shell: false });
+		dir = findInstalledNodeDir(installsDir, version, readdir);
+	}
+	return dir;
+}
+
 export function discoverTestFiles(rootDirectory = process.cwd()) {
 	const testDirectory = path.join(rootDirectory, 'test');
 	return fs
@@ -90,13 +160,17 @@ export function buildNvmTestCommand({ nvmScript, version, testFiles }) {
 export function runNodeVersionMatrix({
 	versions,
 	nvmScript,
+	installsDir,
 	testFiles,
 	env = process.env,
 	spawn = spawnSync,
 	write = console.log,
+	readdir = fs.readdirSync,
 } = {}) {
 	const selectedVersions = versions ?? resolveNodeVersions([], env);
-	const selectedNvmScript = nvmScript ?? resolveNvmScript(env);
+	const selectedNvmScript = installsDir
+		? null
+		: (nvmScript ?? resolveNvmScript(env));
 	const selectedTestFiles = testFiles ?? discoverTestFiles();
 	const continueOnFailure = env.CONTINUE_ON_FAILURE !== '0';
 	const succeeded = [];
@@ -116,22 +190,34 @@ export function runNodeVersionMatrix({
 
 	for (const version of selectedVersions) {
 		write(`\n=== Node ${version} ===`);
-		const result = spawn(
-			'bash',
-			[
-				'-lc',
-				buildNvmTestCommand({
-					nvmScript: selectedNvmScript,
-					version,
-					testFiles: selectedTestFiles,
-				}),
-			],
-			{
-				cwd: process.cwd(),
-				env,
-				stdio: 'inherit',
-			},
-		);
+		let command;
+		let runEnv = env;
+		if (installsDir) {
+			const nodeDir = ensureNodeInstalled(installsDir, version, spawn, readdir);
+			if (!nodeDir) {
+				write(`Node ${version} is not installed and nvm install failed.`);
+				failed.push(version);
+				if (!continueOnFailure) {
+					writeSummary();
+					write('Result: Node version matrix failed.');
+					return 1;
+				}
+				continue;
+			}
+			command = buildDirectNodeTestCommand({ version, testFiles: selectedTestFiles });
+			runEnv = { ...env, AAG_NODE_DIR: nodeDir };
+		} else {
+			command = buildNvmTestCommand({
+				nvmScript: selectedNvmScript,
+				version,
+				testFiles: selectedTestFiles,
+			});
+		}
+		const result = spawn('bash', ['-lc', command], {
+			cwd: process.cwd(),
+			env: runEnv,
+			stdio: 'inherit',
+		});
 
 		if (result.error) {
 			throw result.error;
@@ -168,6 +254,15 @@ export function assertBashAvailable(spawn = spawnSync) {
 export function main(argv = process.argv.slice(2), env = process.env) {
 	assertBashAvailable();
 	const versions = resolveNodeVersions(argv, env);
+	try {
+		resolveNvmScript(env);
+	} catch (error) {
+		const installsDir = resolveNvmWindowsInstalls(env);
+		if (installsDir) {
+			return runNodeVersionMatrix({ versions, env, installsDir });
+		}
+		throw error;
+	}
 	return runNodeVersionMatrix({ versions, env });
 }
 

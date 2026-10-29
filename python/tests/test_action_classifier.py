@@ -4,6 +4,7 @@ import json
 import sys
 import types
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 import numpy as np
@@ -90,16 +91,16 @@ def _build_fake_runtime_utils_module():
     - Class labels
     - ONNX model path stub
     """
-    runtime_module = types.ModuleType("agent_action_guard._runtime_utils")
-    runtime_module.embed_model = types.SimpleNamespace(  # type: ignore
+    runtime_module: Any = types.ModuleType("agent_action_guard._runtime_utils")
+    runtime_module.embed_model = types.SimpleNamespace(
         encode=mock.Mock(return_value=[[0.1, 0.2, 0.3, 0.4]])
     )
-    runtime_module.flatten_action_to_text = mock.Mock(  # type: ignore
+    runtime_module.flatten_action_to_text = mock.Mock(
         side_effect=_runtime_utils_flatten_action_to_text
     )
-    runtime_module.ALL_CLASSES = ["safe", "harmful", "unethical"]  # type: ignore
-    runtime_module.ONNX_MODEL_PATH = _FakeModelPath(exists=True)  # type: ignore
-    runtime_module.create_onnx_session = mock.Mock(  # type: ignore
+    runtime_module.ALL_CLASSES = ["safe", "harmful", "unethical"]
+    runtime_module.ONNX_MODEL_PATH = _FakeModelPath(exists=True)
+    runtime_module.create_onnx_session = mock.Mock(
         return_value=_FakeInferenceSession(
             "test-model", providers=["CPUExecutionProvider"]
         )
@@ -108,9 +109,7 @@ def _build_fake_runtime_utils_module():
     class ActionGuardDecision:
         """Placeholder class for compatibility with runtime expectations."""
 
-        pass
-
-    runtime_module.ActionGuardDecision = ActionGuardDecision  # type: ignore
+    runtime_module.ActionGuardDecision = ActionGuardDecision
     return runtime_module
 
 
@@ -120,7 +119,7 @@ def _build_fake_onnxruntime_module(fake_session_outputs=None):
 
     Ensures that all InferenceSession instances return controlled outputs.
     """
-    onnx_module = types.ModuleType("onnxruntime")
+    onnx_module: Any = types.ModuleType("onnxruntime")
 
     def _inference_session(model_path, providers=None):
         return _FakeInferenceSession(
@@ -129,7 +128,7 @@ def _build_fake_onnxruntime_module(fake_session_outputs=None):
             outputs=fake_session_outputs,
         )
 
-    onnx_module.InferenceSession = _inference_session  # type: ignore
+    onnx_module.InferenceSession = _inference_session
     return onnx_module
 
 
@@ -206,8 +205,8 @@ def test_create_onnx_session_falls_back_to_reference_evaluator(
         def __init__(self, model_path):
             self.model_path = model_path
 
-    fake_onnx = types.ModuleType("onnx")
-    fake_reference = types.ModuleType("onnx.reference")
+    fake_onnx: Any = types.ModuleType("onnx")
+    fake_reference: Any = types.ModuleType("onnx.reference")
     fake_reference.ReferenceEvaluator = FakeReferenceEvaluator
     fake_onnx.reference = fake_reference
 

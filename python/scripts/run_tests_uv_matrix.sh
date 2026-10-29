@@ -67,7 +67,14 @@ for version in "${PYTHON_VERSIONS[@]}"; do
     record_failure "$version"
     continue
   fi
-  venv_python="$venv_dir/bin/python"
+  # Windows venvs use Scripts/python.exe instead of bin/python.
+  venv_bin="$venv_dir/bin"
+  if [[ -x "$venv_dir/Scripts/python.exe" ]]; then
+    venv_bin="$venv_dir/Scripts"
+    venv_python="$venv_bin/python.exe"
+  else
+    venv_python="$venv_bin/python"
+  fi
 
   if ! "$UV" pip install -p "$venv_python" -U pip setuptools wheel; then
     echo "Dependency bootstrap failed for ${version}."
@@ -90,7 +97,7 @@ for version in "${PYTHON_VERSIONS[@]}"; do
   # Run from the Python package root so pytest uses `python/pytest.ini` and
   # doesn't accidentally collect repo-level example/unused scripts.
   pushd "$PYTHON_DIR" >/dev/null
-  if ! PATH="$venv_dir/bin:$PATH" "$venv_python" -m pytest ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
+  if ! PATH="$venv_bin:$PATH" "$venv_python" -m pytest ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
     popd >/dev/null
     echo "Tests failed for ${version}."
     record_failure "$version"

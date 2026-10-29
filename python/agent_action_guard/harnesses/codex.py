@@ -12,9 +12,7 @@ def handle(
     payload: dict[str, Any], *, conf_threshold: float = 0.5
 ) -> tuple[int, str, str]:
     """Return exit code/stdout/stderr for a Codex PreToolUse hook."""
-    result: HookResult = classify_hook_payload(
-        payload, conf_threshold=conf_threshold
-    )
+    result: HookResult = classify_hook_payload(payload, conf_threshold=conf_threshold)
     if not result.blocked:
         return 0, "", ""
 

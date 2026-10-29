@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const DEPENDENCY_RANGES = Object.freeze({
-	'@huggingface/tokenizers': '^0.1.0',
+	'@huggingface/tokenizers': '^0.1.0 || ^0.2.0',
 	'onnxruntime-node': '^1.14.0',
 	openai: '^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0',
 });
@@ -18,6 +18,7 @@ function run(
 	args,
 	{ cwd = packageRoot, env = process.env, inherit = false } = {},
 ) {
+	// nosemgrep: javascript.lang.security.detect-child-process.detect-child-process -- fixed npm/node commands, no user input
 	const result = spawnSync(command, args, {
 		cwd,
 		env,

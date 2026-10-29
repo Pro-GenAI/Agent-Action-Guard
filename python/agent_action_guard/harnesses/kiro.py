@@ -11,9 +11,7 @@ def handle(
     payload: dict[str, Any], *, conf_threshold: float = 0.5
 ) -> tuple[int, str, str]:
     """Return exit code/stdout/stderr for a Kiro PreToolUse hook."""
-    result: HookResult = classify_hook_payload(
-        payload, conf_threshold=conf_threshold
-    )
+    result: HookResult = classify_hook_payload(payload, conf_threshold=conf_threshold)
     if result.blocked:
         return 2, "", result.reason
     return 0, "", ""

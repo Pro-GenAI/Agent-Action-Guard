@@ -1,0 +1,36 @@
+{
+  "docs/website": {
+    "Manrope": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap",
+      "font": "https://fonts.gstatic.com/s/manrope/v23/xn7gYHE41ni1AdIRggexSg.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt"
+    },
+    "Inter": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap",
+      "font": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt"
+    },
+    "Space Grotesk": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap",
+      "font": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/OFL.txt"
+    },
+    "JetBrains Mono": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap",
+      "font": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/OFL.txt"
+    }
+  },
+  "docs/agent-leaderboard-site": {
+    "Inter": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap",
+      "font": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt"
+    },
+    "Space Grotesk": {
+      "stylesheet": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap",
+      "font": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/OFL.txt"
+    }
+  }
+}

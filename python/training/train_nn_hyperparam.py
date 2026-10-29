@@ -142,9 +142,9 @@ def evaluate_onnx_model(
         batch_preds = np.argmax(out, axis=1)
         preds.extend(batch_preds.tolist())
 
-    preds = np.array(preds, dtype=int)[:n]
-    acc = _accuracy_score(y_test, preds)
-    return float(acc), preds
+    predictions = np.array(preds, dtype=int)[:n]
+    acc = _accuracy_score(y_test, predictions)
+    return float(acc), predictions
 
 
 def evaluate_saved_onnx():
@@ -155,7 +155,7 @@ def evaluate_saved_onnx():
 
     texts, labels, classes, _ = load_texts_and_labels()
     # Keep the same split seed/stratify to match training evaluation
-    xtr_texts, xte_texts, ytr, yte, _, _ = train_test_split(
+    _xtr_texts, xte_texts, _ytr, yte, _, _ = train_test_split(
         texts, labels, classes, test_size=0.25, random_state=42, stratify=classes
     )
 

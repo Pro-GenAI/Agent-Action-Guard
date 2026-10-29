@@ -47,6 +47,8 @@ def test_predict_batch_vectorizes_embedding_and_inference(monkeypatch):
 
     assert [label for label, _confidence in results] == ["safe", "harmful"]
     assert calls == [["action-1", "action-2"]]
+    assert classifier.session is not None
+    assert classifier.session.last_input is not None
     assert classifier.session.last_input.shape == (2, 4)
 
 

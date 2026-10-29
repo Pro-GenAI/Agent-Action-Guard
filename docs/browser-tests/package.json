@@ -1,0 +1,10 @@
+{
+  "name": "agent-action-guard-website-checks",
+  "private": true,
+  "scripts": {
+    "test:browser": "playwright test --config playwright.config.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

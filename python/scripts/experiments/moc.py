@@ -138,12 +138,7 @@ def make_piecewise_dataset(
     region = (x[:, 0] >= 0).long()
 
     left_score = 1.5 * x[:, 1] - 0.45 * x[:, 2] + 0.20 * x[:, 3]
-    right_score = (
-        1.15 * x[:, 1] * x[:, 2]
-        + 0.65 * x[:, 3]
-        - 0.35 * x[:, 1]
-        + 0.15
-    )
+    right_score = 1.15 * x[:, 1] * x[:, 2] + 0.65 * x[:, 3] - 0.35 * x[:, 1] + 0.15
     score = torch.where(region.bool(), right_score, left_score)
     noise = 0.18 * torch.randn(n_samples, generator=generator)
     y = (score + noise > 0).long()

@@ -5,9 +5,16 @@ on:
     types: [created]
 
 jobs:
+  validate:
+    name: Validate release source before publication
+    uses: ./.github/workflows/security-audit.yml
+    permissions:
+      contents: read
+
   publish-pypi:
     name: Publish release to PyPI
     runs-on: ubuntu-latest
+    needs: validate
     environment:
       name: pypi
       url: https://pypi.org/p/agent-action-guard
@@ -18,10 +25,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -53,7 +60,7 @@ jobs:
           /tmp/pkg-test/bin/python -m pytest "$GITHUB_WORKSPACE/python/tests"
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # pypa/gh-action-pypi-publish@v1.13.0
         with:
           packages-dir: python/dist
           verbose: true

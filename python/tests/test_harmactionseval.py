@@ -1,6 +1,7 @@
 import importlib
 import json
 import os
+from typing import Any
 
 import pytest
 
@@ -9,7 +10,7 @@ _previous_model = os.environ.get("OPENAI_MODEL")
 os.environ["OPENAI_API_KEY"] = "test-key"
 os.environ["OPENAI_MODEL"] = "test-model"
 
-harmactionseval = importlib.import_module("agent_action_guard.harmactionseval")
+harmactionseval: Any = importlib.import_module("agent_action_guard.harmactionseval")
 
 if _previous_api_key is None:
     os.environ.pop("OPENAI_API_KEY", None)

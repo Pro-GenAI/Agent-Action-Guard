@@ -61,7 +61,7 @@ def _run_until_hook_capture(
     capture_path: Path,
     timeout: float = 20.0,
 ) -> tuple[str, str]:
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # pylint: disable=consider-using-with
         command,
         cwd=cwd,
         env=env,
@@ -83,7 +83,9 @@ def _run_until_hook_capture(
                 break
             time.sleep(0.05)
         else:
-            raise AssertionError("harness did not invoke the Action Guard hook before timeout")
+            raise AssertionError(
+                "harness did not invoke the Action Guard hook before timeout"
+            )
     finally:
         if process.poll() is None:
             process.terminate()
@@ -97,7 +99,11 @@ def _run_until_hook_capture(
 
 def _assert_dataset_seed_is_blocked(tool_name: str, arguments: dict[str, str]) -> None:
     dataset = json.loads(
-        (Path(__file__).parents[1] / "agent_action_guard" / "harmactions_dataset.json").read_text()
+        (
+            Path(__file__).parents[1]
+            / "agent_action_guard"
+            / "harmactions_dataset.json"
+        ).read_text()
     )
     seed = next(item for item in dataset if item["action_id"] == 54)
     assert seed["classification"] == "harmful"
@@ -188,13 +194,7 @@ def test_claude_code_cli_blocks_mock_harmful_action(tmp_path, mock_llm_server):
     test_home = tmp_path / ".claude-test-home"
     test_home.mkdir()
     (test_home / ".claude.json").write_text(
-        json.dumps(
-            {
-                "projects": {
-                    str(tmp_path): {"hasTrustDialogAccepted": True}
-                }
-            }
-        ),
+        json.dumps({"projects": {str(tmp_path): {"hasTrustDialogAccepted": True}}}),
         encoding="utf-8",
     )
 
@@ -227,7 +227,11 @@ def test_claude_code_cli_blocks_mock_harmful_action(tmp_path, mock_llm_server):
     assert not (tmp_path / "aag-harmful-executed").exists()
     assert capture_path.exists()
     assert HARMFUL_COMMAND in capture_path.read_text(encoding="utf-8")
-    assert any(method == "POST" and path.startswith("/v1/messages") for method, path in mock_llm_server.requests)
+    assert any(
+        method == "POST" and path.startswith("/v1/messages")
+        for method, path in mock_llm_server.requests
+    )
+
 
 def test_cursor_cli_blocks_mock_harmful_action(tmp_path, mock_llm_server):
     agent = _require_tool("agent")
@@ -273,6 +277,7 @@ def test_cursor_cli_blocks_mock_harmful_action(tmp_path, mock_llm_server):
     hook_payload = json.loads(capture_path.read_text(encoding="utf-8"))
     assert hook_payload["tool_input"]["command"] == HARMFUL_COMMAND
     assert ("POST", "/agent.v1.AgentService/RunSSE") in mock_llm_server.requests
+
 
 def test_kiro_cli_blocks_mock_harmful_action(tmp_path, mock_llm_server):
     kiro = _require_tool("kiro-cli")

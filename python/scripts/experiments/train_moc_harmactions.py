@@ -25,7 +25,10 @@ from agent_action_guard._runtime_utils import (
     EmbeddingModel,
     flatten_action_to_text,
 )
-from experiments.moc import MixtureOfClassifiers, set_seed
+from experiments.moc import (  # pylint: disable=wrong-import-order
+    MixtureOfClassifiers,
+    set_seed,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "agent_action_guard" / "harmactions_dataset.json"

@@ -132,7 +132,7 @@ def _run_harmactionseval(argv: list[str]) -> int:
     except ModuleNotFoundError as exc:
         if exc.name in {"rich", "dotenv"}:
             raise RuntimeError(
-                'HarmActionsEval dependencies are not installed. Install '
+                "HarmActionsEval dependencies are not installed. Install "
                 '"agent-action-guard[harmactionseval]" first.'
             ) from exc
         raise

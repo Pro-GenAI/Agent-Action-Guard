@@ -1,0 +1,52 @@
+name: Website launch checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check links, metadata, accessibility, budgets, and source backups
+        run: |
+          python3 -m unittest discover -s docs/website/tests -v
+          python3 docs/scripts/site_security.py --check
+          node --test docs/website/tests/tabs.test.cjs
+      - name: Install browser test tools
+        working-directory: docs/browser-tests
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium webkit
+      - name: Chromium and WebKit desktop/mobile smoke tests
+        working-directory: docs/browser-tests
+        run: npm run test:browser
+      - name: Retain browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # actions/upload-artifact@v4
+        with:
+          name: website-browser-diagnostics
+          path: |
+            docs/browser-tests/playwright-report/
+            docs/browser-tests/test-results/
+          retention-days: 14
+      - name: Create verified source snapshot
+        if: github.event_name != 'pull_request'
+        run: python3 docs/scripts/backup_sites.py --output .cache/site-backups/sites.zip
+      - name: Retain source snapshot
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # actions/upload-artifact@v4
+        with:
+          name: website-sources-${{ github.sha }}
+          path: .cache/site-backups/sites.zip
+          retention-days: 30

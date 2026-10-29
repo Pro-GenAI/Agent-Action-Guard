@@ -3,6 +3,8 @@
 
 <head>
 	<meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; connect-src 'none'; font-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-EGt9xgt4KVcNlAp4JJ9Evjw9QdY0ChuGbeK0FaoFKHc=' 'sha256-ixWYM8EeBSDMR33fb48lmtwqMZ7/Tto1nUfLfH28u1s=' 'sha256-pwQduWxX3Cm7lLbQmAos7n73RLP4QrsCDFejmsBdZ78=' 'unsafe-hashes'" />
+	<meta name="referrer" content="no-referrer" />
 	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
 	<title>HarmActionsEval | AI Agent Safety Leaderboard</title>
 	<meta name="description"
@@ -47,17 +49,11 @@
 			"dateModified": "2026-10"
 		}
 	</script>
-
-	<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-	<link
-		href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap"
-		rel="stylesheet" />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-		rel="stylesheet" />
+	<link rel="stylesheet" href="assets/tailwind.css?v=20261029-2" />
+	<link rel="stylesheet" href="assets/fonts/fonts.css" />
 	<style>
 		.material-symbols-outlined {
-			font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+			width: 1em; height: 1em; display: inline-block; flex-shrink: 0;
 		}
 
 		.kinetic-gradient {
@@ -258,7 +254,7 @@
 			font-size: .62rem;
 			letter-spacing: .08em;
 			text-transform: uppercase;
-			color: rgba(227,226,231,.38);
+			color: #bfc5cf;
 		}
 
 		.leaderboard-shell {
@@ -288,7 +284,7 @@
 			font-weight: 800;
 			letter-spacing: .08em;
 			text-transform: uppercase;
-			color: rgba(227,226,231,.55);
+			color: #bfc5cf;
 		}
 
 		.live-pill i {
@@ -338,7 +334,7 @@
 			font: 800 .65rem/1 "Inter", sans-serif;
 			letter-spacing: .14em;
 			text-transform: uppercase;
-			color: rgba(227,226,231,.36);
+			color: #bfc5cf;
 		}
 
 		.podium-score {
@@ -437,12 +433,15 @@
 		}
 
 		.reveal {
-			opacity: 0;
-			transform: translateY(18px);
+			opacity: 1;
+			transform: none;
 			transition: opacity .72s ease, transform .72s cubic-bezier(.16,1,.3,1);
 		}
 
-		.reveal.is-visible {
+		.motion-ready .reveal { opacity: 0; transform: translateY(18px); }
+		.motion-ready .reveal:focus-within { transition: none; }
+
+		.reveal.is-visible, .motion-ready .reveal:focus-within {
 			opacity: 1;
 			transform: none;
 		}
@@ -503,74 +502,29 @@
 		::-webkit-scrollbar-thumb:hover {
 			background: #2ae500;
 		}
+
+/* Keyboard access and policy navigation. */
+[hidden] { display: none !important; }
+#main-content { scroll-margin-top: 100px; }
+:focus-visible { outline: 2px solid #79ff5b; outline-offset: 4px; }
+.skip-link { position: fixed; left: 1rem; top: 1rem; z-index: 10000; transform: translateY(-200%); padding: .75rem 1rem; border-radius: .4rem; background: #79ff5b; color: #052100; font: 700 1rem/1.4 system-ui, sans-serif; }
+.skip-link:hover { color: #052100; }
+.skip-link:focus { transform: none; color: #052100; }
+.policy-links { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem 1.25rem; margin: 1rem 0; }
+
 	</style>
-	<script id="tailwind-config">
-		tailwind.config = {
-			darkMode: "class",
-			theme: {
-				extend: {
-					colors: {
-						"tertiary-fixed": "#e3e2e8",
-						"error": "#ffb4ab",
-						"on-background": "#e3e2e7",
-						"on-primary": "#053900",
-						"tertiary": "#e3e2e8",
-						"surface-dim": "#121317",
-						"outline": "#85957d",
-						"on-secondary-fixed-variant": "#3c475e",
-						"on-surface-variant": "#bbccb0",
-						"inverse-surface": "#e3e2e7",
-						"on-primary-fixed-variant": "#095300",
-						"on-tertiary-fixed-variant": "#46464b",
-						"on-secondary-fixed": "#101b30",
-						"on-tertiary-container": "#515257",
-						"on-tertiary": "#2f3035",
-						"on-error": "#690005",
-						"on-error-container": "#ffdad6",
-						"surface-variant": "#343439",
-						"on-primary-fixed": "#022100",
-						"surface-container-lowest": "#0d0e12",
-						"secondary-container": "#3e4960",
-						"secondary-fixed": "#d7e2ff",
-						"inverse-on-surface": "#2f3035",
-						"primary": "#76ff59",
-						"on-tertiary-fixed": "#1a1b20",
-						"primary-container": "#2ae500",
-						"secondary": "#bbc6e2",
-						"on-secondary": "#253046",
-						"secondary-fixed-dim": "#bbc6e2",
-						"primary-fixed": "#79ff5b",
-						"on-primary-container": "#0d6000",
-						"on-secondary-container": "#adb8d4",
-						"outline-variant": "#3c4b36",
-						"background": "#121317",
-						"surface-container-highest": "#343439",
-						"on-surface": "#e3e2e7",
-						"surface-container": "#1e1f24",
-						"primary-fixed-dim": "#2ae501",
-						"surface-tint": "#2ae501",
-						"inverse-primary": "#106e00",
-						"error-container": "#93000a",
-						"tertiary-container": "#c6c6cc",
-						"surface-container-low": "#1a1b20",
-						"tertiary-fixed-dim": "#c6c6cc",
-						"surface-bright": "#38393d",
-						"surface-container-high": "#292a2e",
-						"surface": "#121317"
-					},
-					fontFamily: {
-						"headline": ["Space Grotesk"],
-						"body": ["Inter"],
-						"label": ["Inter"]
-					},
-					borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
-				},
-			},
-		}
-	</script>
+  <meta property="og:image" content="https://agent-leaderboard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:secure_url" content="https://agent-leaderboard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="HarmActionsEval — AI agent safety benchmark" />
+  <meta name="twitter:image" content="https://agent-leaderboard.github.io/assets/social-card.jpg" />
+  <meta name="twitter:image:alt" content="HarmActionsEval — AI agent safety benchmark" />
 </head>
 
 <body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 	<!-- Top Navigation Bar -->
 	<nav class="topbar fixed top-0 w-full z-50 bg-[#121317]/70 backdrop-blur-xl obsidian-glow">
 		<div class="flex justify-between items-center px-8 py-4 w-full max-w-none">
@@ -582,7 +536,7 @@
 				<a class="hidden md:flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-sm hover:bg-surface-container-highest transition-all duration-200 active:scale-95 text-sm font-medium"
 					href="https://github.com/Pro-GenAI/Agent-Action-Guard" rel="noopener noreferrer"
 					target="_blank">
-					<span class="material-symbols-outlined text-sm" data-icon="code">code</span>
+					<svg class="material-symbols-outlined text-sm" data-icon="code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6 2 12l6 6M16 6l6 6-6 6M14 4l-4 16" /></svg>
 					View on GitHub
 				</a>
 			</div>
@@ -600,25 +554,25 @@
 		<nav class="flex-1 px-4 space-y-2">
 			<a class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary border-l-4 border-primary font-medium text-sm transition-all"
 				href="#">
-				<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+				<svg class="material-symbols-outlined text-2xl" data-icon="leaderboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V10h5v11M10 21V3h5v18M17 21V7h4v14" /></svg>
 				Leaderboard
 			</a>
-			<a class="flex items-center gap-3 px-4 py-3 text-on-surface/40 hover:text-on-surface/80 hover:bg-surface-container-low font-medium text-sm transition-all"
+			<a class="flex items-center gap-3 px-4 py-3 text-on-surface/80 hover:text-on-surface/80 hover:bg-surface-container-low font-medium text-sm transition-all"
 				href="https://github.com/Pro-GenAI/Agent-Action-Guard" rel="noopener noreferrer"
 				target="_blank">
-				<span class="material-symbols-outlined" data-icon="code">code</span>
+				<svg class="material-symbols-outlined text-2xl" data-icon="code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6 2 12l6 6M16 6l6 6-6 6M14 4l-4 16" /></svg>
 				GitHub
 			</a>
 		</nav>
 		<div class="px-4 mt-auto">
-			<button
-				class="w-full kinetic-gradient text-on-primary py-3 rounded-sm font-bold text-sm tracking-tight obsidian-glow active:scale-95 transition-transform mb-6">
-				Full Report
-			</button>
+			<a href="https://action-guard.github.io/docs/#evaluation"
+				class="block text-center w-full kinetic-gradient text-on-primary py-3 rounded-sm font-bold text-sm tracking-tight obsidian-glow active:scale-95 transition-transform mb-6">
+				Benchmark Method
+			</a>
 		</div>
 	</aside>
 	<!-- Main Content Canvas -->
-	<main class="lg:pl-[12.8rem] pt-24 min-h-screen">
+	<main id="main-content" tabindex="-1" class="lg:pl-[12.8rem] pt-24 min-h-screen">
 		<div class="max-w-7xl mx-auto px-8 py-12">
 			<!-- Hero Header Section -->
 			<header class="hero-section reveal mb-16">
@@ -629,17 +583,17 @@
 							class="hero-title text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tighter text-on-surface mb-5 leading-[0.96]">
 							HarmActionsEval: <span class="accent">AI Agent Safety Benchmark</span>
 						</h1>
-						<p class="text-on-surface/60 text-lg leading-relaxed max-w-xl">
+						<p class="text-on-surface/80 text-lg leading-relaxed max-w-xl">
 							Measuring the propensity of autonomous LLM agents to execute harmful actions when provided
 							with powerful toolsets.
 						</p>
 					</div>
 					<div class="stat-card p-6 rounded-xl min-w-[290px]">
 						<div class="relative z-10">
-							<div class="text-sm text-on-surface/40 font-headline uppercase tracking-widest mb-1">Benchmark
+							<div class="text-sm text-on-surface/80 font-headline uppercase tracking-widest mb-1">Benchmark
 								Average</div>
 							<div id="benchmark-average" class="text-5xl font-bold font-headline text-[#f43f5e]" data-target="11.91">11.91%</div>
-							<div class="text-xs text-on-surface/40 mt-2">SafeActions@1 across all tested models</div>
+							<div class="text-xs text-on-surface/80 mt-2">SafeActions@1 across all tested models</div>
 							<div class="stat-meta">
 								<div class="stat-mini"><strong>19</strong><span>Models tested</span></div>
 								<div class="stat-mini"><strong>79.43%</strong><span>Top score</span></div>
@@ -657,8 +611,8 @@
 						<div
 							class="px-8 py-6 border-b border-on-surface/5 flex justify-between items-center bg-surface-container">
 							<h2 class="font-headline font-bold text-xl flex items-center gap-3">
-								<span class="material-symbols-outlined text-primary"
-									data-icon="leaderboard">leaderboard</span>
+								<svg class="material-symbols-outlined text-2xl text-primary"
+									data-icon="leaderboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V10h5v11M10 21V3h5v18M17 21V7h4v14" /></svg>
 								Performance Rankings
 							</h2>
 							<span class="live-pill"><i></i> 19 models</span>
@@ -668,7 +622,7 @@
 								<caption class="sr-only">HarmActionsEval model leaderboard with SafeActions@1 scores.</caption>
 								<thead>
 									<tr
-										class="bg-surface-container-low text-on-surface/40 text-[10px] uppercase tracking-[0.2em] font-bold">
+										class="bg-surface-container-low text-on-surface/80 text-[10px] uppercase tracking-[0.2em] font-bold">
 										<th class="px-8 py-4 font-bold" scope="col">Rank</th>
 										<th class="px-8 py-4 font-bold" scope="col">Model Name</th>
 										<th class="px-8 py-4 font-bold text-right" scope="col">SafeActions@1</th>
@@ -676,247 +630,247 @@
 								</thead>
 								<tbody class="divide-y divide-on-surface/5">
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">01</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">01</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/google/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/google.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Gemini 3.8 Flash</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Google</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Google</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#fde047] text-lg">79.43%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">02</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">02</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/anthropic/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/anthropic.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Claude Opus 5</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Anthropic</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Anthropic</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#facc15] text-lg">48.23%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">03</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">03</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 6.1 Sol</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#f59e0b] text-lg">25.53%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">04</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">04</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/alibabacloud/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/alibabacloud.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Qwen 3.5 397B A17B</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Alibaba Cloud</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Alibaba Cloud</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#fb923c] text-lg">23.40%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">05</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">05</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 5.6 Terra</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#f97316] text-lg">17.73%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">06</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">06</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 5.3 Chat</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#ef4444] text-lg">12.77%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">07</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">07</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/anthropic/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/anthropic.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Claude Sonnet 5</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Anthropic</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Anthropic</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#f43f5e] text-lg">3.55%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">08</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">08</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 6 Luna</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#f43f5e] text-lg">3.55%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">09</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">09</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/anthropic/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/anthropic.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Claude Sonnet 4.6</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Anthropic</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Anthropic</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#ec4899] text-lg">2.84%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">10</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">10</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-microsoft" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/microsoft.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-microsoft" src="assets/providers/microsoft.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Phi 4 Mini Reasoning</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Microsoft</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Microsoft</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#ec4899] text-lg">2.84%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">11</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">11</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/x/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/x.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Grok 4.20 Non Reasoning</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">xAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">xAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#db2777] text-lg">2.13%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">12</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">12</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/mistralai/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/mistralai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Ministral 3 3B</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Mistral AI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Mistral AI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#db2777] text-lg">2.13%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">13</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">13</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/google/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/google.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Gemini 3.1 Flash Lite</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Google</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Google</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-extrabold score-071 text-[#c026d3] text-lg">0.71%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">14</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">14</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 5.4 Mini</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-extrabold score-071 text-[#c026d3] text-lg">0.71%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">15</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">15</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-openai" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-openai" src="assets/providers/openai.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">GPT 5.6 Luna</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">OpenAI</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">OpenAI</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-extrabold score-071 text-[#c026d3] text-lg">0.71%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">16</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">16</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/anthropic/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/anthropic.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Claude Haiku 4.5 (2025-10-01)</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Anthropic</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Anthropic</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#d946ef] text-lg">0.00%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">17</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">17</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo" src="https://cdn.simpleicons.org/anthropic/e3e2e7" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo" src="assets/providers/anthropic.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Claude Haiku 4.5</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Anthropic</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Anthropic</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#d946ef] text-lg">0.00%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">18</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">18</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-ibm" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ibm.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-ibm" src="assets/providers/ibm.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Granite 4 H Tiny</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">IBM</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">IBM</span>
 												</div>
 											</div>
 										</td>
 										<td class="px-8 py-5 text-right font-headline font-bold text-[#d946ef] text-lg">0.00%</td>
 									</tr>
 									<tr class="group hover:bg-surface-container-high transition-colors">
-										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/60">19</td>
+										<td class="px-8 py-5 text-sm font-headline font-bold text-on-surface/80">19</td>
 										<td class="px-8 py-5">
 											<div class="flex items-center gap-3">
-												<img class="provider-logo provider-logo-microsoft" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/microsoft.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+												<img width="20" height="20" class="provider-logo provider-logo-microsoft" src="assets/providers/microsoft.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.style.display='none'" />
 												<div class="flex flex-col">
 													<span class="font-medium text-on-surface">Phi 4 Mini Instruct</span>
-													<span class="text-[10px] text-on-surface/40 uppercase">Microsoft</span>
+													<span class="text-[10px] text-on-surface/80 uppercase">Microsoft</span>
 												</div>
 											</div>
 										</td>
@@ -933,33 +887,33 @@
 					<section
 						class="spotlight-card reveal bg-surface-container-high p-8 rounded-xl obsidian-glow relative overflow-hidden group">
 						<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-							<span class="material-symbols-outlined text-8xl" data-icon="security"
-								style="font-variation-settings: 'FILL' 1;">security</span>
+							<svg class="material-symbols-outlined text-8xl" data-icon="security"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 7v5c0 5 9 10 9 10s9-5 9-10V7l-9-4ZM12 3v19M3 10h18" /></svg>
 						</div>
 						<h3 class="font-headline font-bold text-2xl mb-6 flex items-center gap-3">
-							<span class="material-symbols-outlined text-primary"
-								data-icon="psychology_alt">psychology_alt</span>
+							<svg class="material-symbols-outlined text-2xl text-primary"
+								data-icon="psychology_alt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21v-4H6v-5H3l3-5a7 7 0 1 1 12 9v5M10 9h6M13 6v6" /></svg>
 							Safety Insights
 						</h3>
 						<p class="text-on-surface leading-relaxed mb-6 font-medium border-l-2 border-primary pl-6">
-							"AI agents with harmful tools will use them - even the most capable LLMs."
+							Every tested model executed some harmful actions in this benchmark.
 						</p>
-						<p class="text-on-surface/60 text-sm leading-relaxed">
-							Our research indicates that as agentic capabilities increase, the probability of safety
-							policy violation scales non-linearly when presented with actionable tool interfaces.
+						<p class="text-on-surface/80 text-sm leading-relaxed">
+							These scores measure the reported benchmark prompts and tool setup. They do not establish a
+							general relationship between model capability and safety in every deployment.
 						</p>
 
 					</section>
 					<!-- Methodology Summary Card -->
 					<section class="spotlight-card reveal bg-surface-container-low p-8 rounded-xl border border-on-surface/5">
-						<h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface/40 mb-4">Methodology
+						<h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface/80 mb-4">Methodology
 							Preview</h4>
 						<div class="space-y-4">
 							<div class="flex gap-4">
-								<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+								<svg class="material-symbols-outlined text-2xl text-primary" data-icon="bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z" /></svg>
 								<div>
 									<div class="text-sm font-bold">SafeActions@1</div>
-									<p class="text-xs text-on-surface/60 mt-1">Single-turn tool execution safety under
+									<p class="text-xs text-on-surface/80 mt-1">Single-turn tool execution safety under
 										adversarial pressure.</p>
 								</div>
 							</div>
@@ -978,14 +932,14 @@
 						<div class="flex items-center gap-6">
 							<div
 								class="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-								<span class="material-symbols-outlined text-primary text-4xl"
-									data-icon="shield_lock">shield_lock</span>
+								<svg class="material-symbols-outlined text-primary text-4xl"
+									data-icon="shield_lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 7v5c0 5 9 10 9 10s9-5 9-10V7l-9-4ZM9 12h6v5H9v-5Zm1 0V9a2 2 0 0 1 4 0v3" /></svg>
 							</div>
 							<div>
 								<h3 class="text-2xl font-bold font-headline text-on-surface mb-2">Want a free solution
 									for agent safety?</h3>
-								<p class="text-on-surface/60 max-w-md">Secure your LLM agents today with our open-source
-									framework designed to block harmful actions in real-time.</p>
+								<p class="text-on-surface/80 max-w-md">Add a classifier before tool execution with our open-source
+									framework. Classification can miss harmful actions or flag safe ones.</p>
 							</div>
 						</div>
 						<div class="flex flex-col sm:flex-row items-center gap-4">
@@ -993,8 +947,8 @@
 								href="https://action-guard.github.io/" rel="noopener noreferrer"
 								target="_blank">
 								Try Agent Action Guard
-								<span class="material-symbols-outlined group-hover:rotate-45 transition-transform"
-									data-icon="open_in_new">open_in_new</span>
+								<svg class="material-symbols-outlined text-2xl group-hover:rotate-45 transition-transform"
+									data-icon="open_in_new" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7M21 3 10 14M10 3H3v18h18v-7" /></svg>
 							</a>
 						</div>
 					</div>
@@ -1003,18 +957,19 @@
 		</div>
 	</main>
 	<!-- Floating Action Button (FAB) -->
-	<a class="fixed right-8 bottom-8 kinetic-gradient text-on-primary p-4 rounded-xl shadow-2xl obsidian-glow hover:scale-110 active:scale-95 transition-all group z-50"
+	<a aria-label="View source on GitHub" class="fixed right-8 bottom-8 kinetic-gradient text-on-primary p-4 rounded-xl shadow-2xl obsidian-glow hover:scale-110 active:scale-95 transition-all group z-50"
 		href="https://github.com/Pro-GenAI/Agent-Action-Guard" rel="noopener noreferrer" target="_blank">
 		<div class="flex items-center gap-3">
-			<span class="material-symbols-outlined" data-icon="code"
-				style="font-variation-settings: 'FILL' 1;">code</span>
+			<svg class="material-symbols-outlined text-2xl" data-icon="code"
+			 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6 2 12l6 6M16 6l6 6-6 6M14 4l-4 16" /></svg>
 			<span class="font-bold pr-2 hidden group-hover:block transition-all whitespace-nowrap">View on GitHub</span>
 		</div>
 	</a>
 	<footer
-		class="lg:pl-[12.8rem] border-t border-on-surface/5 bg-surface-container-lowest py-8 text-center text-xs text-on-surface/40">
-		<p>© 2026 HarmActionsEval Benchmark Project. All rights reserved.</p>
-	</footer>
+		class="lg:pl-[12.8rem] border-t border-on-surface/5 bg-surface-container-lowest py-8 text-center text-xs text-on-surface/80">
+		<p>© 2026 HarmActionsEval Benchmark Project. <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md">CC BY 4.0</a> · <a href="/privacy/">Privacy &amp; data use</a></p>
+	<nav class="policy-links" aria-label="Footer"><a href="/terms/">Terms &amp; refunds</a><a href="/privacy/#cookies">Cookies</a><a href="/privacy/#data-requests">Data requests</a></nav>
+  </footer>
 	<script>
 		(() => {
 			const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1056,6 +1011,7 @@
 						observer.unobserve(entry.target);
 					});
 				}, { threshold: 0.08, rootMargin: "0px 0px -36px" });
+				document.documentElement.classList.add("motion-ready");
 				revealTargets.forEach((el) => observer.observe(el));
 			}
 

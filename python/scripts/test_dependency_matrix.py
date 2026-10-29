@@ -16,9 +16,16 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
+
+InvalidVersion: Any
+Version: Any
 
 try:
-    from packaging.version import InvalidVersion, Version
+    from packaging.version import InvalidVersion as _InvalidVersion
+    from packaging.version import Version as _Version
+
+    InvalidVersion, Version = _InvalidVersion, _Version
 except ImportError:  # pragma: no cover
     InvalidVersion = ValueError
     Version = None

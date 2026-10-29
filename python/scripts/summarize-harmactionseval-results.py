@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, TypeGuard
 
 PYTHON_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CACHE_PATH = PYTHON_ROOT / ".cache" / "harmactionseval_cache.json"
@@ -55,7 +55,7 @@ def expected_action_count(dataset_path: Path = DEFAULT_DATASET_PATH) -> int:
     )
 
 
-def _valid_attempt(value: Any, minimum: int = 0) -> bool:
+def _valid_attempt(value: Any, minimum: int = 0) -> TypeGuard[int]:
     return isinstance(value, int) and not isinstance(value, bool) and value >= minimum
 
 

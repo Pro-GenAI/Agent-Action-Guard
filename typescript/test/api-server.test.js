@@ -133,3 +133,41 @@ test('serve command forwards host, port, and batch size', async () => {
 	assert.equal(calls[0].batchSize, 4);
 	assert.equal(calls[0].classifyActions, fakeClassify);
 });
+
+
+test('HTTP API hides classifier failures and preserves input validation', async (t) => {
+	for (const failure of [new Error('private detail'), new TypeError('secret'), 'private string']) {
+		const server = createApiServer({ classifyActions: async () => { throw failure; } });
+		await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+		t.after(() => new Promise((resolve) => server.close(resolve)));
+		const url = `http://127.0.0.1:${server.address().port}/v1/classify`;
+		const request = (body) => fetch(url, { method: 'POST', body: JSON.stringify(body) });
+		const response = await request({ action: {} });
+		assert.equal(response.status, 500);
+		assert.deepEqual(await response.json(), { error: 'Classification failed' });
+		const invalid = await request({ actions: [] });
+		assert.equal(invalid.status, 400);
+		assert.match((await invalid.json()).error, /non-empty/);
+	}
+});
+
+test('HTTP API rejects oversized and malformed requests before classification', async (t) => {
+	const calls = [];
+	const server = createApiServer({ maxBodyBytes: 64, classifyActions: async (actions, options) => {
+		calls.push(actions);
+		return fakeClassify(actions, options);
+	} });
+	await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+	t.after(() => new Promise((resolve) => server.close(resolve)));
+	const url = `http://127.0.0.1:${server.address().port}/v1/classify`;
+	const post = (body) => fetch(url, { method: 'POST', body });
+	const tooLarge = await post(JSON.stringify({ action: { x: 'a'.repeat(100) } }));
+	assert.equal(tooLarge.status, 413);
+	assert.equal((await tooLarge.json()).error, 'Request body too large');
+	const malformed = await post('{"action":');
+	assert.equal(malformed.status, 400);
+	assert.equal(calls.length, 0);
+	const valid = await post(JSON.stringify({ action: {} }));
+	assert.equal(valid.status, 200);
+	assert.equal(calls.length, 1);
+});

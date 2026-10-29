@@ -8,6 +8,7 @@ import json
 from collections.abc import Mapping
 from typing import Any, Callable
 
+from ._guard_utils import argument_builder, validate_threshold
 from .action_classifier import HarmfulActionException, is_action_harmful
 
 
@@ -46,8 +47,7 @@ def check_tool_action(
     conf_threshold: float = 0.5,
 ) -> tuple[str | None, float]:
     """Classify a tool call and raise when a harmful result meets the threshold."""
-    if not 0.0 <= conf_threshold <= 1.0:
-        raise ValueError("conf_threshold must be between 0.0 and 1.0")
+    validate_threshold(conf_threshold)
 
     label, confidence = is_action_harmful(build_action(name, arguments))
     if label and confidence >= conf_threshold:
@@ -95,13 +95,17 @@ def guard_callable(
     conf_threshold: float = 0.5,
 ) -> Callable[..., Any]:
     """Wrap a plain callable while preserving sync/async behavior and metadata."""
-    action_name = name or getattr(func, "__name__", "tool")
+    action_name = str(name or getattr(func, "__name__", "tool"))
+    validate_threshold(conf_threshold)
+    arguments = argument_builder(func)
 
-    if inspect.iscoroutinefunction(func):
+    if inspect.iscoroutinefunction(func) or inspect.iscoroutinefunction(
+        getattr(func, "__call__", None)
+    ):
 
         @functools.wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            payload = kwargs if kwargs else {"args": list(args)}
+            payload = arguments(args, kwargs)
             check_tool_action(action_name, payload, conf_threshold=conf_threshold)
             return await func(*args, **kwargs)
 
@@ -109,7 +113,7 @@ def guard_callable(
 
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        payload = kwargs if kwargs else {"args": list(args)}
+        payload = arguments(args, kwargs)
         check_tool_action(action_name, payload, conf_threshold=conf_threshold)
         return func(*args, **kwargs)
 

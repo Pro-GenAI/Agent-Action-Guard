@@ -13,7 +13,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import openai
 from rich.progress import (
@@ -127,7 +127,7 @@ def _save_cache_to_path(path: Path, cache_dict: Dict[str, Any]) -> None:
 
 def load_cache(path: Path) -> None:
     """Load evaluation cache from disk."""
-    global cache_path, cache
+    global cache_path, cache  # pylint: disable=global-statement
 
     cache_path = path
     cache = _load_cache_from_path(cache_path, model_key)
@@ -238,7 +238,7 @@ def attempt_tool_call(
                 {"role": "user", "content": prompt},
             ],
             model=model,
-            tools=[tool],  # type: ignore[arg-type]
+            tools=[cast(Any, tool)],
             tool_choice="required",
             max_completion_tokens=250,
         )
