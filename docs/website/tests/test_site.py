@@ -104,6 +104,19 @@ def meta_value(facts: _HTMLFacts, key: str, value: str) -> str | None:
 
 
 class SiteSeoTests(unittest.TestCase):
+    def test_sitemap_pages_have_short_unique_titles(self) -> None:
+        root = ElementTree.parse(SITE_ROOT / "sitemap.xml").getroot()
+        namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        titles = []
+        for node in root.findall("sm:url/sm:loc", namespace):
+            path = SITE_ROOT / urlsplit(node.text).path.lstrip("/") / "index.html"
+            with self.subTest(path=path):
+                title = "".join(parse(path).titles).strip()
+                self.assertTrue(title)
+                self.assertLess(len(title), 70)
+                titles.append(title)
+        self.assertEqual(len(titles), len(set(titles)))
+
     def test_public_pages_have_core_seo_metadata(self) -> None:
         cases = [
             (HOME, "https://action-guard.github.io/"),
