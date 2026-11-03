@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; connect-src 'none'; font-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-asNNwv3ZGGaeaAq73XEwOR/Y4IeIhvCtMaymbDzU39c='" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07080b" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="author" content="Agent Action Guard" />
+  <title>How to secure MCP tool calls before an AI agent executes them | Agent Action Guard</title>
+  <meta name="description" content="Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access." />
+  <link rel="canonical" href="https://action-guard.github.io/blog/secure-mcp-tool-calls/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Agent Action Guard" />
+  <meta property="og:title" content="How to secure MCP tool calls before an AI agent executes them" />
+  <meta property="og:description" content="Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access." />
+  <meta property="og:url" content="https://action-guard.github.io/blog/secure-mcp-tool-calls/" />
+  <meta property="og:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:secure_url" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Agent Action Guard — screen tool calls before execution" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How to secure MCP tool calls before an AI agent executes them" />
+  <meta name="twitter:description" content="Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access." />
+  <meta name="twitter:image" content="https://action-guard.github.io/assets/social-card.jpg" />
+  <meta name="twitter:image:alt" content="Agent Action Guard — screen tool calls before execution" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How to secure MCP tool calls before an AI agent executes them","description":"Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access.","url":"https://action-guard.github.io/blog/secure-mcp-tool-calls/","mainEntityOfPage":"https://action-guard.github.io/blog/secure-mcp-tool-calls/","datePublished":"2026-11-03","dateModified":"2026-11-03","author":{"@type":"Organization","name":"Agent Action Guard","url":"https://action-guard.github.io/"},"publisher":{"@type":"Organization","name":"Agent Action Guard","url":"https://action-guard.github.io/"},"image":"https://action-guard.github.io/assets/social-card.jpg","isPartOf":{"@type":"Blog","name":"Agent Action Guard Blog","url":"https://action-guard.github.io/blog/"}}</script>
+  <link rel="stylesheet" href="../../assets/fonts/fonts.css" />
+  <link rel="stylesheet" href="../../assets/blog.css?v=20261103-1" />
+  <script defer src="../../assets/vendor/highlight-11.11.1.min.js"></script>
+  <script defer src="../../assets/blog.js?v=20261103-1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header"><div class="container header-inner"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">A</span> Agent Action Guard</a><nav class="site-nav" aria-label="Primary"><a href="/">Home</a><a href="/docs/">Docs</a><a href="/blog/" aria-current="page">Blog</a><a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a></nav></div></header>
+<main id="main-content" tabindex="-1"><section class="article-hero"><div class="container"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/blog/">Blog</a><span aria-hidden="true">/</span><span>MCP security</span></nav><p class="eyebrow" style="margin-top:34px">MCP security / Problem → solution</p><h1>How to secure MCP tool calls before an AI agent executes them</h1><p class="lead">Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access.</p><div class="hero-meta"><span><time datetime="2026-11-03">3 November 2026</time></span><span>8 min read</span><span>Agent Action Guard editorial</span></div></div></section><div class="container article-layout"><article class="prose"><div class="insight"><strong>The problem</strong><p>A discoverable MCP tool may have more privileges than a task requires.</p><strong>The solution</strong><p>Keep permission checks in the client or server dispatch boundary.</p></div>
+<section id="boundary">
+<h2>Define the boundary between agents and tools</h2>
+<p>The <a href="https://modelcontextprotocol.io/introduction">Model Context Protocol (MCP)</a> standardizes access to external tools and context. It does not make every available tool safe for every caller. Tool descriptions and retrieved resources are not grants of authority.</p>
+<p>Before connecting a tool, decide which identities can call it, which resources it can access, what destinations are allowed, and which operations are reversible. Keep credentials scoped to the user and job.</p>
+</section>
+<section id="pipeline">
+<h2>A safe tool-dispatch pipeline</h2>
+<div class="pipeline" aria-label="Tool call checks"><span>Proposed call</span><span>Schema + identity</span><span>Risk screening</span><span>Approval</span><span>Execute + audit</span></div>
+<ol>
+<li><strong>Normalize:</strong> parse the tool name and full structured argument object; reject unknown or malformed values.</li>
+<li><strong>Authorize:</strong> enforce caller and tenant boundaries, exact permitted paths, and destination restrictions.</li>
+<li><strong>Screen:</strong> evaluate the final action before executing it and hold suspicious calls for review.</li>
+<li><strong>Approve:</strong> bind approvals to the exact validated arguments, not a generic tool name.</li>
+<li><strong>Dispatch:</strong> use least-privilege credentials and idempotency protection for retried side effects; record minimal audit metadata.</li>
+</ol>
+</section>
+<section id="implementation">
+<h2>Screen an MCP-compatible function action</h2>
+<p>Agent Action Guard supports structured action screening in Python and JavaScript. This Python example shows a checkpoint that your authorized MCP dispatcher can call:</p>
+<pre><code class="language-python">from agent_action_guard import is_action_harmful
+
+def screen_before_dispatch(tool_name, arguments):
+    action = {
+        "type": "function",
+        "function": {
+            "name": tool_name,
+            "arguments": arguments,
+        },
+    }
+    harmful, confidence = is_action_harmful(action)
+    if harmful:
+        raise PermissionError("Action blocked for review")
+    return confidence  # Not a grant of permission
+
+# Validate schema, caller, resource and destination first.
+# Screen the final arguments, enforce approval, then dispatch.</code></pre>
+<p>See the <a href="/docs/#javascript">JavaScript API</a>, <a href="/docs/#integrations">Python integrations</a>, and <a href="/docs/#hooks">native agent hooks</a>. Hook adapters must normalize actual native payloads and respect each host’s project-level trust gates.</p>
+</section>
+<section id="failure">
+<h2>Failure and privacy are part of security</h2>
+<p>Make malformed requests and unavailable screening services fail closed. Bound input size, concurrency, and request timeouts. The project’s built-in classifier HTTP service has <strong>no authentication, TLS, or rate limiting</strong>; do not expose it directly to the internet. Use an authenticated TLS-terminating proxy and trusted-client access if remote access is required.</p>
+<p>An external embedding provider may receive action text. Avoid logging credentials and tool arguments unnecessarily, and consult the <a href="/privacy/#runtime-data">runtime privacy notice</a> and <a href="/docs/#production">production guidance</a> before deployment.</p>
+</section></article><aside class="toc" aria-label="On this page"><strong>In this guide</strong><a href="#boundary">Define the boundary</a><a href="#pipeline">Safe tool dispatch</a><a href="#implementation">Screen MCP actions</a><a href="#failure">Failure and privacy</a><a class="toc-action" href="/blog/">← All articles</a></aside></div><section class="container article-end"><h2>Keep building</h2><p class="lead">Use these references when you implement the execution boundary in your own agent.</p><div class="article-end-links"><a href="/docs/">Integration documentation</a><a href="/blog/">All articles</a><a href="https://github.com/Pro-GenAI/Agent-Action-Guard">Source code</a></div></section></main>
+  <footer class="site-footer"><div class="container footer-inner"><p>© 2026 Agent Action Guard · Open-source research and engineering</p><nav aria-label="Footer"><a href="/terms/">Terms &amp; refunds</a><a href="/privacy/#cookies">Cookies</a><a href="/privacy/#data-requests">Data requests</a><a href="/privacy/">Privacy &amp; data use</a><a href="/docs/">Docs</a><a href="/blog/">Blog</a><a href="https://github.com/Pro-GenAI/Agent-Action-Guard">GitHub</a></nav></div></footer>
+</body>
+</html>

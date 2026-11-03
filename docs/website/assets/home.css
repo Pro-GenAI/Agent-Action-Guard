@@ -909,7 +909,7 @@ footer { border-top: 1px solid var(--line); background: #060709; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.6rem; padding-block: 2.6rem; }
 .foot p { margin: .5rem 0 0; color: var(--dim); font-size: .85rem; }
 .foot nav { display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; }
-.foot nav a { color: var(--muted); font: 500 .9rem/1 var(--font-b); transition: color .2s ease; }
+.foot nav a { display: inline-flex; align-items: center; min-height: 24px; color: var(--muted); font: 500 .9rem/1 var(--font-b); transition: color .2s ease; }
 .foot nav a:hover { color: var(--green-2); }
 
 /* ---------- reveal ---------- */

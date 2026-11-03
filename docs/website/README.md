@@ -17,6 +17,14 @@ node --test docs/website/tests/tabs.test.cjs
 
 Run that command from the repository root. All browser assets are served locally,
 including licensed fonts and Highlight.js 11.11.1; see `assets/THIRD_PARTY.md`.
+The `/blog/` index and four static `/blog/<slug>/` articles publish
+problem-led engineering guides on agent actions, framework selection,
+prompt injection, and MCP tool security. Articles share local `assets/blog.css`
+and `assets/blog.js`, with native GitHub Pages directory routes,
+JSON-LD Blog/BlogPosting metadata, same-origin social images, and
+locally bundled syntax highlighting. Add new articles to the index,
+cross-links, sitemap and SEO/browser regression checks.
+
 The `/privacy/` page documents website and runtime data handling, cookie use,
 and access/correction/deletion requests. `/terms/` explains licensing, current
 free-access/payment/refund scope, benchmark limitations, and project contact.

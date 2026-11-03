@@ -143,6 +143,15 @@ class SiteSeoTests(unittest.TestCase):
         self.assertIn("/docs/", home.links)
         self.assertIn("/", docs.links)
 
+    def test_homepage_and_docs_link_to_blog(self) -> None:
+        home = parse(HOME)
+        docs = parse(DOCS)
+        blog = parse(SITE_ROOT / "blog/index.html")
+        self.assertIn("/blog/", home.links)
+        self.assertIn("/blog/", docs.links)
+        self.assertIn("/", blog.links)
+        self.assertIn("/docs/", blog.links)
+
     def test_readme_links_to_docs(self) -> None:
         readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("https://action-guard.github.io/docs/", readme)
@@ -161,6 +170,11 @@ class SiteSeoTests(unittest.TestCase):
             {
                 "https://action-guard.github.io/",
                 "https://action-guard.github.io/docs/",
+                "https://action-guard.github.io/blog/",
+                "https://action-guard.github.io/blog/unsafe-ai-agent-actions/",
+                "https://action-guard.github.io/blog/best-ai-agent-frameworks-2026/",
+                "https://action-guard.github.io/blog/stop-prompt-injection/",
+                "https://action-guard.github.io/blog/secure-mcp-tool-calls/",
                 "https://action-guard.github.io/privacy/",
                 "https://action-guard.github.io/terms/",
             },

@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-for (const [port, paths] of [[8765, ['/', '/docs/', '/privacy/', '/terms/']], [8766, ['/', '/privacy/', '/terms/']]]) {
+for (const [port, paths] of [[8765, ['/', '/docs/', '/blog/', '/blog/unsafe-ai-agent-actions/', '/blog/best-ai-agent-frameworks-2026/', '/blog/stop-prompt-injection/', '/blog/secure-mcp-tool-calls/', '/privacy/', '/terms/']], [8766, ['/', '/privacy/', '/terms/']]]) {
   for (const route of paths) {
     test(`${port}${route} has a usable mobile/desktop page and sharing card`, async ({ page }) => {
       const errors = [];
@@ -30,6 +30,13 @@ test('homepage tabs retain keyboard focus and panel visibility', async ({ page }
     await expect(page.locator(panel)).toBeVisible();
     await page.keyboard.press('Home');
     await expect(tab).toBeFocused();
+  }
+});
+
+test('homepage footer links have usable touch target heights', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8765/');
+  for (const link of await page.locator('.foot nav a').all()) {
+    expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(24);
   }
 });
 
@@ -90,4 +97,24 @@ test('content security policy blocks injected scripts while bundled code remains
   await javascriptTab.click();
   await expect(javascriptTab).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#code-js')).toBeVisible();
+});
+
+test('blog index links to all articles and each table of contents targets a section', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8765/blog/');
+  const links = page.locator('main .card h2 a');
+  await expect(links).toHaveCount(4);
+  for (const route of [
+    '/blog/unsafe-ai-agent-actions/',
+    '/blog/best-ai-agent-frameworks-2026/',
+    '/blog/stop-prompt-injection/',
+    '/blog/secure-mcp-tool-calls/',
+  ]) {
+    await expect(page.locator('main .card h2 a[href="' + route + '"]')).toHaveCount(1);
+    await page.goto('http://127.0.0.1:8765' + route);
+    for (const href of await page.locator('.toc a[href^="#"]').evaluateAll((anchors) => anchors.map((a) => a.getAttribute('href')))) {
+      await expect(page.locator(href)).toHaveCount(1);
+    }
+    await expect(page.locator('.toc .toc-action')).toBeVisible();
+    await page.goto('http://127.0.0.1:8765/blog/');
+  }
 });
