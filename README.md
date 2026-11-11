@@ -6,8 +6,8 @@
 <p align="center"><em>Framework to block harmful AI agent actions before they cause harm — lightweight, real-time, easy-to-use.</em></p>
 
 [![PyPI](https://img.shields.io/pypi/v/agent-action-guard?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/agent-action-guard/)
-[![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.github.io/)
-[![Docs](https://img.shields.io/badge/Docs-2AE500?style=for-the-badge&logo=readthedocs&logoColor=111111)](https://action-guard.github.io/docs/)
+[![Website](https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=github&logoColor=white)](https://action-guard.pro-genai.com/)
+[![Docs](https://img.shields.io/badge/Docs-2AE500?style=for-the-badge&logo=readthedocs&logoColor=111111)](https://action-guard.pro-genai.com/docs/)
 [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@praneeth.v/the-agent-action-classifier-a-step-toward-safer-autonomous-ai-agents-1ec57a601449)
 [![npm](https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/agent-action-guard)
 <!-- [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=si1qF_zRa1E) -->
@@ -190,9 +190,9 @@ Share a quick note in [Discussions](https://github.com/Pro-GenAI/Agent-Action-Gu
 
 Licensed under [CC BY 4.0](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md). If you prefer not to provide attribution, send a brief acknowledgment to praneeth.vad@gmail.com with the details of your usage and the potential impact on your project.
 
-Website and runtime data handling is described in the [privacy notice](https://action-guard.github.io/privacy/). Both packages classify locally; configuring an embedding API sends action text to that endpoint. Pre-provision local embedding assets for offline use. The [privacy and launch-feature review](docs/PRIVACY_REVIEW.md) records the website audit and checks for future accounts, tracking, email, billing, or uploads.
+Website and runtime data handling is described in the [privacy notice](https://action-guard.pro-genai.com/privacy/). Both packages classify locally; configuring an embedding API sends action text to that endpoint. Pre-provision local embedding assets for offline use. The [privacy and launch-feature review](docs/PRIVACY_REVIEW.md) records the website audit and checks for future accounts, tracking, email, billing, or uploads.
 
-See [project terms and payment/refund scope](https://action-guard.github.io/terms/), [cookie information](https://action-guard.github.io/privacy/#cookies), and [access/correction/deletion requests](https://action-guard.github.io/privacy/#data-requests). The review includes the twenty-area launch checklist and accessibility checks; these describe the current implementation rather than certifying legal compliance.
+See [project terms and payment/refund scope](https://action-guard.pro-genai.com/terms/), [cookie information](https://action-guard.pro-genai.com/privacy/#cookies), and [access/correction/deletion requests](https://action-guard.pro-genai.com/privacy/#data-requests). The review includes the twenty-area launch checklist and accessibility checks; these describe the current implementation rather than certifying legal compliance.
 
 The [website launch review](docs/LAUNCH_REVIEW.md) records responsive/link checks, sharing previews, browser-test commands, and verified source backups. Both static sites remain tracking-free and use the existing public contact email.
 

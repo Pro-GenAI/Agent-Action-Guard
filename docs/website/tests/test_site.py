@@ -119,14 +119,14 @@ class SiteSeoTests(unittest.TestCase):
 
     def test_public_pages_have_core_seo_metadata(self) -> None:
         cases = [
-            (HOME, "https://action-guard.github.io/"),
-            (DOCS, "https://action-guard.github.io/docs/"),
+            (HOME, "https://action-guard.pro-genai.com/"),
+            (DOCS, "https://action-guard.pro-genai.com/docs/"),
             (
                 SITE_ROOT / "privacy/index.html",
-                "https://action-guard.github.io/privacy/",
+                "https://action-guard.pro-genai.com/privacy/",
             ),
             (LEADERBOARD, "https://agent-leaderboard.github.io/"),
-            (SITE_ROOT / "terms/index.html", "https://action-guard.github.io/terms/"),
+            (SITE_ROOT / "terms/index.html", "https://action-guard.pro-genai.com/terms/"),
             (
                 LEADERBOARD.parent / "terms/index.html",
                 "https://agent-leaderboard.github.io/terms/",
@@ -167,13 +167,13 @@ class SiteSeoTests(unittest.TestCase):
 
     def test_readme_links_to_docs(self) -> None:
         readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
-        self.assertIn("https://action-guard.github.io/docs/", readme)
+        self.assertIn("https://action-guard.pro-genai.com/docs/", readme)
 
     def test_robots_and_sitemap_expose_public_pages(self) -> None:
         robots = (SITE_ROOT / "robots.txt").read_text(encoding="utf-8")
         self.assertIn("User-agent: *", robots)
         self.assertIn("Allow: /", robots)
-        self.assertIn("Sitemap: https://action-guard.github.io/sitemap.xml", robots)
+        self.assertIn("Sitemap: https://action-guard.pro-genai.com/sitemap.xml", robots)
 
         root = ElementTree.parse(SITE_ROOT / "sitemap.xml").getroot()
         namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
@@ -181,15 +181,15 @@ class SiteSeoTests(unittest.TestCase):
         self.assertEqual(
             urls,
             {
-                "https://action-guard.github.io/",
-                "https://action-guard.github.io/docs/",
-                "https://action-guard.github.io/blog/",
-                "https://action-guard.github.io/blog/unsafe-ai-agent-actions/",
-                "https://action-guard.github.io/blog/best-ai-agent-frameworks-2026/",
-                "https://action-guard.github.io/blog/stop-prompt-injection/",
-                "https://action-guard.github.io/blog/secure-mcp-tool-calls/",
-                "https://action-guard.github.io/privacy/",
-                "https://action-guard.github.io/terms/",
+                "https://action-guard.pro-genai.com/",
+                "https://action-guard.pro-genai.com/docs/",
+                "https://action-guard.pro-genai.com/blog/",
+                "https://action-guard.pro-genai.com/blog/unsafe-ai-agent-actions/",
+                "https://action-guard.pro-genai.com/blog/best-ai-agent-frameworks-2026/",
+                "https://action-guard.pro-genai.com/blog/stop-prompt-injection/",
+                "https://action-guard.pro-genai.com/blog/secure-mcp-tool-calls/",
+                "https://action-guard.pro-genai.com/privacy/",
+                "https://action-guard.pro-genai.com/terms/",
             },
         )
 

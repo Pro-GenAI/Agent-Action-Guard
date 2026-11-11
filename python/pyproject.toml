@@ -65,7 +65,7 @@ required-environments = [
 agent-action-guard = "agent_action_guard.cli:main"
 
 [project.urls]
-Homepage = "https://action-guard.github.io/"
+Homepage = "https://action-guard.pro-genai.com/"
 Issues = "https://github.com/Pro-GenAI/Agent-Action-Guard/issues"
 Repository = "https://github.com/Pro-GenAI/Agent-Action-Guard"
 

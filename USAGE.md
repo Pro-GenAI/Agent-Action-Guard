@@ -495,11 +495,11 @@ action text to your configured endpoint. Review its privacy/retention terms
 before screening sensitive actions. GGUF takes precedence over ONNX, which takes
 precedence over API configuration. Optional LLM evaluations send actions to model
 providers and retain result caches. Your application's logging and HTTP-service
-access/retention remain under your control. See the [privacy notice](https://action-guard.github.io/privacy/)
+access/retention remain under your control. See the [privacy notice](https://action-guard.pro-genai.com/privacy/)
 and [feature review](docs/PRIVACY_REVIEW.md).
 
 For access, correction, or deletion of personal information sent to the
-maintainer, use the [data-request contact route](https://action-guard.github.io/privacy/#data-requests).
+maintainer, use the [data-request contact route](https://action-guard.pro-genai.com/privacy/#data-requests).
 For local usage, review and remove your own saved action files, CLI output,
 application logs, and evaluation caches when no longer needed. Downloaded model
 assets under `~/.cache/agent-action-guard/` are separate from those files. A

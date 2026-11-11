@@ -143,7 +143,7 @@ class AccessibilityTests(unittest.TestCase):
         self.assertIn("not a guarantee for every workload", home)
         board = (ROOTS[1] / "index.html").read_text()
         self.assertNotIn("Full Report", board)
-        self.assertIn('href="https://action-guard.github.io/docs/#evaluation"', board)
+        self.assertIn('href="https://action-guard.pro-genai.com/docs/#evaluation"', board)
         self.assertIn('aria-label="View source on GitHub"', board)
         # Progressive enhancement leaves the benchmark visible when scripting is disabled.
         base_reveal = re.search(r"\n\s*\.reveal\s*\{([^}]+)\}", board)[1]

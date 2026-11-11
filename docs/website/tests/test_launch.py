@@ -18,7 +18,7 @@ from test_site import meta_value, parse
 
 REPO = Path(__file__).resolve().parents[3]
 SITES = {
-    "action-guard.github.io": REPO / "docs/website",
+    "action-guard.pro-genai.com": REPO / "docs/website",
     "agent-leaderboard.github.io": REPO / "docs/agent-leaderboard-site",
 }
 
@@ -162,7 +162,7 @@ class LaunchTests(unittest.TestCase):
                         self.assertEqual(image.get("loading"), "lazy")
 
     def test_optimized_demo_matches_the_verified_source_pair(self):
-        assets = SITES["action-guard.github.io"] / "assets"
+        assets = SITES["action-guard.pro-genai.com"] / "assets"
         manifest = json.loads((assets / "demo-optimization.json").read_text())
         for name, key in (
             ("source", "source_sha256"),
@@ -184,14 +184,14 @@ class LaunchTests(unittest.TestCase):
         self.assertIn('src="assets/demo.gif"', html)
 
     def test_documented_runtime_matches_package_minimum(self):
-        html = (SITES["action-guard.github.io"] / "docs/index.html").read_text()
+        html = (SITES["action-guard.pro-genai.com"] / "docs/index.html").read_text()
         self.assertNotIn("Python 3.8", html)
         self.assertIn("Python 3.10 through 3.14", html)
         project = (REPO / "python/pyproject.toml").read_text()
         self.assertRegex(project, r'requires-python\s*=\s*"[^\"]*3\.10')
 
     def test_docs_contain_wide_code_and_tables_at_small_breakpoints(self):
-        html = (SITES["action-guard.github.io"] / "docs/index.html").read_text()
+        html = (SITES["action-guard.pro-genai.com"] / "docs/index.html").read_text()
         self.assertIn("grid-template-columns: minmax(0, 1fr)", html)
         self.assertIn("article, .card { min-width: 0; }", html)
         self.assertIn(".table-scroll { max-width: 100%; overflow-x: auto; }", html)
@@ -308,7 +308,7 @@ class ExternalLinkTests(unittest.TestCase):
     def test_discovery_deduplicates_and_leaves_own_sites_for_local_checks(self):
         parser = external.Links()
         parser.feed(
-            '<a href="https://example.com/a#one">one</a><a href="https://example.com/a#two">two</a><a href="https://action-guard.github.io/terms/">own</a><a href="mailto:a@example.com">email</a>'
+            '<a href="https://example.com/a#one">one</a><a href="https://example.com/a#two">two</a><a href="https://action-guard.pro-genai.com/terms/">own</a><a href="mailto:a@example.com">email</a>'
         )
         self.assertEqual(parser.urls, {"https://example.com/a"})
 

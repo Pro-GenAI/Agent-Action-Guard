@@ -11,7 +11,7 @@ from xml.etree import ElementTree
 
 DOCS_ROOT = Path(__file__).resolve().parents[2]
 SITES = {
-    "action-guard.github.io": DOCS_ROOT / "website",
+    "action-guard.pro-genai.com": DOCS_ROOT / "website",
     "agent-leaderboard.github.io": DOCS_ROOT / "agent-leaderboard-site",
 }
 
@@ -176,7 +176,7 @@ class PrivacyTests(unittest.TestCase):
                 "font-display: swap", (root / "assets/fonts/fonts.css").read_text()
             )
             self.assertTrue((root / "assets/THIRD_PARTY.md").is_file())
-        vendor = SITES["action-guard.github.io"] / "assets/vendor"
+        vendor = SITES["action-guard.pro-genai.com"] / "assets/vendor"
         self.assertIn("11.11.1", (vendor / "highlight-11.11.1.min.js").read_text())
         self.assertIn("Redistribution", (vendor / "highlight-LICENSE").read_text())
         assets = SITES["agent-leaderboard.github.io"] / "assets"

@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parents[2]
-SITE_HOSTS = {"action-guard.github.io", "agent-leaderboard.github.io"}
+SITE_HOSTS = {"action-guard.pro-genai.com", "agent-leaderboard.github.io"}
 
 
 class Links(HTMLParser):

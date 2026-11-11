@@ -59,11 +59,11 @@ License
 - See LICENSE.md for full terms.
 
 Blog resources
-- Editorial index: https://action-guard.github.io/blog/
-- Unsafe agent actions: https://action-guard.github.io/blog/unsafe-ai-agent-actions/
-- Choosing AI agent frameworks in 2026: https://action-guard.github.io/blog/best-ai-agent-frameworks-2026/
-- Prompt injection: https://action-guard.github.io/blog/stop-prompt-injection/
-- Secure MCP tool calls: https://action-guard.github.io/blog/secure-mcp-tool-calls/
+- Editorial index: https://action-guard.pro-genai.com/blog/
+- Unsafe agent actions: https://action-guard.pro-genai.com/blog/unsafe-ai-agent-actions/
+- Choosing AI agent frameworks in 2026: https://action-guard.pro-genai.com/blog/best-ai-agent-frameworks-2026/
+- Prompt injection: https://action-guard.pro-genai.com/blog/stop-prompt-injection/
+- Secure MCP tool calls: https://action-guard.pro-genai.com/blog/secure-mcp-tool-calls/
 
 Canonical docs for agents
 - AGENTS.md

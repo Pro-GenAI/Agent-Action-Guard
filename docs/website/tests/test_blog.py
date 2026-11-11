@@ -16,7 +16,7 @@ SLUGS = (
     "stop-prompt-injection",
     "secure-mcp-tool-calls",
 )
-ORIGIN = "https://action-guard.github.io"
+ORIGIN = "https://action-guard.pro-genai.com"
 
 
 class PageFacts(HTMLParser):

@@ -33,7 +33,7 @@ The Docker image runs as UID 10001 with a writable `/home/aag` cache. It copies 
 
 Both static sites already contain `/privacy/` and `/terms/` in this checkout. Those directories and their same-origin assets must be published to the existing repositories for the public 404s to disappear:
 
-- `docs/website/` → `action-guard/action-guard.github.io`
+- `docs/website/` → `action-guard/action-guard.github.io` (GitHub Pages repository; public site: `https://action-guard.pro-genai.com/`)
 - `docs/agent-leaderboard-site/` → `agent-leaderboard/agent-leaderboard.github.io`
 
 Validated deployment ZIPs are available locally in `.cache/security-fixes/deploy/`, with file checksums in `manifest.json`. They contain public site files and policies, without tests, tool environments, or credentials.
