@@ -150,5 +150,21 @@ class BlogTests(unittest.TestCase):
         self.assertIn('role="region" tabindex="0"', frameworks)
 
 
+    def test_blog_end_of_page_calls_to_action(self):
+        """Every HTML and Markdown blog page should invite readers to the main site."""
+        for slug in (None, *SLUGS):
+            folder = BLOG / slug if slug else BLOG
+            html = (folder / "index.html").read_text(encoding="utf-8")
+            markdown = (folder / "index.md").read_text(encoding="utf-8")
+            canonical = ORIGIN + "/blog/" + (slug + "/" if slug else "")
+            main = html[html.index("<main"):html.index("</main>")]
+            with self.subTest(slug=slug or "index"):
+                self.assertIn('class="lead main-site-cta"', main[-1500:])
+                self.assertIn('href="/">Agent Action Guard main page</a>', main[-1500:])
+                self.assertIn("## Continue on the main website", markdown)
+                self.assertIn(f"[Visit the Agent Action Guard main page]({ORIGIN}/)", markdown)
+                self.assertTrue(markdown.rstrip().endswith(f"]({canonical})**."))
+
+
 if __name__ == "__main__":
     unittest.main()

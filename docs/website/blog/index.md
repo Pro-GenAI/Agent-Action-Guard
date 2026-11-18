@@ -47,3 +47,9 @@ MCP security · 8 min read
 Build secure MCP tool execution with argument validation, least privilege, action screening, approvals, safe failure handling, and bounded access.
 
 A discoverable MCP tool may have more privileges than a task requires. Read solution →
+
+## Continue on the main website
+
+Ready to see how these ideas work in practice? [Visit the Agent Action Guard main page](https://action-guard.pro-genai.com/) to explore runtime screening, practical examples, and ways to get started.
+
+For the complete reading experience, **[open the blog on the main website](https://action-guard.pro-genai.com/blog/)**.

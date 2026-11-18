@@ -89,3 +89,9 @@ Use these references when you implement the execution boundary in your own agent
 [Integration documentation](https://action-guard.pro-genai.com/docs/)
 [All articles](https://action-guard.pro-genai.com/blog/)
 [Source code](https://github.com/Pro-GenAI/Agent-Action-Guard)
+
+## Continue on the main website
+
+Ready to see how these ideas work in practice? [Visit the Agent Action Guard main page](https://action-guard.pro-genai.com/) to explore runtime screening, practical examples, and ways to get started.
+
+For the complete reading experience, **[open this guide on the main website](https://action-guard.pro-genai.com/blog/best-ai-agent-frameworks-2026/)**.
