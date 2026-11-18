@@ -51,3 +51,15 @@ from the repository root; CI checks it with `--check`. Script execution and
 same-origin assets are exercised by the browser tests. See
 [security maintenance](../security-maintenance.md) for deployment requirements
 and the response-header controls that GitHub Pages cannot configure here.
+
+## Markdown editions and AI discovery
+
+Every public content page (`index.html`) has a matching `index.md` with the
+full text of the page, its canonical HTML backlink, and useful code examples.
+The HTML head advertises the Markdown alternate, and its footer links to it.
+`llms.txt` lists both addresses for each page, including the leaderboard.
+Keep HTML, Markdown, and `llms.txt` synchronized whenever content changes.
+
+Only canonical HTML pages belong in `sitemap.xml` to avoid submitting duplicate
+representations for search indexing. Markdown editions have no Jekyll front matter
+so static hosting can serve the original plain-text source.

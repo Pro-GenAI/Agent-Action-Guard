@@ -1,0 +1,22 @@
+# HarmActionsEval — AI Agent Safety Leaderboard
+
+> HarmActionsEval reports SafeActions@1 benchmark scores for autonomous agents executing tools under adversarial conditions. Results are specific to the published benchmark setup, not a guarantee of real-world agent safety.
+
+The HTML pages are canonical; Markdown mirrors link back to the corresponding HTML URLs.
+
+## Leaderboard pages — HTML and Markdown
+
+- [HarmActionsEval leaderboard — HTML](https://agent-leaderboard.github.io/) | [Markdown](https://agent-leaderboard.github.io/index.md) — HarmActionsEval is an AI agent safety leaderboard benchmarking how often autonomous LLM agents avoid harmful tool actions under adversarial pressure.
+- [Privacy and data use — HTML](https://agent-leaderboard.github.io/privacy/) | [Markdown](https://agent-leaderboard.github.io/privacy/index.md) — How Agent Action Guard
+- [Project terms — HTML](https://agent-leaderboard.github.io/terms/) | [Markdown](https://agent-leaderboard.github.io/terms/index.md) — Agent Action Guard project terms: open-source license, free package access, payment and refund scope, benchmark limitations, and contact details.
+
+## Main project and implementation guides
+
+- [Agent Action Guard home — HTML](https://action-guard.pro-genai.com/) | [Markdown](https://action-guard.pro-genai.com/index.md) — Classify proposed agent tool calls with a lightweight Python and JavaScript runtime, local inference, and native pre-tool-use hooks.
+- [Documentation — HTML](https://action-guard.pro-genai.com/docs/) | [Markdown](https://action-guard.pro-genai.com/docs/index.md) — Official Agent Action Guard documentation: install the Python or JavaScript package, screen AI agent tool calls, configure embedding backends, integrations, hooks, CLI, and HTTP API.
+- [Engineering blog index — HTML](https://action-guard.pro-genai.com/blog/) | [Markdown](https://action-guard.pro-genai.com/blog/index.md) — Practical engineering guides to AI agent safety, prompt injection, secure MCP tools, and choosing AI agent frameworks in 2026.
+
+- [HarmActionsEval source](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/python/agent_action_guard/harmactionseval.py): Benchmark implementation.
+- [Repository](https://github.com/Pro-GenAI/Agent-Action-Guard): Code, methodology, and integration notes.
+
+Read the [main site's llms.txt](https://action-guard.pro-genai.com/llms.txt) for individual security guides and integration documentation.

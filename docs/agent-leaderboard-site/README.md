@@ -35,3 +35,11 @@ from the repository root; CI checks it with `--check`. Script execution and
 same-origin assets are exercised by the browser tests. See
 [security maintenance](../security-maintenance.md) for deployment requirements
 and the response-header controls that GitHub Pages cannot configure here.
+
+## Markdown editions and AI discovery
+
+Each public content page has a sibling `index.md` containing its substantive
+text, leaderboard snapshot when applicable, and a link to the canonical HTML.
+Pages advertise the Markdown alternative in HTML metadata and footer links.
+Update both editions and `llms.txt` together with leaderboard or policy edits.
+The sitemap lists canonical HTML URLs rather than duplicate Markdown mirrors.
