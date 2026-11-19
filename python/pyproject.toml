@@ -66,6 +66,7 @@ agent-action-guard = "agent_action_guard.cli:main"
 
 [project.urls]
 Homepage = "https://action-guard.pro-genai.com/"
+Documentation = "https://action-guard.pro-genai.com/docs/"
 Issues = "https://github.com/Pro-GenAI/Agent-Action-Guard/issues"
 Repository = "https://github.com/Pro-GenAI/Agent-Action-Guard"
 
