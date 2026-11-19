@@ -257,6 +257,8 @@ Action Guard is a learned classifier, not a complete security boundary. For high
 
 ## Learn more
 
+- [Website](https://action-guard.pro-genai.com/)
+- [Documentation](https://action-guard.pro-genai.com/docs/)
 - [Main repository](https://github.com/Pro-GenAI/Agent-Action-Guard)
 - [Full usage and configuration](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/USAGE.md)
 - [Runnable JavaScript example](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/typescript/examples/basic-usage.js)
