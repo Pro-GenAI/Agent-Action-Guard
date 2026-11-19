@@ -11,7 +11,6 @@ SITES = (
 
 class MarkdownDiscoverabilityTests(unittest.TestCase):
     def test_all_public_html_pages_have_discoverable_markdown_mirrors(self):
-        root_index = (REPO / "llms.txt").read_text(encoding="utf-8")
         for site, origin in SITES:
             site_index = (site / "llms.txt").read_text(encoding="utf-8")
             self.assertTrue(site_index.startswith("# "))
@@ -31,9 +30,20 @@ class MarkdownDiscoverabilityTests(unittest.TestCase):
                     self.assertTrue(markdown.startswith("# "))
                     self.assertIn(f"]({canonical})", markdown)
                     self.assertGreater(len(markdown), 350)
-                    for index in (site_index, root_index):
-                        self.assertIn(f"]({canonical})", index)
-                        self.assertIn(f"]({md_url})", index)
+                    self.assertIn(f"]({canonical})", site_index)
+                    self.assertIn(f"]({md_url})", site_index)
+
+    def test_ai_resource_index_is_hosted_by_the_website(self):
+        self.assertFalse((REPO / "llms.txt").exists())
+        main_site = REPO / "docs" / "website" / "llms.txt"
+        content = main_site.read_text(encoding="utf-8")
+        for resource in (
+            "python/README.md",
+            "python/agent_action_guard/harmactionseval.py",
+            "https://agent-leaderboard.github.io/llms.txt",
+        ):
+            with self.subTest(resource=resource):
+                self.assertIn(resource, content)
 
     def test_markdown_content_retains_docs_and_rankings(self):
         docs = (SITES[0][0] / "docs" / "index.md").read_text(encoding="utf-8")

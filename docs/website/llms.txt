@@ -50,3 +50,9 @@ The HTML pages below are canonical. Their Markdown counterparts provide equivale
 - [License](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md): CC BY 4.0.
 - [Privacy HTML](https://action-guard.pro-genai.com/privacy/) | [Privacy Markdown](https://action-guard.pro-genai.com/privacy/index.md).
 - [Terms HTML](https://action-guard.pro-genai.com/terms/) | [Terms Markdown](https://action-guard.pro-genai.com/terms/index.md).
+
+## Additional repository documentation
+
+- [Python runtime README](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/python/README.md).
+- [HarmActionsEval benchmark implementation](https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/python/agent_action_guard/harmactionseval.py).
+- [Leaderboard llms.txt](https://agent-leaderboard.github.io/llms.txt).

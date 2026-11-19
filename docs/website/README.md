@@ -57,8 +57,10 @@ and the response-header controls that GitHub Pages cannot configure here.
 Every public content page (`index.html`) has a matching `index.md` with the
 full text of the page, its canonical HTML backlink, and useful code examples.
 The HTML head advertises the Markdown alternate, and its footer links to it.
-`llms.txt` lists both addresses for each page, including the leaderboard.
-Keep HTML, Markdown, and `llms.txt` synchronized whenever content changes.
+`docs/website/llms.txt` (served as `https://action-guard.pro-genai.com/llms.txt`)
+lists both addresses for each page, including the leaderboard, plus repository
+resources. Do not duplicate this file at the repository root. Keep HTML,
+Markdown, and this website discovery index synchronized whenever content changes.
 
 Only canonical HTML pages belong in `sitemap.xml` to avoid submitting duplicate
 representations for search indexing. Markdown editions have no Jekyll front matter
