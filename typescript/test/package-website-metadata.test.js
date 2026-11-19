@@ -15,5 +15,8 @@ test('npm package metadata points to the canonical project website', () => {
 test('npm package README links to the canonical website and docs', () => {
 	assert.ok(readme.includes(`[Website](${CANONICAL_WEBSITE})`));
 	assert.ok(readme.includes(`[Documentation](${CANONICAL_WEBSITE}docs/)`));
-	assert.doesNotMatch(readme, /https?:\\/\\/action-guard\\.github\\.io(?:[/?#]|$)/i);
+	assert.doesNotMatch(
+		readme,
+		new RegExp('https?://action-guard[.]github[.]io(?:[/?#]|$)', 'i'),
+	);
 });
