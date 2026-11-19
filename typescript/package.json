@@ -1,6 +1,6 @@
 {
 	"name": "agent-action-guard",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "TypeScript runtime for screening AI agent actions as safe, harmful, or unethical.",
 	"homepage": "https://action-guard.pro-genai.com/",
 	"type": "module",
