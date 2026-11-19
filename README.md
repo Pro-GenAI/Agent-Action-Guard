@@ -55,6 +55,8 @@ agent-action-guard hooks install --target codex
 
 OpenClaw and Hermes intentionally retain their project-plugin trust gates. After installing the OpenClaw hook, explicitly enable `agent-action-guard` with `openclaw plugins enable agent-action-guard`. For Hermes, start trusted repositories with `HERMES_ENABLE_PROJECT_PLUGINS=1` so the generated `.hermes/plugins/agent-action-guard/` plugin is loaded.
 
+Want a harness that has action-guard built-in? Try [Agent-RT](https://github.com/Pro-GenAI/Agent-RT).
+
 Want to run the evaluation benchmark too?
 
 ```bash

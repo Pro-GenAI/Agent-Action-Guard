@@ -169,6 +169,21 @@ class SiteSeoTests(unittest.TestCase):
         readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("https://action-guard.pro-genai.com/docs/", readme)
 
+    def test_agent_rt_harness_callout_is_present(self) -> None:
+        agent_rt_url = "https://github.com/Pro-GenAI/Agent-RT"
+        message = "Want a harness that has action-guard built-in? Try "
+        readme = (SITE_ROOT.parents[1] / "README.md").read_text(encoding="utf-8")
+        markdown = (SITE_ROOT / "index.md").read_text(encoding="utf-8")
+        homepage = HOME.read_text(encoding="utf-8")
+
+        for document in (readme, markdown):
+            self.assertIn(f"{message}[Agent-RT]({agent_rt_url}).", document)
+        self.assertIn(
+            f'{message}<a class="text-link" href="{agent_rt_url}">Agent-RT</a>.',
+            homepage,
+        )
+        self.assertIn(agent_rt_url, parse(HOME).links)
+
     def test_robots_and_sitemap_expose_public_pages(self) -> None:
         robots = (SITE_ROOT / "robots.txt").read_text(encoding="utf-8")
         self.assertIn("User-agent: *", robots)

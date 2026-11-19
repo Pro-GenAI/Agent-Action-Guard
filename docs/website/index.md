@@ -378,5 +378,7 @@ Free · Open source · Built for agents
 
 Add Agent Action Guard before production execution and give your autonomous systems a dedicated action-safety checkpoint.
 
+Want a harness that has action-guard built-in? Try [Agent-RT](https://github.com/Pro-GenAI/Agent-RT).
+
 [Install Agent Action Guard](https://github.com/Pro-GenAI/Agent-Action-Guard?tab=readme-ov-file#-usage)
 [Read the Paper](https://www.researchgate.net/publication/396525269_Agent_Action_Guard_Safe_AI_Agents_through_Action_Classifier)
