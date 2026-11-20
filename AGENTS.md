@@ -101,6 +101,8 @@ await ensureActionSafety(action, { raiseException: true });
 
 ## Development & CI
 
+- `typescript/test/makefile.test.js` checks that both TypeScript test targets pass the configured worker count.
+
 - CircleCI `.circleci/config.yml` uses Apple Silicon (arm64) macOS runners, unlike the regular local Intel Mac (x86_64) tests; architecture-specific installation and runtime behavior must be validated separately. The current CircleCI pipeline's four jobs run on Apple Silicon macOS by default (`m4pro.medium`, Xcode 27; `uname -m` must be `arm64`): Python and Node test matrices (`make test-matrix`) plus Python and TypeScript security checks (`make install-dev` then `make security`). CircleCI's Apple Silicon (arm64) environment is different from the regular/local Intel Mac (x86_64) test environment: passing tests or security checks on Intel macOS does not verify CircleCI Apple Silicon compatibility. Investigate and validate Apple Silicon-specific dependency installation, native binary support, and security scanner behavior independently. The Node jobs provision nvm in `BASH_ENV`, and security reports are stored as CircleCI artifacts. Never refer to test scripts or security commands copied from other projects that do not exist here.
 
 - Formatting and linting: run `make format` and `make lint` from `python/`.
