@@ -11,6 +11,8 @@ SECURITY_BIN := bin
 SECURITY_PY := python
 endif
 NODE_TEST_VERSIONS ?=
+# Cap default concurrency for native ONNX tests; users can override TEST_WORKERS.
+TEST_WORKERS ?= $(shell node -p 'Math.max(2, Math.min(require("node:os").availableParallelism(), 4))')
 
 .PHONY: verify install install-dev format lint quality test test-matrix security dependency-matrix dependency-matrix-bounds latency-backends
 
@@ -36,10 +38,10 @@ lint:
 	npm run lint
 
 test:
-	npm test
+	npm test -- --test-concurrency=$(TEST_WORKERS)
 
 test-matrix:
-	NODE_TEST_VERSIONS="$(NODE_TEST_VERSIONS)" npm run test:all-versions
+	NODE_TEST_VERSIONS="$(NODE_TEST_VERSIONS)" TEST_WORKERS="$(TEST_WORKERS)" npm run test:all-versions
 
 security:
 	PATH="$(CURDIR)/$(SECURITY_VENV)/$(SECURITY_BIN):$(CURDIR)/node_modules/.bin:$$PATH" npm run security:audit -- $(SECURITY_ARGS)

@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+ROOT_MAKEFILE = (ROOT / "Makefile").read_text(encoding="utf-8")
+
 PACKAGE_STEPS = ["install-dev", "test", "test-matrix", "security"]
 ROOT_STEPS = ["-C python verify", "-C typescript verify"]
 
@@ -49,3 +51,9 @@ def test_verify_runs_in_order_and_stops_on_failure(
     expected = steps if failure_index is None else steps[: failure_index + 1]
     assert log.read_text(encoding="utf-8").splitlines() == expected
     assert (result.returncode == 0) == (failure_index is None), result.stderr
+
+
+def test_root_make_test_runs_python_and_typescript_concurrently():
+    assert "$(MAKE) -j2 test-python test-typescript" in ROOT_MAKEFILE
+    assert "test-python:\n\t$(MAKE) -C python test" in ROOT_MAKEFILE
+    assert "test-typescript:\n\t$(MAKE) -C typescript test" in ROOT_MAKEFILE

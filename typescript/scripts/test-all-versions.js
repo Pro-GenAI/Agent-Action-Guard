@@ -102,7 +102,21 @@ export function findInstalledNodeDir(installsDir, version, readdir = fs.readdirS
 		: null;
 }
 
-export function buildDirectNodeTestCommand({ version, testFiles }) {
+export function normalizeTestConcurrency(value) {
+	if (value === undefined || value === null || value === '') {
+		return null;
+	}
+	if (!/^[1-9]\d*$/.test(String(value)) || !Number.isSafeInteger(Number(value))) {
+		throw new Error('TEST_WORKERS must be a positive integer');
+	}
+	return Number(value);
+}
+
+export function buildDirectNodeTestCommand({
+	version,
+	testFiles,
+	testConcurrency,
+}) {
 	const quotedTests = testFiles.map(shellQuote).join(' ');
 	return [
 		'set -euo pipefail',
@@ -114,7 +128,7 @@ export function buildDirectNodeTestCommand({ version, testFiles }) {
 		'echo "Using Node $actual ($(npm --version | sed \'s/^/npm /\'))"',
 		'ONNXRUNTIME_NODE_INSTALL=skip npm ci --no-audit --no-fund',
 		'npm run build',
-		`node --test ${quotedTests}`,
+		`node --test ${testConcurrency ? `--test-concurrency=${testConcurrency} ` : ''}${quotedTests}`,
 	].join('\n');
 }
 
@@ -140,7 +154,12 @@ export function shellQuote(value) {
 	return `'${String(value).replaceAll("'", `'"'"'`)}'`;
 }
 
-export function buildNvmTestCommand({ nvmScript, version, testFiles }) {
+export function buildNvmTestCommand({
+	nvmScript,
+	version,
+	testFiles,
+	testConcurrency,
+}) {
 	const quotedTests = testFiles.map(shellQuote).join(' ');
 	return [
 		'set -euo pipefail',
@@ -153,7 +172,7 @@ export function buildNvmTestCommand({ nvmScript, version, testFiles }) {
 		'echo "Using Node $actual ($(npm --version | sed \'s/^/npm /\'))"',
 		'ONNXRUNTIME_NODE_INSTALL=skip npm ci --no-audit --no-fund',
 		'npm run build',
-		`node --test ${quotedTests}`,
+		`node --test ${testConcurrency ? `--test-concurrency=${testConcurrency} ` : ''}${quotedTests}`,
 	].join('\n');
 }
 
@@ -173,6 +192,7 @@ export function runNodeVersionMatrix({
 		: (nvmScript ?? resolveNvmScript(env));
 	const selectedTestFiles = testFiles ?? discoverTestFiles();
 	const continueOnFailure = env.CONTINUE_ON_FAILURE !== '0';
+	const testConcurrency = normalizeTestConcurrency(env.TEST_WORKERS);
 	const succeeded = [];
 	const failed = [];
 
@@ -204,13 +224,14 @@ export function runNodeVersionMatrix({
 				}
 				continue;
 			}
-			command = buildDirectNodeTestCommand({ version, testFiles: selectedTestFiles });
+			command = buildDirectNodeTestCommand({ version, testFiles: selectedTestFiles, testConcurrency });
 			runEnv = { ...env, AAG_NODE_DIR: nodeDir };
 		} else {
 			command = buildNvmTestCommand({
 				nvmScript: selectedNvmScript,
 				version,
 				testFiles: selectedTestFiles,
+				testConcurrency,
 			});
 		}
 		const result = spawn('bash', ['-lc', command], {

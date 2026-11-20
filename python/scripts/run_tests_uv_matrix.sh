@@ -5,6 +5,8 @@ PYTHON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_ROOT="${VENV_ROOT:-$PYTHON_DIR/.uv-venvs}"
 CONTINUE_ON_FAILURE="${CONTINUE_ON_FAILURE:-1}"
 UV="${UV:-uv}"
+TEST_WORKERS="${TEST_WORKERS:-logical}"
+TEST_DIST="${TEST_DIST:-worksteal}"
 export UV_VENV_CLEAR="1"
 
 DEFAULT_VERSIONS=(3.10 3.11 3.12 3.13 3.14)
@@ -88,7 +90,7 @@ for version in "${PYTHON_VERSIONS[@]}"; do
     continue
   fi
 
-  if ! "$UV" pip install -p "$venv_python" pytest "rich>=12,<15"; then
+  if ! "$UV" pip install -p "$venv_python" pytest pytest-xdist "rich>=12,<15"; then
     echo "Test dependency install failed for ${version}."
     record_failure "$version"
     continue
@@ -97,7 +99,7 @@ for version in "${PYTHON_VERSIONS[@]}"; do
   # Run from the Python package root so pytest uses `python/pytest.ini` and
   # doesn't accidentally collect repo-level example/unused scripts.
   pushd "$PYTHON_DIR" >/dev/null
-  if ! PATH="$venv_bin:$PATH" "$venv_python" -m pytest ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
+  if ! PATH="$venv_bin:$PATH" "$venv_python" -m pytest -p xdist.plugin -n "$TEST_WORKERS" --dist="$TEST_DIST" ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
     popd >/dev/null
     echo "Tests failed for ${version}."
     record_failure "$version"

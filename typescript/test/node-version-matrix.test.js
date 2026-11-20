@@ -11,12 +11,29 @@ import {
 	buildNvmTestCommand,
 	findInstalledNodeDir,
 	normalizeNodeVersions,
+	normalizeTestConcurrency,
 	resolveNodeVersions,
 	resolveNvmScript,
 	resolveNvmWindowsInstalls,
 	runNodeVersionMatrix,
 	shellQuote,
 } from '../scripts/test-all-versions.js';
+
+test('test worker count is validated for the matrix', () => {
+	assert.equal(normalizeTestConcurrency(undefined), null);
+	assert.equal(normalizeTestConcurrency(''), null);
+	assert.equal(normalizeTestConcurrency('4'), 4);
+	for (const bad of ['0', '-2', 'auto', '1;exit', '9007199254740992']) {
+		assert.throws(() => normalizeTestConcurrency(bad), /TEST_WORKERS/);
+	}
+});
+
+test('direct and nvm-based Node matrix commands enable explicit concurrency', () => {
+	const direct = buildDirectNodeTestCommand({ version: '22', testFiles: ['test/a.test.js'], testConcurrency: 2 });
+	const nvm = buildNvmTestCommand({ nvmScript: '/nvm.sh', version: '22', testFiles: ['test/a.test.js'], testConcurrency: 3 });
+	assert.ok(direct.includes('node --test --test-concurrency=2'));
+	assert.ok(nvm.includes('node --test --test-concurrency=3'));
+});
 
 test('Bash prerequisite fails early for a missing or unusable Bash executable', () => {
 	assert.doesNotThrow(() => assertBashAvailable(() => ({ status: 0 })));
@@ -221,4 +238,27 @@ test('Windows matrix reports a failed version when Node cannot be installed', ()
 	});
 	assert.equal(status, 1);
 	assert.ok(output.includes('Failed versions: 26'));
+});
+
+
+test('matrix passes the configured worker count to all version runs', () => {
+	const commands = [];
+	const status = runNodeVersionMatrix({
+		versions: ['20', '22'],
+		nvmScript: '/nvm.sh',
+		testFiles: ['test/a.test.js'],
+		env: { TEST_WORKERS: '3' },
+		spawn: (_command, args) => {
+			commands.push(args[1]);
+			return { status: 0 };
+		},
+		write: () => {},
+	});
+	assert.equal(status, 0);
+	assert.equal(commands.length, 2);
+	assert.ok(
+		commands.every((command) =>
+			command.includes('node --test --test-concurrency=3'),
+		),
+	);
 });

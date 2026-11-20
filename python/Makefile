@@ -39,7 +39,7 @@ test:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 $(UV) run --with pytest --with pytest-xdist --with rich pytest -p xdist.plugin -n $(TEST_WORKERS) --dist=$(TEST_DIST)
 
 test-matrix:
-	UV="$(UV)" PYTHON_TEST_VERSIONS="$(PYTHON_TEST_VERSIONS)" bash scripts/run_tests_uv_matrix.sh
+	UV="$(UV)" PYTHON_TEST_VERSIONS="$(PYTHON_TEST_VERSIONS)" TEST_WORKERS="$(TEST_WORKERS)" TEST_DIST="$(TEST_DIST)" bash scripts/run_tests_uv_matrix.sh
 
 security:
 	$(UV) run python scripts/security_audit.py $(SECURITY_ARGS)
