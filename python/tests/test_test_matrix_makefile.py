@@ -56,7 +56,7 @@ if [[ "$1" == "venv" ]]; then
   mkdir -p "$4/bin"
   cat > "$4/bin/python" <<'EOF'
 #!/usr/bin/env bash
-printf '%s\n' "$PWD" "$@" > "$TEST_CAPTURE"
+printf '%s\n' "$PYTEST_DISABLE_PLUGIN_AUTOLOAD" "$PWD" "$@" > "$TEST_CAPTURE"
 EOF
   chmod +x "$4/bin/python"
 fi
@@ -75,6 +75,8 @@ fi
             "TEST_CAPTURE": str(capture),
             "TEST_WORKERS": workers,
             "TEST_DIST": distribution,
+            # A conflicting caller environment must not auto-register xdist twice.
+            "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "0",
             "PYTEST_ARGS_OVERRIDE": "-q",
         },
         capture_output=True,
@@ -83,6 +85,6 @@ fi
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert capture.read_text(encoding="utf-8").splitlines() == [
-        str(ROOT), "-m", "pytest", "-p", "xdist.plugin", "-n", workers,
+        "1", str(ROOT), "-m", "pytest", "-p", "xdist.plugin", "-n", workers,
         f"--dist={distribution}", "-q",
     ]

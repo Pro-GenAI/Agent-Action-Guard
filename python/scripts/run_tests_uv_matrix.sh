@@ -99,7 +99,9 @@ for version in "${PYTHON_VERSIONS[@]}"; do
   # Run from the Python package root so pytest uses `python/pytest.ini` and
   # doesn't accidentally collect repo-level example/unused scripts.
   pushd "$PYTHON_DIR" >/dev/null
-  if ! PATH="$venv_bin:$PATH" "$venv_python" -m pytest -p xdist.plugin -n "$TEST_WORKERS" --dist="$TEST_DIST" ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
+  # Isolated matrix venvs may not import sitecustomize before pytest loads entry points.
+  # Disable auto-discovery explicitly so -p xdist.plugin registers xdist only once.
+  if ! PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PATH="$venv_bin:$PATH" "$venv_python" -m pytest -p xdist.plugin -n "$TEST_WORKERS" --dist="$TEST_DIST" ${PYTEST_ARGS[@]+"${PYTEST_ARGS[@]}"}; then
     popd >/dev/null
     echo "Tests failed for ${version}."
     record_failure "$version"
