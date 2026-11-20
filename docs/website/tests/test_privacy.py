@@ -221,6 +221,16 @@ class PrivacyTests(unittest.TestCase):
                 (root / "robots.txt").read_text(),
             )
 
+    def test_contact_links_are_excluded_from_cloudflare_obfuscation(self):
+        for host, root in SITES.items():
+            for page in ("privacy/index.html", "terms/index.html"):
+                html = (root / page).read_text()
+                links = re.findall(r'<a href="mailto:[^"]+">.*?</a>', html)
+                with self.subTest(host=host, page=page):
+                    self.assertTrue(links)
+                    for link in links:
+                        self.assertIn(f"<!--email_off-->{link}<!--/email_off-->", html)
+
 
 if __name__ == "__main__":
     unittest.main()
