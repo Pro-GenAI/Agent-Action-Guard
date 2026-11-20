@@ -387,6 +387,10 @@ section { position: relative; }
 .copy-feedback:empty { margin: 0; }
 .code-window > .copy-feedback:not(:empty) { padding: 0 1.25rem .75rem; }
 
+.download-badges { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin: 0 0 1.25rem; }
+.download-badges a { display: inline-flex; max-width: 100%; }
+.download-badges img { display: block; width: auto; height: 28px; max-width: 100%; }
+
 .trust { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; padding: 0; margin: 0; list-style: none; color: var(--muted); font: 500 .85rem/1.2 var(--font-l); }
 .trust li { display: inline-flex; align-items: center; gap: .45rem; }
 .trust .ico { width: 1rem; height: 1rem; color: var(--green); stroke-width: 2.4; }

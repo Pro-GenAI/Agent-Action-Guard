@@ -51,6 +51,17 @@ class SecurityTests(unittest.TestCase):
             rendered, security.render(rendered.replace("test=1", "test=2"))
         )
 
+    def test_live_download_badges_only_open_homepage_image_sources(self):
+        homepage = ROOT / "docs/website/index.html"
+        policy = security.policy(homepage.read_text())
+        self.assertIn("img-src 'self' data: https://static.pepy.tech https://img.shields.io", policy)
+        for site in security.SITES:
+            for page in site.rglob("index.html"):
+                if page == homepage:
+                    continue
+                with self.subTest(page=page):
+                    self.assertIn("img-src 'self' data:; media-src", security.policy(page.read_text()))
+
     def test_external_scripts_are_allowed_only_from_self(self):
         source = '<script src="/assets/home.js"></script>'
         self.assertIn("script-src 'self'", security.policy(source))

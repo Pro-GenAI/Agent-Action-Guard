@@ -32,6 +32,8 @@ Keep policy navigation, skip links, tab semantics, and sitemap entries synchroni
 See the twenty-area inventory in `../PRIVACY_REVIEW.md` before adding
 accounts, tracking, email, billing, uploads, or hosted action processing.
 
+Only the main homepage loads off-origin image assets: the live Pepy PyPI total-download badge and Shields.io npm 18-month badge. Restrict the CSP image exception, disclose the requests in both synchronized privacy notices, and test the exact badge URLs.
+
 Changed browser assets use a version query in HTML. Bump it when a markup/script
 or stylesheet contract changes so cached files do not conflict with new HTML.
 

@@ -1,6 +1,6 @@
 # Privacy and launch-feature review
 
-Reviewed 29 October 2026. Scope: the shipped Python and TypeScript runtimes,
+Reviewed 29 October 2026; amended 20 November 2026. Scope: the shipped Python and TypeScript runtimes,
 `docs/website/`, and `docs/agent-leaderboard-site/`. This records the implementation
 and future release checks; it is not a certification of legal compliance.
 
@@ -11,7 +11,7 @@ depends on the service, facts, jurisdiction, and current law.
 | Area | Current implementation | Review before adding a related feature |
 | --- | --- | --- |
 | Children and signup | Static developer documentation and benchmark results; no account registration or age collection. | Assess audience and information collection before adding accounts or collecting children's data. Where applicable, implement parental notice, verifiable consent, access/deletion, and retention controls. A date-of-birth field alone is not a compliance solution. |
-| Third-party fonts and assets | Fonts, syntax highlighting, styles, illustrations, and provider marks are served from each site's own origin. Font licenses and third-party attribution accompany the files. | Keep automatic browser asset requests on the same origin. Review licenses and data transfers before adding embeds or remote assets. |
+| Third-party fonts and assets | Fonts, syntax highlighting, styles, illustrations, and provider marks are served from each site's own origin. The project homepage additionally loads a PyPI download badge from `static.pepy.tech` and an npm download badge from `img.shields.io`; those providers receive requests including IP/browser metadata, not action text. | Keep other automatic browser assets same-origin; review data transfers and licenses before expanding these exceptions. |
 | Analytics and session replay | No analytics, advertising pixels, session replay, keystroke recording, or persistent browser storage in the authored sites. Pointer effects only change local visual styles. | Review purpose, minimization, masking, retention, and applicable consent before adding tracking. Do not record action payloads, credentials, or form text. |
 | Marketing email | No mailing-list signup or marketing sender. `send_email` examples describe screened agent tools; they are not a project mailing system. | Review commercial-message rules; provide accurate sender/subject information, a valid postal address, and a working opt-out with timely suppression. Keep marketing separate from service messages. |
 | Subscription renewals | No checkout, billing, paid subscription, or recurring charge. External provider/API fees are governed by those providers. | Disclose price, billing interval, trial conversion, and renewal/cancellation terms before purchase; obtain applicable affirmative consent, preserve evidence, and support required reminders and straightforward cancellation. |
@@ -50,7 +50,7 @@ an access-controlled deployment is intentionally configured.
   describes the project's current free, no-checkout scope. Keep cookie information
   and data-request/deletion routes discoverable from every public page.
 - Run `python3 -m unittest discover -s docs/website/tests -v` after website edits.
-  The tests check same-origin asset references, bundled licenses, privacy links,
+  The tests check same-origin asset references (except the two exact download badges), bundled licenses, privacy links,
   metadata, and the existing benchmark/documentation snapshot.
 - Run `node --test docs/website/tests/tabs.test.cjs` for the shipped homepage
   script's keyboard selection, focus, panel visibility, and install-copy tests.
@@ -78,7 +78,7 @@ takes payments. This is an implementation inventory, not legal certification.
 | 5 | Tracking consent | No optional tracking is enabled, so no fictitious consent toggle/banner is presented. Review any new tracking before loading it, including applicable opt-in and withdrawal controls. |
 | 6 | Intake permissions | No signup, newsletter, or data-entry form exists. Data requests open the visitor's mail client; nothing is submitted automatically. Any future intake must disclose its purpose and separate optional marketing consent. |
 | 7 | Data minimization | No age, account, or consent-profile database is added. Data-request instructions ask for only enough information to locate the record and discourage secrets/identity documents in the initial request. |
-| 8 | Vendor/code inventory | All website assets are same-origin. Fonts, Highlight.js, generated Tailwind CSS, and provider marks have local provenance/license notes. Runtime third-party data flow remains documented above. |
+| 8 | Vendor/code inventory | Website assets are same-origin except two live download badge images from Pepy and Shields.io on the project homepage. Fonts, Highlight.js, generated Tailwind CSS, and provider marks retain local provenance/license notes. Runtime third-party data flow remains documented above. |
 | 9 | Fair interactions | Ordinary links/buttons, visible keyboard focus, and accessible tab selection; no preselected purchase, forced registration, countdown, or consent wall. The inert leaderboard report button is replaced with a working methodology link. |
 | 10 | Cost transparency | Free project access is distinguished from separately chosen paid model APIs/hosting in the terms. There are no hidden project fees or auto-renewals. |
 | 11 | Recognition provenance | Existing mentions/stars link to their source and are described as mentions or stars, not customer reviews. Homepage and terms explicitly avoid implying endorsement by people or employers. |
@@ -114,7 +114,7 @@ compliance with every local law.
 | 4 | Refund policy | `/terms/#refunds` explains free access, no project checkout/subscription, and separately purchased provider services. No fictitious paid offering is introduced. |
 | 5 | Cookie and form consent | No optional trackers or site forms exist. `/privacy/#third-parties` explains that email links open the visitor's mail app and require their own send action; no mailing-list enrollment occurs. Any future form/embed needs a feature-specific review. |
 | 6 | What user data is collected | The new definition list separates provider-held hosting records, correspondence the user sends, and action data controlled by the package operator or configured API provider. It makes no unsupported fixed retention/deletion promise. |
-| 7 | Third-party embeds | Local assets and ordinary outbound links are preserved. No social feed, video iframe, analytics SDK, map, remote font, or third-party form is added. Regression tests reject automatic remote asset loads and authored network/storage calls. |
+| 7 | Third-party embeds | Local assets and ordinary outbound links are preserved. The project homepage loads only two approved off-origin download-counter images, disclosed in `/privacy/`; there are no social feeds, iframes, analytics SDKs, maps, remote fonts/scripts, or third-party forms. Tests reject other remote asset loads and authored network/storage calls. |
 | 8 | Alt text and colour contrast | Meaningful images have alternatives; repeated decorative marks are hidden beside visible names. Existing contrast checks remain, and new copy-status text uses the tested muted-text palette. This is not a full WCAG audit. |
 | 9 | Keyboard use and clear controls | Existing skip links and roving tabs remain. Copy controls now announce success/failure through visible polite status regions. A false/throwing legacy copy command never reports success; temporary fields are cleaned up, focus restored, and duplicate pending copies suppressed. Permission errors explain manual copying. Tests cover both buttons, fallback modes, retries, concurrency, and missing optional elements. |
 | 10 | Reviews, claims, and transparency | Removed three star cards and one like card because profile/post links did not establish the named interaction. Removed employer titles from the retained source-linked mention cards. A bibliography reference is labeled as such. Benchmark values and their limitations are unchanged; the remaining social sources still need operator verification if access-gated. |

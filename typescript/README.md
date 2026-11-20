@@ -11,7 +11,8 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/v/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white&color=CB3837" alt="npm version" /></a>
-  <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/dm/agent-action-guard?style=for-the-badge&logo=npm&logoColor=white" alt="npm downloads" /></a>
+  <a href="https://pepy.tech/projects/agent-action-guard"><img src="https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&amp;units=NONE&amp;left_color=BLACK&amp;right_color=GREEN&amp;left_text=PyPI%20Downloads" alt="PyPI total downloads" height="28" /></a>
+  <a href="https://www.npmjs.com/package/agent-action-guard"><img src="https://img.shields.io/npm/d18m/agent-action-guard?style=for-the-badge&amp;label=npm%20downloads" alt="npm downloads in the last 18 months" height="28" /></a>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 20+" />
   <a href="https://github.com/Pro-GenAI/Agent-Action-Guard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-CC_BY_4.0-darkgreen.svg?style=for-the-badge" alt="CC BY 4.0 license" /></a>
 </p>

@@ -10,6 +10,8 @@ from urllib.parse import unquote, urlsplit
 from xml.etree import ElementTree
 
 DOCS_ROOT = Path(__file__).resolve().parents[2]
+ALLOWED_DOWNLOAD_BADGES = {"https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=PyPI%20Downloads", "https://img.shields.io/npm/d18m/agent-action-guard?style=for-the-badge&label=npm%20downloads"}
+
 SITES = {
     "action-guard.pro-genai.com": DOCS_ROOT / "website",
     "agent-leaderboard.github.io": DOCS_ROOT / "agent-leaderboard-site",
@@ -69,8 +71,8 @@ class PrivacyTests(unittest.TestCase):
     def test_privacy_notices_and_styles_stay_synchronized(self):
         main, leaderboard = SITES.values()
         self.assertEqual(
-            (main / "privacy/index.html").read_text().split("<body>", 1)[1],
-            (leaderboard / "privacy/index.html").read_text().split("<body>", 1)[1],
+            (main / "privacy/index.html").read_text().split("<body>", 1)[1].replace("https://action-guard.pro-genai.com/privacy/index.md", "/privacy/index.md"),
+            (leaderboard / "privacy/index.html").read_text().split("<body>", 1)[1].replace("https://agent-leaderboard.github.io/privacy/index.md", "/privacy/index.md"),
         )
         self.assertEqual(
             (main / "assets/privacy.css").read_bytes(),
@@ -97,6 +99,9 @@ class PrivacyTests(unittest.TestCase):
                             self.assertTrue((path / "index.html").is_file())
 
     def assert_local_asset(self, ref, page, root):
+        if ref in ALLOWED_DOWNLOAD_BADGES:
+            self.assertEqual(page, SITES["action-guard.pro-genai.com"] / "index.html")
+            return
         if ref.startswith(("data:", "#")):
             return
         parsed = urlsplit(ref)

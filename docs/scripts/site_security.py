@@ -47,6 +47,13 @@ def policy(source: str) -> str:
     scripts.update(digest(value) for value in handlers.handlers)
     if handlers.handlers:
         scripts.add("'unsafe-hashes'")
+    # Only the project homepage loads these two live download-counter images.
+    image_src = "img-src 'self' data:"
+    if (
+        'src="https://static.pepy.tech/personalized-badge/agent-action-guard?' in source
+        and 'src="https://img.shields.io/npm/d18m/agent-action-guard?' in source
+    ):
+        image_src += " https://static.pepy.tech https://img.shields.io"
     return "; ".join(
         [
             "default-src 'none'",
@@ -56,7 +63,7 @@ def policy(source: str) -> str:
             "frame-src 'none'",
             "connect-src 'none'",
             "font-src 'self'",
-            "img-src 'self' data:",
+            image_src,
             "media-src 'self'",
             "style-src 'self' 'unsafe-inline'",
             "script-src 'self' " + " ".join(sorted(scripts)),

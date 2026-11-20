@@ -4,7 +4,7 @@
 
 > This is the Markdown edition of the public page. The linked HTML page is the canonical version for search engines and the interactive website.
 
-Updated 29 October 2026
+Updated 20 November 2026
 
 This notice describes the static Agent Action Guard website, documentation, and HarmActionsEval leaderboard at `action-guard.pro-genai.com` and `agent-leaderboard.github.io`, and the data flow of the project's Python and JavaScript packages.
 
@@ -14,7 +14,7 @@ The authored pages do not use analytics, advertising trackers, session recording
 
 GitHub Pages serves these sites and receives normal request information, including your IP address and browser/request metadata. Hosting processing and retention are governed by [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). This notice does not promise that the hosting provider keeps no logs.
 
-Links to GitHub, package registries, model providers, papers, and other external sites take you to services with their own privacy practices. The authored pages do not embed those services or automatically load their assets.
+The main project homepage loads two live download-count images from `static.pepy.tech` (PyPI) and `img.shields.io` (npm). Those providers receive image requests, including browser/request metadata and IP addresses, but no agent action text. Other external links lead to services with their own privacy practices; they do not load assets until you follow them.
 
 ## What information is handled, and by whom?
 
@@ -32,7 +32,7 @@ Normal local classification does not send action payloads to the maintainer. You
 
 ## External links, embeds, and consent
 
-There are no embedded videos, social feeds, maps, third-party forms, or remote font/CDN assets in the authored pages. An external link is a navigation choice; the destination's data practices apply after you open it. Provider logos and local demo animations do not connect to the named provider.
+There are no embedded videos, social feeds, maps, third-party forms, remote fonts, or remote scripts in the authored pages. The two live download badges on the project homepage are the only externally hosted images; they request image data automatically. Other outbound links navigate only when selected. Provider logos and local demo animations do not connect to the named provider.
 
 Email links open your mail application. The site does not submit a message or add you to a marketing list; sending remains your choice. There is no site form or marketing-consent checkbox. If forms or third-party embeds are introduced, review their data recipients and purpose before loading them, and provide any applicable consent and withdrawal controls.
 

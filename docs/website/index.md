@@ -16,6 +16,11 @@ pip install agent-action-guard
 
 $ npm i agent-action-guard 
 
+**Live package downloads:**
+
+<a href="https://pepy.tech/projects/agent-action-guard"><img src="https://static.pepy.tech/personalized-badge/agent-action-guard?period=total&units=NONE&left_color=BLACK&right_color=GREEN&left_text=PyPI%20Downloads" alt="PyPI total downloads" height="28"></a>
+[![npm downloads (last 18 months)](https://img.shields.io/npm/d18m/agent-action-guard?style=for-the-badge&label=npm%20downloads)](https://www.npmjs.com/package/agent-action-guard)
+
 - Open source
 
 - Free to use
