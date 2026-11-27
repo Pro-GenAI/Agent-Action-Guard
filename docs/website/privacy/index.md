@@ -60,7 +60,7 @@ The static sites have no user accounts or action-history database to delete. For
 
 ## Project details and copyright concerns
 
-Agent Action Guard is the open-source project maintained by [Pro-GenAI on GitHub](https://github.com/Pro-GenAI/Agent-Action-Guard). Project contact: Praneeth, [praneeth.vad@gmail.com](mailto:praneeth.vad@gmail.com). These sites do not offer a paid hosted service. See the [project terms and payment/refund information](https://action-guard.pro-genai.com/terms/).
+Agent Action Guard is the open-source project maintained by [Praneeth Vadlapati](https://github.com/Pro-GenAI/Agent-Action-Guard). Project contact: Praneeth, [praneeth.vad@gmail.com](mailto:praneeth.vad@gmail.com). These sites do not offer a paid hosted service. See the [project terms and payment/refund information](https://action-guard.pro-genai.com/terms/).
 
 Contact the project maintainer at [praneeth.vad@gmail.com](mailto:praneeth.vad@gmail.com) for privacy questions or concerns about project material. Include the relevant page or repository path, and avoid sending secrets or unnecessary personal information. Correspondence is used to address your request and may be retained as needed for that purpose. This contact is not represented as a registered DMCA agent.
 
