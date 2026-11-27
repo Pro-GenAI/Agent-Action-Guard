@@ -32,4 +32,4 @@ See [privacy and data use](https://agent-leaderboard.github.io/privacy/), the [c
 
 ## Project contact and accessibility feedback
 
-Agent Action Guard is maintained by [Pro-GenAI on GitHub](https://github.com/Pro-GenAI/Agent-Action-Guard). Contact Praneeth at [praneeth.vad@gmail.com](mailto:praneeth.vad@gmail.com) for project, privacy, copyright, or accessibility questions. For accessibility feedback, include the page, the difficulty encountered, and any browser or assistive-technology details you wish to share. Avoid sending secrets or unnecessary personal information.
+Agent Action Guard is maintained by [Praneeth Vadlapati](https://github.com/Pro-GenAI/Agent-Action-Guard). Contact Praneeth at [praneeth.vad@gmail.com](mailto:praneeth.vad@gmail.com) for project, privacy, copyright, or accessibility questions. For accessibility feedback, include the page, the difficulty encountered, and any browser or assistive-technology details you wish to share. Avoid sending secrets or unnecessary personal information.
