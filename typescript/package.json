@@ -1,5 +1,6 @@
 {
 	"name": "agent-action-guard",
+	"author": "Praneeth Vadlapati",
 	"version": "1.2.4",
 	"description": "TypeScript runtime for screening AI agent actions as safe, harmful, or unethical.",
 	"homepage": "https://action-guard.pro-genai.com/",
